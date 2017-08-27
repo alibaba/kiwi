@@ -1,0 +1,35 @@
+{
+  "name": "intl-format",
+  "version": "1.0.0",
+  "description": "I18N tools for universal javascrit apps, easy use & better api;",
+  "main": "built/src/index.js",
+  "author": "linhuiw",
+  "keywords": ["I18N", "intl", "react", "G11N", "L10N"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dt-fe/intl-format.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dt-fe/intl-format/issues"
+  },
+  "homepage": "https://github.com/dt-fe/intl-format",
+  "scripts": {
+    "lint": "tslint src",
+    "autofix": "tslint src --fix",
+    "build": "tsc",
+    "test": "mocha --compilers ts:ts-node/register test/**/*.ts -R spec"
+  },
+  "dependencies": {
+    "proxy-polyfill": "^0.1.7"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^7.0.31",
+    "babel-cli": "^6.18.0",
+    "mocha": "^3.5.0",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.5.0",
+    "typescript": "^2.4.2"
+  },
+  "license": "MIT"
+}
