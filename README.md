@@ -2,8 +2,8 @@
 I18N tools for universal javascrit apps, easy use & better api;
 
 ### How To Use
-
 Init this I18N tools
+
 ```javascript
 import IntlFormat from 'intl-format';
 
@@ -20,7 +20,6 @@ const intlFormat = IntlFormat.init('en-uk', {
 Then use it in your components
 
 ```javascript
-
 intlFormat.test; // testvalue;
 
 intlFormat.get('test'); // testvalue;
