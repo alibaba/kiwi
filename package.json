@@ -1,6 +1,6 @@
 {
   "name": "intl-format",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "I18N tools for universal javascrit apps, easy use & better api;",
   "main": "built/src/index.js",
   "author": "linhuiw",
