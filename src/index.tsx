@@ -3,21 +3,22 @@
  * @author @linhuiw
  */
 import 'proxy-polyfill';
+import { get as lodashGet } from 'lodash';
 
-const I18N = {
-  __lang__: 'zh-cn',
-  __data__: {},
-  __metas__: {},
-  setLang: (lang: string) => {
-    I18N.__lang__ = lang;
-    I18N.__data__ = I18N.__metas__[lang];
-  },
-  init: (lang: string, metas: object) => {
-    I18N.__lang__ = lang;
-    I18N.__metas__ = metas;
-    I18N.__data__ = metas[lang];
-  },
-  getProp: (obj, is, value?) => {
+class I18N {
+  __lang__: string;
+  __metas__: any;
+  __data__: any;
+  constructor(lang: string, metas: object) {
+    this.__lang__ = lang;
+    this.__metas__ = metas;
+    this.__data__ = metas[lang];
+  }
+  setLang(lang: string) {
+    this.__lang__ = lang;
+    this.__data__ = this.__metas__[lang];
+  }
+  getProp(obj, is, value?) {
     if (typeof is === 'string') {
       is = is.split('.');
     }
@@ -30,41 +31,49 @@ const I18N = {
       if (value !== undefined && obj[prop] === undefined) {
         obj[prop] = {};
       }
-      return I18N.getProp(obj[prop], is, value);
+      return this.getProp(obj[prop], is, value);
     }
-  },
-  template: (str, args) => {
-    if (!str) return '';
+  }
+  template(str, args) {
+    if (!str) {
+      return '';
+    }
     return str.replace(/\$\{(.+?)\}/g, (match, p1) => {
-      return I18N.getProp(
+      return this.getProp(
         {
           ...args,
-          ...I18N.__data__
+          ...this.__data__
         },
         p1
       );
     });
-  },
-  get: str => {
-    return Reflect.get(I18N.__data__, str);
+  }
+  get(str) {
+    return lodashGet(this.__data__, str);
+  }
+}
+
+const IntlFormat = {
+  init: (lang: string, metas: object) => {
+    const i18n = new I18N(lang, metas);
+    const getLang = new Proxy(i18n, {
+      get(target, property, receiver) {
+        if (
+          property === 'setLang' ||
+          property === 'get' ||
+          property === 'template' ||
+          property === 'init'
+        ) {
+          return function() {
+            return target[property].apply(i18n, arguments);
+          };
+        }
+        return i18n.get(property);
+      }
+    });
+    return getLang;
   }
 };
 
-const getLang: any = new Proxy(I18N, {
-  get(target, property, receiver) {
-    if (
-      property === 'setLang' ||
-      property === 'get' ||
-      property === 'template' ||
-      property === 'init'
-    ) {
-      return function() {
-        return target[property].apply(this, arguments);
-      };
-    }
-    return I18N.__data__[property];
-  }
-});
-
-export { getLang };
-export default getLang;
+export { IntlFormat };
+export default IntlFormat;

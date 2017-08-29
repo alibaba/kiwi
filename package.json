@@ -20,6 +20,7 @@
     "test": "mocha --compilers ts:ts-node/register test/**/*.ts -R spec"
   },
   "dependencies": {
+    "lodash": "^4.17.4",
     "proxy-polyfill": "^0.1.7"
   },
   "devDependencies": {
