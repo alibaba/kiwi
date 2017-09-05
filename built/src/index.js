@@ -9,6 +9,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("proxy-polyfill");
+var intl_messageformat_1 = require("intl-messageformat");
 var lodash_1 = require("lodash");
 var I18N = (function () {
     function I18N(lang, metas) {
@@ -43,12 +44,26 @@ var I18N = (function () {
         if (!str) {
             return '';
         }
-        return str.replace(/\$\{(.+?)\}/g, function (match, p1) {
+        return str.replace(/\{(.+?)\}/g, function (match, p1) {
             return _this.getProp(__assign({}, args, _this.__data__), p1);
         });
     };
-    I18N.prototype.get = function (str) {
-        return lodash_1.get(this.__data__, str);
+    I18N.prototype.get = function (str, options) {
+        var msg = lodash_1.get(this.__data__, str);
+        if (options) {
+            try {
+                msg = new intl_messageformat_1.default(msg, this.__lang__);
+                msg = msg.format(options);
+                return msg;
+            }
+            catch (err) {
+                console.warn("intl-format format message failed for key='" + str + "'", err);
+                return '';
+            }
+        }
+        else {
+            return msg;
+        }
     };
     return I18N;
 }());
