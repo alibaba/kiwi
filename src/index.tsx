@@ -3,6 +3,7 @@
  * @author @linhuiw
  */
 import 'proxy-polyfill';
+import IntlMessageFormat from 'intl-messageformat';
 import { get as lodashGet } from 'lodash';
 
 class I18N {
@@ -38,7 +39,7 @@ class I18N {
     if (!str) {
       return '';
     }
-    return str.replace(/\$\{(.+?)\}/g, (match, p1) => {
+    return str.replace(/\{(.+?)\}/g, (match, p1) => {
       return this.getProp(
         {
           ...args,
@@ -48,8 +49,20 @@ class I18N {
       );
     });
   }
-  get(str) {
-    return lodashGet(this.__data__, str);
+  get(str, options?) {
+    let msg = lodashGet(this.__data__, str);
+    if (options) {
+      try {
+        msg = new IntlMessageFormat(msg, this.__lang__); // TODO memorize
+        msg = msg.format(options);
+        return msg;
+      } catch (err) {
+        console.warn(`intl-format format message failed for key='${str}'`, err);
+        return '';
+      }
+    } else {
+      return msg;
+    }
   }
 }
 

@@ -7,12 +7,12 @@ Init this I18N tools
 ```javascript
 import IntlFormat from 'intl-format';
 
-const intlFormat = IntlFormat.init('en-uk', {
-  'en-uk': {
+const intlFormat = IntlFormat.init('en-UK', {
+  'en-UK': {
     test: 'testvalue',
-    testTemplate: 'you have ${value} unread message'
+    testTemplate: 'you have {value} unread message'
   },
-  'zh-cn': {
+  'zh-CN': {
     lang: '语言'
   }
 });
@@ -24,9 +24,15 @@ intlFormat.test; // testvalue;
 
 intlFormat.get('test'); // testvalue;
 
+intlFormat.get('testTemplate', {
+  value: three
+}); // value is 'you have three unread message'
+
 intlFormat.template(intlFormat.testTemplate, {
   value: three
 }); // value is 'you have three unread message'
+
+
 ```
 
 How to change default language?

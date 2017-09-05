@@ -3,13 +3,14 @@ import IntlFormat from '../src/index';
 describe('IntlFormat', function() {
   let intlFormat;
   before(function() {
-    intlFormat = IntlFormat.init('zh-cn', {
-      'zh-cn': {
+    intlFormat = IntlFormat.init('zh-CN', {
+      'zh-CN': {
         test: '测试',
-        testTemplate: '你有${value}条未读通知',
+        testTemplate: '你有{value}条未读通知',
         foo: {
           bar: 'foobar'
-        }
+        },
+        photo: '我{num, plural, =0 {没有照片} =1 {有1张照片} other {有#张照片}}'
       }
     });
   });
@@ -19,6 +20,24 @@ describe('IntlFormat', function() {
     });
     it('Get method: get key test value for current lanuage', function() {
       assert.equal(intlFormat.get('test'), '测试');
+      assert.equal(
+        intlFormat.get('photo', {
+          num: 0
+        }),
+        '我没有照片'
+      );
+      assert.equal(
+        intlFormat.get('photo', {
+          num: 1
+        }),
+        '我有1张照片'
+      );
+      assert.equal(
+        intlFormat.get('photo', {
+          num: 1000
+        }),
+        '我有1,000张照片'
+      );
     });
     it('Template method: get template values for current lanuage', function() {
       assert.equal(
@@ -27,15 +46,21 @@ describe('IntlFormat', function() {
         }),
         '你有3条未读通知'
       );
+      assert.equal(
+        intlFormat.get('testTemplate', {
+          value: 3
+        }),
+        '你有3条未读通知'
+      );
     });
     it('Different instance values', function() {
-      const intlFormat1: any = IntlFormat.init('zh-cn', {
-        'zh-cn': {
+      const intlFormat1: any = IntlFormat.init('zh-CN', {
+        'zh-CN': {
           test: 'firstvalue'
         }
       });
-      const intlFormat2: any = IntlFormat.init('zh-cn', {
-        'zh-cn': {
+      const intlFormat2: any = IntlFormat.init('zh-CN', {
+        'zh-CN': {
           test: 'secondvalue'
         }
       });
