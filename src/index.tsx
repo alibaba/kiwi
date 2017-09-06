@@ -50,10 +50,10 @@ class I18N {
     });
   }
   get(str, options?) {
-    let msg = lodashGet(this.__data__, str);
+    let msg = lodashGet(this.__data__, str, str);
     if (options) {
       try {
-        msg = new IntlMessageFormat(msg, this.__lang__); // TODO memorize
+        msg = new IntlMessageFormat(msg, this.__lang__);
         msg = msg.format(options);
         return msg;
       } catch (err) {
