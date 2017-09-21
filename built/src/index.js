@@ -8,9 +8,9 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require("proxy-polyfill");
 var intl_messageformat_1 = require("intl-messageformat");
 var lodash_1 = require("lodash");
+var Observer_1 = require("./Observer");
 var I18N = (function () {
     function I18N(lang, metas) {
         this.__lang__ = lang;
@@ -49,7 +49,7 @@ var I18N = (function () {
         });
     };
     I18N.prototype.get = function (str, options) {
-        var msg = lodash_1.get(this.__data__, str);
+        var msg = lodash_1.get(this.__data__, str, str);
         if (options) {
             try {
                 msg = new intl_messageformat_1.default(msg, this.__lang__);
@@ -70,21 +70,9 @@ var I18N = (function () {
 var IntlFormat = {
     init: function (lang, metas) {
         var i18n = new I18N(lang, metas);
-        var getLang = new Proxy(i18n, {
-            get: function (target, property, receiver) {
-                if (property === 'setLang' ||
-                    property === 'get' ||
-                    property === 'template' ||
-                    property === 'init') {
-                    return function () {
-                        return target[property].apply(i18n, arguments);
-                    };
-                }
-                return i18n.get(property);
-            }
-        });
+        var getLang = Observer_1.default(i18n);
+        console.log(getLang, 'getLang');
         return getLang;
     }
 };
-exports.IntlFormat = IntlFormat;
-exports.default = IntlFormat;
+window.IntlFormat = IntlFormat;

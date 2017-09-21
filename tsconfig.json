@@ -13,7 +13,7 @@
     "emitDecoratorMetadata": true,
     "baseUrl": "./src/",
     "allowSyntheticDefaultImports": true,
-    "lib": ["es6"],
+    "lib": ["dom", "es6", "es5"],
     "types": ["node", "mocha"]
   },
   "exclude": ["node_modules", "packages", "built"]

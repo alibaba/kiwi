@@ -2,9 +2,9 @@
  * I18N Tools
  * @author @linhuiw
  */
-import 'proxy-polyfill';
 import IntlMessageFormat from 'intl-messageformat';
 import { get as lodashGet } from 'lodash';
+import Observer from './Observer';
 
 class I18N {
   __lang__: string;
@@ -69,22 +69,7 @@ class I18N {
 const IntlFormat = {
   init: (lang: string, metas: object) => {
     const i18n = new I18N(lang, metas);
-    const getLang = new Proxy(i18n, {
-      get(target, property, receiver) {
-        if (
-          property === 'setLang' ||
-          property === 'get' ||
-          property === 'template' ||
-          property === 'init'
-        ) {
-          return function() {
-            return target[property].apply(i18n, arguments);
-          };
-        }
-        return i18n.get(property);
-      }
-    });
-    return getLang;
+    return Observer(i18n);
   }
 };
 

@@ -17,20 +17,24 @@
     "lint": "tslint src",
     "autofix": "tslint src --fix",
     "build": "tsc",
+    "demo": "webpack-dev-server --config demo/webpack.config.js",
+    "demo-build": "webpack --config demo/webpack.config.js",
     "test": "mocha --compilers ts:ts-node/register test/**/*.ts -R spec"
   },
   "dependencies": {
     "intl-messageformat": "^2.1.0",
-    "lodash": "^4.17.4",
-    "proxy-polyfill": "^0.1.7"
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.31",
     "babel-cli": "^6.18.0",
     "mocha": "^3.5.0",
+    "ts-loader": "^2.3.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.5.0",
+    "webpack": "^3.3.0",
+    "webpack-dev-server": "^2.5.1",
     "typescript": "^2.4.2"
   },
   "license": "MIT"
