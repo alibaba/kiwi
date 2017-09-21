@@ -1,5 +1,4 @@
 const Observer = obj => {
-  console.log(obj, '====');
   Object.keys(obj.__data__ || obj).forEach(key => {
     defineReactive(obj, key);
   });
