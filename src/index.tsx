@@ -3,7 +3,7 @@
  * @author @linhuiw
  */
 import IntlMessageFormat from 'intl-messageformat';
-import { get as lodashGet } from 'lodash';
+import * as lodashGet from 'lodash.get';
 import Observer from './Observer';
 
 class I18N {

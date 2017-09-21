@@ -4,7 +4,13 @@
   "description": "I18N tools for universal javascrit apps, easy use & better api;",
   "main": "built/src/index.js",
   "author": "linhuiw",
-  "keywords": ["I18N", "intl", "react", "G11N", "L10N"],
+  "keywords": [
+    "I18N",
+    "intl",
+    "react",
+    "G11N",
+    "L10N"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/dt-fe/intl-format.git"
@@ -23,7 +29,8 @@
   },
   "dependencies": {
     "intl-messageformat": "^2.1.0",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "lodash.get": "^4.4.2"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
