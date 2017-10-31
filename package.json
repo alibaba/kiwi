@@ -22,7 +22,7 @@
     "test": "mocha --compilers ts:ts-node/register test/**/*.ts -R spec"
   },
   "dependencies": {
-    "intl-messageformat": "^2.1.0",
+    "intl-messageformat": "^2.2.0",
     "lodash.get": "^4.4.2"
   },
   "devDependencies": {
