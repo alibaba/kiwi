@@ -1,7 +1,9 @@
-# intl-format
+# intl-format [![npm version](https://badge.fury.io/js/intl-format.svg)](http://badge.fury.io/js/intl-format)
+
 I18N tools for universal javascrit apps, easy use & better api;
 
 ### How To Use
+
 Init this I18N tools
 
 ```javascript
@@ -11,13 +13,15 @@ const intlFormat = IntlFormat.init('en-UK', {
   'en-UK': {
     test: 'testvalue',
     testTemplate: 'you have {value} unread message',
-    photo: "You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}"
+    photo:
+      'You have {num, plural, =0 {no photos.} =1 {one photo.} other {# photos.}}'
   },
   'zh-CN': {
     lang: '语言'
   }
 });
 ```
+
 Then use it in your components
 
 ```javascript
@@ -39,9 +43,11 @@ intlFormat.get('photo', {
 ```
 
 How to change default language?
+
 ```javascript
 intlFormat.setLang('zh-cn'); // change the default language to zh-cn;
 ```
 
 ### License
+
 MIT
