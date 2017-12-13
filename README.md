@@ -1,4 +1,4 @@
-# intl-format [![npm version](https://badge.fury.io/js/intl-format.svg)](http://badge.fury.io/js/intl-format)
+# intl-format [![npm version](https://badge.fury.io/js/intl-format.svg)](http://badge.fury.io/js/intl-format) [![Build Status](https://travis-ci.org/nefe/intl-format.svg)](https://travis-ci.org/nefe/intl-format)
 
 I18N tools for universal javascrit apps, easy use & better api;
 
