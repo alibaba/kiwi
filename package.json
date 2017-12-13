@@ -1,6 +1,6 @@
 {
   "name": "intl-format",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "I18N tools for universal javascrit apps, easy use & better api;",
   "main": "built/src/index.js",
   "types": "built/src/index.d.ts",

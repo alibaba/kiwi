@@ -30,3 +30,4 @@ var defineReactive = function (obj, key) {
     });
 };
 exports.default = Observer;
+//# sourceMappingURL=Observer.js.map

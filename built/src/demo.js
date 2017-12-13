@@ -12,3 +12,4 @@ var intlFormat = index_1.default.init('zh-CN', {
     }
 });
 console.log(intlFormat.test, 'intlFormat.test');
+//# sourceMappingURL=demo.js.map

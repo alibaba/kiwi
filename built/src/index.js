@@ -48,12 +48,12 @@ var I18N = (function () {
             return _this.getProp(__assign({}, args, _this.__data__), p1);
         });
     };
-    I18N.prototype.get = function (str, options) {
+    I18N.prototype.get = function (str, args) {
         var msg = lodashGet(this.__data__, str, str);
-        if (options) {
+        if (args) {
             try {
                 msg = new intl_messageformat_1.default(msg, this.__lang__);
-                msg = msg.format(options);
+                msg = msg.format(args);
                 return msg;
             }
             catch (err) {
@@ -75,3 +75,4 @@ var IntlFormat = {
 };
 exports.IntlFormat = IntlFormat;
 exports.default = IntlFormat;
+//# sourceMappingURL=index.js.map
