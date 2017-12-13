@@ -6,7 +6,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import * as lodashGet from 'lodash.get';
 import Observer from './Observer';
 
-interface I18NAPI {
+export interface I18NAPI {
   /**
    * 初始化对应语言
    * @param lang: 对应语言

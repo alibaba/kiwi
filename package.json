@@ -3,6 +3,7 @@
   "version": "1.1.0",
   "description": "I18N tools for universal javascrit apps, easy use & better api;",
   "main": "built/src/index.js",
+  "types": "built/src/index.d.ts",
   "author": "linhuiw",
   "keywords": ["I18N", "intl", "react", "G11N", "L10N"],
   "repository": {
