@@ -6,6 +6,32 @@ import IntlMessageFormat from 'intl-messageformat';
 import * as lodashGet from 'lodash.get';
 import Observer from './Observer';
 
+interface I18NAPI {
+  /**
+   * 初始化对应语言
+   * @param lang: 对应语言
+   * @param metas: 所有语言的语言文件
+   */
+  init?(lang: string, metas: object): I18NAPI;
+  /**
+   * 设置对应语言
+   * @param lang: 切换的对应语言
+   */
+  setLang?(lang: string): void;
+  /**
+   * 获取对应语言的模板值
+   * @param template: 对应语言的模板
+   * @param args: 模板的参数
+   */
+  template?(str: string, args: object): string;
+  /**
+   * 获取对应语言的值
+   * @param name: 对应语言的模板的 Key
+   * @param options: 模板的参数
+   */
+  get(name: string, args?: object): string;
+}
+
 class I18N {
   __lang__: string;
   __metas__: any;
@@ -49,12 +75,12 @@ class I18N {
       );
     });
   }
-  get(str, options?) {
+  get(str, args?) {
     let msg = lodashGet(this.__data__, str, str);
-    if (options) {
+    if (args) {
       try {
         msg = new IntlMessageFormat(msg, this.__lang__);
-        msg = msg.format(options);
+        msg = msg.format(args);
         return msg;
       } catch (err) {
         console.warn(`intl-format format message failed for key='${str}'`, err);
@@ -67,7 +93,9 @@ class I18N {
 }
 
 const IntlFormat = {
-  init: (lang: string, metas: object) => {
+  init: (lang: string, metas: object): I18NAPI & {
+    [key: string]: string;
+  } => {
     const i18n = new I18N(lang, metas);
     return Observer(i18n);
   }
