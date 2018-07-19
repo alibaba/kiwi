@@ -1,5 +1,5 @@
 {
-  "name": "intl-format",
+  "name": "kiwi-intl",
   "version": "1.2.0",
   "description": "I18N tools for universal javascrit apps, easy use & better api;",
   "main": "built/src/index.js",
@@ -8,12 +8,12 @@
   "keywords": ["I18N", "intl", "react", "G11N", "L10N"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/dt-fe/intl-format.git"
+    "url": "https://github.com/dt-fe/kiwi-intl.git"
   },
   "bugs": {
-    "url": "https://github.com/dt-fe/intl-format/issues"
+    "url": "https://github.com/dt-fe/kiwi-intl/issues"
   },
-  "homepage": "https://github.com/dt-fe/intl-format",
+  "homepage": "https://github.com/dt-fe/kiwi-intl",
   "scripts": {
     "lint": "tslint src",
     "autofix": "tslint src --fix",
