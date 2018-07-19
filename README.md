@@ -1,4 +1,4 @@
-# intl-format [![npm version](https://badge.fury.io/js/intl-format.svg)](http://badge.fury.io/js/intl-format) [![Build Status](https://travis-ci.org/nefe/intl-format.svg)](https://travis-ci.org/nefe/intl-format)
+# kiwi-intl [![npm version](https://badge.fury.io/js/kiwi-intl.svg)](http://badge.fury.io/js/kiwi-intl) [![Build Status](https://travis-ci.org/nefe/kiwi-intl.svg)](https://travis-ci.org/nefe/kiwi-intl)
 
 I18N tools for universal javascrit apps, easy use & better api;
 
@@ -7,7 +7,7 @@ I18N tools for universal javascrit apps, easy use & better api;
 Init this I18N tools
 
 ```javascript
-import IntlFormat from 'intl-format';
+import IntlFormat from 'kiwi-intl';
 
 const intlFormat = IntlFormat.init('en-UK', {
   'en-UK': {
