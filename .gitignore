@@ -20,11 +20,3 @@ yarn-error.log*
 .vscode
 
 package-lock.json
-/kiwi-cli/.kiwi
-
-/kiwi-cli/export-en_US
-/kiwi-cli/export-zh_TW
-
-/kiwi-extension/out
-/kiwi-extension/.vscode-test/
-/kiwi-extension/.vsix
