@@ -1,4 +1,4 @@
-# kiwi linter
+# 🐤 kiwi linter
 
 kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮出中文字符串，并一键提取中文字符串到对应的语言 Key 库。
 
