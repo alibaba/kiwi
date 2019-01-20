@@ -23,9 +23,9 @@
 ## 使用文档及 API
 可以到对应子目录中查看：
 
-`kiwi-intl`: [📝 文档链接](https://github.com/nefe/kiwi/tree/master/kiwi-intl)
+`kiwi-intl`: [📝 文档链接](https://github.com/nefe/kiwi/tree/master/kiwi-intl)
 
-`kiwi-cli`: [📝 文档链接](https://github.com/nefe/kiwi/tree/master/kiwi-cli)
+`kiwi-cli`: [📝 文档链接](https://github.com/nefe/kiwi/tree/master/kiwi-cli)
 
 `kiwi-linter`: [📝 文档链接](https://github.com/nefe/kiwi/tree/master/kiwi-linter)
 
