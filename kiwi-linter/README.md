@@ -1,32 +1,39 @@
 # kiwi linter
 
-> Better use with the awesome [kiwi-intl](https://github.com/nefe/kiwi-intl) package
+kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮出中文字符串，并一键提取中文字符串到对应的语言 Key 库。
 
-> Vscode extension search `kiwi linter` and install, or visit in [marketplace](https://marketplace.visualstudio.com/items?itemName=undefinedvs.vscode-i18n-linter)
+同时优化开发体验，在 `VS Code` 中提供搜索中文，提示国际化值对应的中文功能。
 
-Lint string literals (eg. Chinese) in your `.js(x)` or `.ts(x)` files and provide a quick fix option with one click in VSCode.
+## 如何使用
 
-![](https://img.alicdn.com/tfs/TB1EYENfTnI8KJjy0FfXXcdoVXa-1006-368.gif)
+> VS Code 插件搜索 kiwi linter 安装
 
-## Options
+> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/nefe/kiwi)结合使用
+
+
+![演示](https://img.alicdn.com/tfs/TB1EYENfTnI8KJjy0FfXXcdoVXa-1006-368.gif)
+
+![展示](https://img.alicdn.com/tfs/TB1pzAIC4YaK1RjSZFnXXa80pXa-884-308.png)
+
+## 配置项
 
 ### vscode-i18n-linter.i18nFilesPattern
 
 default: `src/**/ts*`
 
-The files to scan, you can specify any [minimatch](https://github.com/isaacs/minimatch) pattern.
+待扫描的文件类型，可以基于 [minimatch](https://github.com/isaacs/minimatch) 规则进行自定义。
 
 ### vscode-i18n-linter.markStringLiterals
 
 default: `true`
 
-Whether to mark those non-English letters with border or not.
+是否标红中文字符串，默认开启。
 
 ### vscode-i18n-linter.showOverviewRuler
 
 default: `true`
 
-Show non-English letter position on the overview ruler.
+右侧滚动条中，是否显示对应的待提取中文高亮。
 
 ![](https://img.alicdn.com/tfs/TB1CHZRrxGYBuNjy0FnXXX5lpXa-1088-568.png)
 
@@ -34,27 +41,18 @@ Show non-English letter position on the overview ruler.
 
 default: `#ff4400`
 
-The color of marked string literals or occurrence on the overview ruler.
+待提取文字，高亮颜色。
 
 ### vscode-i18n-linter.enableReplaceSuggestion
 
 default: `true`
 
-Provide a quick fix option (light blub on the left) to extract string literals to I18N variables.
+是否开启一键提取中文功能。
 
-### vscode-i18n-linter.showI18NInPlace
+## VS code 命令
 
-default: `true`
-
-Show I18N values right atop I18N variables.
-
-![](https://img.alicdn.com/tfs/TB1G.8ErStYBeNjSspkXXbU8VXa-1104-226.png)
-
-## Actions
-
-### Find I18N inside Current File
-
-Provides a quick search functionality inside current file for I18N values. The default shortcut is `cmd + ctrl + f`.
+### 在当前文件中查找国际化文案
+默认快捷键是 `cmd + ctrl + f`.
 
 ![](https://img.alicdn.com/tfs/TB1dzf8rpOWBuNjy0FiXXXFxVXa-1256-700.png)
 
@@ -62,41 +60,13 @@ Provides a quick search functionality inside current file for I18N values. The d
 
 ### 1.1.4
 
-- Feat add inline comment emoji
-
-### 1.1.3
-
-- Feat add inline comment option
+-  优化国际化文案提示
 
 ### 1.1.2
 
-- Support html file
-
-### 1.1.0
-
-- Feat update i18n key rule
-
-### 1.0.10
-
-- Replace language file require method, use node read file
-
-### 1.0.6
-
-- Fix language file require bug
-
-### 1.0.2
-
-- Fix a issue when manually update lang files get overwrited
-- Fix a issue when disable `markStringLiertals` cause `replaceSuggestion` not working
-- Add disposables for performance consideration
-
-### 1.0.1
-
-- Add missing `typescript` dependency
+- 支持 HTML 文件
 
 ### 1.0.0
 
-- Support in-place I18N value display
-- Support I18N value search for current file
-- Enhance extension options
-- Fix new lang file nested key issue
+- 支持国际化 Key 值显示
+- 支持对应国际化文案的搜索

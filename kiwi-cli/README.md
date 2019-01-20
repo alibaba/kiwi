@@ -1,10 +1,14 @@
-# kiwi cli
-
-> Better use with the awesome [intl-format](https://github.com/nefe/intl-format) package
+# 🐤 kiwi cli
 
 Kiwi 的 CLI 工具
 
-## 参数
+## 如何使用
+
+> yarn add kiwi-intl
+
+> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/nefe/kiwi)结合使用
+
+## CLI 参数
 ### `--init`
 初始化项目，提取未翻译的文案
 
