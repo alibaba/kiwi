@@ -1,0 +1,39 @@
+{
+  "name": "kiwi-cli",
+  "version": "1.0.0",
+  "description": "a cli for kiwi",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nefe/kiwi-cli.git"
+  },
+  "keywords": [
+    "cli",
+    "kiwi",
+    "i18n"
+  ],
+  "bin": {
+    "kiwi": "dist/index.js"
+  },
+  "author": "linhuiw",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nefe/kiwi-cli/issues"
+  },
+  "homepage": "https://github.com/nefe/kiwi-cli#readme",
+  "dependencies": {
+    "@types/commander": "^2.12.2",
+    "@types/lodash": "^4.14.119",
+    "@types/node": "^10.12.14",
+    "commander": "^2.19.0",
+    "d3-dsv": "^1.0.10",
+    "google-translate": "^2.2.0",
+    "lodash": "^4.17.11",
+    "ora": "^3.0.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
+}

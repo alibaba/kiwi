@@ -1,0 +1,127 @@
+{
+  "name": "vscode-i18n-linter",
+  "displayName": "kiwi linter",
+  "description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
+  "version": "1.1.9",
+  "publisher": "undefinedvs",
+  "engines": {
+    "vscode": "^1.18.0"
+  },
+  "categories": [
+    "Other",
+    "Linters"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nefe/vscode-i18n-linter"
+  },
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact",
+    "onLanguage:javascript",
+    "onLanguage:html",
+    "onCommand:vscode-i18n-linter.replaceCommon",
+    "onCommand:vscode-i18n-linter.findI18N",
+    "onCommand:vscode-i18n-linter.findAllI18N"
+  ],
+  "main": "./out/extension",
+  "icon": "icon.png",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "I18N Linter",
+      "properties": {
+        "vscode-i18n-linter.markStringLiterals": {
+          "type": "boolean",
+          "default": true,
+          "description": "Mark string literals in editor so you can quickly spot on them"
+        },
+        "vscode-i18n-linter.showOverviewRuler": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show non-English letter position on the overview ruler"
+        },
+        "vscode-i18n-linter.markColor": {
+          "type": "string",
+          "default": "#f40",
+          "description": "The color of matched non-English letters"
+        },
+        "vscode-i18n-linter.enableReplaceSuggestion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Add a light blob beside string literal and provide I18N variable replacement suggestions"
+        },
+        "vscode-i18n-linter.showI18NInPlace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether show I18N value right atop the I18N variable"
+        },
+        "vscode-i18n-linter.inlineI18NComment": {
+          "type": "boolean",
+          "default": true,
+          "description": "Display I18N comment inline"
+        },
+        "vscode-i18n-linter.i18nFilesPattern": {
+          "type": "string",
+          "default": "src/**/*.+(js|html|ts*)",
+          "description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "vscode-i18n-linter.replaceCommon",
+        "title": "Replace Common String Literals to I18N variables"
+      },
+      {
+        "command": "vscode-i18n-linter.findI18N",
+        "title": "Search inside Current File for I18N Strings"
+      },
+      {
+        "command": "vscode-i18n-linter.findAllI18N",
+        "title": "Search inside All Files for I18N Strings"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "vscode-i18n-linter.findI18N",
+        "key": "cmd+ctrl+f",
+        "mac": "cmd+ctrl+f"
+      },
+      {
+        "command": "vscode-i18n-linter.findAllI18N",
+        "key": "cmd+ctrl+r",
+        "mac": "cmd+ctrl+r"
+      }
+    ]
+  },
+  "keywords": [
+    "React",
+    "i18n"
+  ],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^5.0.4",
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^7.0.43",
+    "vscode": "^1.1.6"
+  },
+  "dependencies": {
+    "@angular/compiler": "^7.2.0",
+    "fbbk-json": "^1.1.1",
+    "find-in-files": "^0.5.0",
+    "fs-extra": "^7.0.1",
+    "globby": "^7.1.1",
+    "lodash": "^4.17.4",
+    "minimatch": "^3.0.4",
+    "ts-node": "^6.0.3",
+    "typescript": "^2.8.3"
+  }
+}
