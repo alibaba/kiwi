@@ -88,8 +88,10 @@ export function findI18NPositions(code: string) {
 
   const regexMatches = getRegexMatches(I18N, code);
   let matchPositions = positions.concat(regexMatches);
-  matchPositions = _.uniqBy(matchPositions, (position) => {
-    return `${position.code}-${position.line}`;
+  matchPositions = _.uniqBy(matchPositions, (position: Position & {
+    line: number
+  }) => {
+    return `${position.code}-${(position.line)}`;
   });
 
   cache.addCache(code, matchPositions);

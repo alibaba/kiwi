@@ -44,6 +44,40 @@ function findTextInTs(code: string) {
         }
         break;
       }
+      case ts.SyntaxKind.JsxElement: {
+        const { children } = node as ts.JsxElement;
+
+        children.forEach(child => {
+          if (child.kind === ts.SyntaxKind.JsxText) {
+            const text = child.getText();
+
+            if (text.match(DOUBLE_BYTE_REGEX)) {
+              const start = child.getStart();
+              const end = child.getEnd();
+              const startPos = activeEditor.document.positionAt(start);
+              const endPos = activeEditor.document.positionAt(end);
+
+              const { trimStart, trimEnd } = trimWhiteSpace(code, startPos, endPos);
+              const range = new vscode.Range(trimStart, trimEnd);
+
+              matches.push({
+                range,
+                text: text.trim(),
+                isString: false
+              });
+            }
+          }
+        });
+        break;
+      }
+      case ts.SyntaxKind.TemplateExpression: {
+        const { pos, end } = node;
+        const templateContent = code.slice(pos, end);
+
+        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+          // @TODO: 逻辑待完善
+        }
+      }
     }
 
     ts.forEachChild(node, visit);
