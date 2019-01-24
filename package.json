@@ -7,7 +7,7 @@
     "kiwi-linter"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish-linter": "cd kiwi-linter && vsce publish --yarn"
   },
   "repository": {
     "type": "git",
