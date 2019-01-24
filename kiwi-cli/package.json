@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/nefe/kiwi-cli.git"
+    "url": "git+ssh://git@github.com/nefe/kiwi.git"
   },
   "keywords": [
     "cli",
@@ -21,9 +21,9 @@
   "author": "linhuiw",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nefe/kiwi-cli/issues"
+    "url": "https://github.com/nefe/kiwi/issues"
   },
-  "homepage": "https://github.com/nefe/kiwi-cli#readme",
+  "homepage": "https://github.com/nefe/kiwi#readme",
   "dependencies": {
     "@types/commander": "^2.12.2",
     "@types/lodash": "^4.14.119",

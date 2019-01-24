@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "description": "kiwi is a full process international solution",
+  "workspaces": [
+    "kiwi-cli",
+    "kiwi-intl",
+    "kiwi-linter"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nefe/kiwi.git"
+  },
+  "author": "linhuiw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nefe/kiwi/issues"
+  },
+  "homepage": "https://github.com/nefe/kiwi#readme"
+}

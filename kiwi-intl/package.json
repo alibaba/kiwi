@@ -8,12 +8,12 @@
   "keywords": ["I18N", "intl", "react", "G11N", "L10N"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/dt-fe/kiwi-intl.git"
+    "url": "https://github.com/nefe/kiwi.git"
   },
   "bugs": {
-    "url": "https://github.com/dt-fe/kiwi-intl/issues"
+    "url": "https://github.com/nefe/kiwi/issues"
   },
-  "homepage": "https://github.com/dt-fe/kiwi-intl",
+  "homepage": "https://github.com/nefe/kiwi",
   "scripts": {
     "lint": "tslint src",
     "autofix": "tslint src --fix",
