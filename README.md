@@ -5,7 +5,7 @@
 
 ## 如何使用
 
-> yarn add kiwi-intl kiwi-cli
+> yarn add kiwi-intl kiwi-clis
 
 > VS Code 插件搜索 kiwi linter 安装
 

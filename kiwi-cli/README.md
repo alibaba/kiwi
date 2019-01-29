@@ -4,7 +4,7 @@ Kiwi 的 CLI 工具
 
 ## 如何使用
 
-> yarn add kiwi-intl
+> yarn add kiwi-clis
 
 > 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/nefe/kiwi)结合使用
 
