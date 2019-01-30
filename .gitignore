@@ -17,6 +17,5 @@ yarn-error.log*
 *.orig
 .history/
 .cache-loader/
-.vscode
 
 package-lock.json
