@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './App.css';
+import I18N from './I18N';
 
 import logo from './logo.svg';
 
@@ -15,6 +16,8 @@ class App extends React.Component {
           Hello kiwi 🐤
           <br/>
           This is a kiwi demo
+          <br/>
+          <span>{I18N.common.test}</span>
         </p>
       </div>
     );
