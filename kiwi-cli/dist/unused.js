@@ -22,7 +22,6 @@ function findUnUsed() {
             const hasKey = recursiveReadFile('./src', key);
             if (!hasKey) {
                 unUnsedKeys.push(key);
-                console.log('=====', key);
             }
         });
     });

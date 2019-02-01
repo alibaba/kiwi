@@ -5,7 +5,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PROJECT_CONFIG = {
-    dir: './langs',
+    dir: './.kiwi',
     configFile: './.kiwi/config.json',
     defaultConfig: {
         srcLang: 'zh_CN',

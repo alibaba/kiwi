@@ -1,10 +1,11 @@
 {
   "name": "kiwi-clis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a cli for kiwi",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublish": "tsc"
   },
   "repository": {
     "type": "git",

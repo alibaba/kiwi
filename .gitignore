@@ -19,3 +19,6 @@ yarn-error.log*
 .cache-loader/
 
 package-lock.json
+
+
+dist/
