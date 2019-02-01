@@ -62,6 +62,7 @@ const langs = {
 };
 // 从 Cookie 中取语言值, 默认为 zh_CN
 const defaultLang = getCurrentLang();
+console.log(defaultLang, 'defaultLang');
 let curLang;
 if (Object.keys(langs).indexOf(defaultLang) > -1) {
   curLang = defaultLang;
