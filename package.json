@@ -4,7 +4,8 @@
   "workspaces": [
     "kiwi-cli",
     "kiwi-intl",
-    "kiwi-linter"
+    "kiwi-linter",
+    "kiwi-demo"
   ],
   "scripts": {
     "publish-linter": "cd kiwi-linter && vsce publish --yarn"
