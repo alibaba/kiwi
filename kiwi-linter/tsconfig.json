@@ -9,6 +9,7 @@
       "dom",
       "es2016.array.include"
     ],
+    "skipLibCheck": true,
     "sourceMap": true,
     "rootDir": "src"
   },
