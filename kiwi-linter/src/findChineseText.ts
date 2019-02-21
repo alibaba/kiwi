@@ -8,17 +8,20 @@ import * as vscode from 'vscode';
 import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
+import { removeFileComment } from './astUtils';
 
 /**
  * 查找 Ts 文件中的中文
  * @param code
  */
-function findTextInTs(code: string) {
+function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
+  const noCommentCode = removeFileComment(code, fileName);
+
   const ast = ts.createSourceFile(
     '',
-    code,
+    noCommentCode,
     ts.ScriptTarget.ES2015,
     true,
     ts.ScriptKind.TSX
@@ -142,5 +145,5 @@ export function findChineseText(code: string, fileName: string) {
   if (fileName.endsWith('.html')) {
     return findTextInHtml(code);
   }
-  return findTextInTs(code);
+  return findTextInTs(code, fileName);
 }
