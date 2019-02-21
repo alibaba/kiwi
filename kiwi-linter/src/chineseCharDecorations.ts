@@ -6,6 +6,9 @@ import * as vscode from 'vscode';
 import { setLineDecorations } from './lineAnnotation';
 import { findChineseText } from './findChineseText';
 
+/**
+ * 中文的标记，红框样式
+ */
 function getChineseCharDecoration() {
   // 配置提示框样式
   const hasOverviewRuler = vscode.workspace
@@ -33,18 +36,27 @@ function getChineseCharDecoration() {
   });
 }
 
-
 let timeout = null;
+let prevChineseCharDecoration = null;
 export function triggerUpdateDecorations(callback?) {
   if (timeout) {
     clearTimeout(timeout);
   }
   timeout = setTimeout(() => {
-    const targetStrs = updateDecorations();
+    const activeEditor = vscode.window.activeTextEditor;
+    if (prevChineseCharDecoration) {
+      /** 清除原有的提示 */
+      activeEditor.setDecorations(prevChineseCharDecoration, []);
+    }
+    const { targetStrs, chineseCharDecoration } = updateDecorations();
+    prevChineseCharDecoration = chineseCharDecoration;
     callback(targetStrs);
   }, 500);
 }
 
+/**
+ * 更新标记
+ */
 export function updateDecorations() {
   const activeEditor = vscode.window.activeTextEditor;
   const currentFilename = activeEditor.document.fileName;
@@ -74,8 +86,13 @@ export function updateDecorations() {
     return;
   }
 
+  /** 设置 I18N 的提示 */
   setLineDecorations(activeEditor);
+  /** 设置中文的提示 */
   activeEditor.setDecorations(chineseCharDecoration, chineseChars);
 
-  return targetStrs;
+  return {
+    targetStrs,
+    chineseCharDecoration
+  };
 }
