@@ -9,7 +9,6 @@ import * as fs from 'fs';
 import { getSuggestLangObj } from './getLangData';
 import { I18N_GLOB } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
-import { CodeLensProvider } from './codeLens';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
@@ -39,26 +38,6 @@ export function activate(context: vscode.ExtensionContext) {
     triggerUpdateDecorations((newTargetStrs) => {
       targetStrs = newTargetStrs;
     });
-  }
-
-  const showI18NInPlace = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('showI18NInPlace');
-  const inlineI18NComment = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('inlineI18NComment');
-  if (showI18NInPlace && !inlineI18NComment) {
-    context.subscriptions.push(
-      vscode.languages.registerCodeLensProvider(
-        [
-          { scheme: 'file', language: 'typescript' },
-          { scheme: 'file', language: 'javascript' },
-          { scheme: 'file', language: 'typescriptreact' },
-          { scheme: 'file', language: 'html' }
-        ],
-        new CodeLensProvider()
-      )
-    );
   }
 
   context.subscriptions.push(

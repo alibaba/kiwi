@@ -14,6 +14,9 @@ import {
 } from 'vscode';
 import { findI18NPositions, Position } from './findI18NPositions';
 
+/**
+ * I18N 中文显示位置
+ */
 const annotationDecoration: TextEditorDecorationType = window.createTextEditorDecorationType(
   {
     after: {

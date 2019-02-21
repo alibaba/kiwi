@@ -46,9 +46,6 @@ export function triggerUpdateDecorations(callback?) {
 }
 
 export function updateDecorations() {
-  const inlineI18NComment = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('inlineI18NComment');
   const activeEditor = vscode.window.activeTextEditor;
   const currentFilename = activeEditor.document.fileName;
   const chineseCharDecoration = getChineseCharDecoration();
@@ -77,9 +74,7 @@ export function updateDecorations() {
     return;
   }
 
-  if (inlineI18NComment) {
-    setLineDecorations(activeEditor);
-  }
+  setLineDecorations(activeEditor);
   activeEditor.setDecorations(chineseCharDecoration, chineseChars);
 
   return targetStrs;
