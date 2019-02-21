@@ -1,7 +1,6 @@
 /**
  * @author linhuiw
  * @desc 利用 Ast 查找对应文件中的中文文案
- * @TODO: 这里要忽略注释
  */
 import * as ts from 'typescript';
 import * as vscode from 'vscode';
