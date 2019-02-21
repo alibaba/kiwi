@@ -52,16 +52,6 @@
           "default": true,
           "description": "Add a light blob beside string literal and provide I18N variable replacement suggestions"
         },
-        "vscode-i18n-linter.showI18NInPlace": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether show I18N value right atop the I18N variable"
-        },
-        "vscode-i18n-linter.inlineI18NComment": {
-          "type": "boolean",
-          "default": true,
-          "description": "Display I18N comment inline"
-        },
         "vscode-i18n-linter.i18nFilesPattern": {
           "type": "string",
           "default": "src/**/*.+(js|html|ts*)",
