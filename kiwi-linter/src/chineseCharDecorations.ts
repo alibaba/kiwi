@@ -62,7 +62,7 @@ export function updateDecorations() {
   targetStrs.map((match) => {
     const decoration = {
       range: match.range,
-      hoverMessage: `检测到中文文案： **'${match.text}'**`
+      hoverMessage: `🐤 检测到中文文案🇨🇳 ： ${match.text}`
     };
     chineseChars.push(decoration);
   });
