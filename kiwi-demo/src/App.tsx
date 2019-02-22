@@ -4,7 +4,7 @@ import I18N, { LangEnum } from './I18N';
 import logo from './logo.svg';
 
 class App extends React.Component {
-  changeLang(lang: LangEnum) {
+  public changeLang(lang: LangEnum) {
     document.cookie = `kiwi-locale=${lang}; path=/`;
     window.location.reload();
   };
