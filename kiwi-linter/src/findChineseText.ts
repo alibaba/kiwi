@@ -106,10 +106,12 @@ function findTextInHtml(code) {
       let { start: { offset: startOffset }, end: { offset: endOffset } } = valueSpan;
       const nodeValue = code.slice(startOffset, endOffset);
       let startPos, endPos;
+      let isString = false;
       /** 处理带引号的情况 */
       if (nodeValue.charAt(0) === '"' || nodeValue.charAt(0) === '\'') {
         startPos = activeEditor.document.positionAt(startOffset + 1);
         endPos = activeEditor.document.positionAt(endOffset - 1);
+        isString = true;
       } else {
         startPos = activeEditor.document.positionAt(startOffset);
         endPos = activeEditor.document.positionAt(endOffset);
@@ -119,7 +121,7 @@ function findTextInHtml(code) {
       matches.push({
         range,
         text: value,
-        isString: true
+        isString
       });
     } else if (value && typeof value === "object" && value.source && value.source.match(DOUBLE_BYTE_REGEX)) {
       /**

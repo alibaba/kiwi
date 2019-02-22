@@ -128,7 +128,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         const currentFilename = activeEditor.document.fileName;
         const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
-        const suggestComponentRegex = /\/components\/(\w+)\/.*?\.tsx?/;
 
         let suggestion = [];
         if (currentFilename.includes('/pages/')) {
