@@ -54,7 +54,7 @@
         },
         "vscode-i18n-linter.i18nFilesPattern": {
           "type": "string",
-          "default": "src/**/*.+(js|html|ts*)",
+          "default": "**/src/**/*.+(js|html|ts*)",
           "description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
         }
       }

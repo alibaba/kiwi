@@ -19,7 +19,7 @@ kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮�
 
 ### vscode-i18n-linter.i18nFilesPattern
 
-default: `src/**/ts*`
+default: `**/src/**/ts*`
 
 待扫描的文件类型，可以基于 [minimatch](https://github.com/isaacs/minimatch) 规则进行自定义。
 
