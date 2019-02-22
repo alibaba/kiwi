@@ -3,7 +3,6 @@
  * @desc parser 相关的工具方法
  */
 import * as vscode from 'vscode';
-import { start } from 'repl';
 
 export function trimWhiteSpace(code: string, startPos: vscode.Position, endPos: vscode.Position) {
   const lines = code.split('\n');

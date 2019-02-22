@@ -121,6 +121,27 @@ function findTextInHtml(code) {
         text: value,
         isString: true
       });
+    } else if (value && typeof value === "object" && value.source && value.source.match(DOUBLE_BYTE_REGEX)) {
+      /**
+       * <span>{{expression}}中文</span> 这种情况的兼容
+       */
+      const chineseMatches = value.source.match(DOUBLE_BYTE_REGEX);
+      chineseMatches.map((match) => {
+        const valueSpan = node.valueSpan || node.sourceSpan;
+        let { start: { offset: startOffset }, end: { offset: endOffset } } = valueSpan;
+        const nodeValue = code.slice(startOffset, endOffset);
+        const start = nodeValue.indexOf(match);
+        const end = start + match.length;
+        let startPos = activeEditor.document.positionAt(startOffset + start);
+        let endPos = activeEditor.document.positionAt(startOffset + end);
+        const { trimStart, trimEnd } = trimWhiteSpace(code, startPos, endPos);
+        const range = new vscode.Range(trimStart, trimEnd);
+        matches.push({
+          range,
+          text: match[0],
+          isString: false
+        });
+      });
     }
 
     if (node.children && node.children.length) {
