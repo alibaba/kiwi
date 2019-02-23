@@ -5,6 +5,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as _ from 'lodash';
+import * as prettier from 'prettier';
+import { ResolveConfigOptions } from 'prettier';
 import { getLangData } from './getLangData';
 import { LANG_PREFIX } from './const';
 
@@ -47,15 +49,32 @@ export function updateLangFiles(
     _.set(obj, fullKey, text);
     fs.writeFileSync(
       targetFilename,
-      `export default ${JSON.stringify(obj, null, 2)}`
+      prettierFile(`export default ${JSON.stringify(obj, null, 2)}`)
     );
+  }
+}
+/**
+ * 使用 Prettier 格式化文件
+ * @param fileContent
+ */
+function prettierFile(fileContent) {
+  try {
+    return prettier.format(fileContent, {
+      parser: 'typescript',
+      trailingComma: 'all',
+      singleQuote: false,
+      ...ResolveConfigOptions
+    });
+  } catch (e) {
+    console.error(`代码格式化报错！${e.toString()}\n代码为：${fileContent}`);
+    return fileContent;
   }
 }
 
 export function generateNewLangFile(key: string, value: string) {
   const obj = _.set({}, key, value);
 
-  return `export default ${JSON.stringify(obj, null, 2)}`;
+  return prettierFile(`export default ${JSON.stringify(obj, null, 2)}`);
 }
 
 export function addImportToMainLangFile(newFilename: string) {
@@ -73,8 +92,3 @@ export function addImportToMainLangFile(newFilename: string) {
   }
   fs.writeFileSync(`${LANG_PREFIX}index.ts`, mainContent);
 }
-
-
-
-
-
