@@ -6,7 +6,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import * as prettier from 'prettier';
-import { ResolveConfigOptions } from 'prettier';
 import { getLangData } from './getLangData';
 import { LANG_PREFIX } from './const';
 
@@ -62,8 +61,7 @@ function prettierFile(fileContent) {
     return prettier.format(fileContent, {
       parser: 'typescript',
       trailingComma: 'all',
-      singleQuote: false,
-      ...ResolveConfigOptions
+      singleQuote: false
     });
   } catch (e) {
     console.error(`代码格式化报错！${e.toString()}\n代码为：${fileContent}`);
