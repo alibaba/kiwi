@@ -254,31 +254,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(editor => {
       activeEditor = editor;
-      const pattern = vscode.workspace
-        .getConfiguration('vscode-i18n-linter')
-        .get('i18nFilesPattern');
-      if (
-        editor &&
-        pattern !== '' &&
-        !minimatch(
-          editor.document.uri.fsPath.replace(
-            vscode.workspace.rootPath + '/',
-            ''
-          ),
-          pattern
-        )
-      ) {
-        console.log(
-          editor.document.uri.fsPath.replace(
-            vscode.workspace.rootPath + '/',
-            ''
-          ) +
-            ' 不匹配 ' +
-            pattern
-        );
-        return;
-      }
-
       if (editor) {
         triggerUpdateDecorations((newTargetStrs) => {
           targetStrs = newTargetStrs;
@@ -290,31 +265,6 @@ export function activate(context: vscode.ExtensionContext) {
   // 当 文档发生变化时 的时候重新检测当前文档中的中文文案
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(event => {
-      const pattern = vscode.workspace
-        .getConfiguration('vscode-i18n-linter')
-        .get('i18nFilesPattern');
-      if (
-        activeEditor &&
-        pattern !== '' &&
-        !minimatch(
-          activeEditor.document.uri.fsPath.replace(
-            vscode.workspace.rootPath + '/',
-            ''
-          ),
-          pattern
-        )
-      ) {
-        console.log(
-          activeEditor.document.uri.fsPath.replace(
-            vscode.workspace.rootPath + '/',
-            ''
-          ) +
-            ' 不匹配 ' +
-            pattern
-        );
-        return;
-      }
-
       if (activeEditor && event.document === activeEditor.document) {
         triggerUpdateDecorations((newTargetStrs) => {
           targetStrs = newTargetStrs;
