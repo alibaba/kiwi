@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
-    "publish-linter": "cd kiwi-linter && vsce publish --yarn"
+    "publish-linter": "cd kiwi-linter && vsce publish"
   },
   "repository": {
     "type": "git",
