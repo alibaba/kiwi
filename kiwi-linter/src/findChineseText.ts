@@ -16,11 +16,10 @@ import { removeFileComment } from './astUtils';
 function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
-  const noCommentCode = removeFileComment(code, fileName);
 
   const ast = ts.createSourceFile(
     '',
-    noCommentCode,
+    code,
     ts.ScriptTarget.ES2015,
     true,
     ts.ScriptKind.TSX
@@ -52,13 +51,14 @@ function findTextInTs(code: string, fileName: string) {
         children.forEach(child => {
           if (child.kind === ts.SyntaxKind.JsxText) {
             const text = child.getText();
+            /** 修复注释含有中文的情况，Angular 文件错误的 Ast 情况 */
+            const noCommentText = removeFileComment(text, fileName);
 
-            if (text.match(DOUBLE_BYTE_REGEX)) {
+            if (noCommentText.match(DOUBLE_BYTE_REGEX)) {
               const start = child.getStart();
               const end = child.getEnd();
               const startPos = activeEditor.document.positionAt(start);
               const endPos = activeEditor.document.positionAt(end);
-
               const { trimStart, trimEnd } = trimWhiteSpace(code, startPos, endPos);
               const range = new vscode.Range(trimStart, trimEnd);
 
