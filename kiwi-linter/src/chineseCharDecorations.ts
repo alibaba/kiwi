@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import { setLineDecorations } from './lineAnnotation';
 import { findChineseText } from './findChineseText';
+import * as minimatch from 'minimatch';
 
 /**
  * 中文的标记，红框样式
@@ -48,12 +49,47 @@ export function triggerUpdateDecorations(callback?) {
       /** 清除原有的提示 */
       activeEditor.setDecorations(prevChineseCharDecoration, []);
     }
+    if (!matchPattern()) {
+      return;
+    }
     const { targetStrs, chineseCharDecoration } = updateDecorations();
     prevChineseCharDecoration = chineseCharDecoration;
     callback(targetStrs);
   }, 500);
 }
 
+/**
+ * 查看文件名是否匹配
+ */
+function matchPattern() {
+  const activeEditor = vscode.window.activeTextEditor;
+  const pattern = vscode.workspace
+        .getConfiguration('vscode-i18n-linter')
+        .get('i18nFilesPattern');
+  if (
+    activeEditor &&
+    pattern !== '' &&
+    !minimatch(
+      activeEditor.document.uri.fsPath.replace(
+        vscode.workspace.rootPath + '/',
+        ''
+      ),
+      pattern
+    )
+  ) {
+    console.log(
+      activeEditor.document.uri.fsPath.replace(
+        vscode.workspace.rootPath + '/',
+        ''
+      ) +
+        ' 不匹配 ' +
+        pattern
+    );
+    return false;
+  } else {
+    return true;
+  }
+}
 /**
  * 更新标记
  */

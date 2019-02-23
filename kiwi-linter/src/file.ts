@@ -61,7 +61,7 @@ function prettierFile(fileContent) {
     return prettier.format(fileContent, {
       parser: 'typescript',
       trailingComma: 'all',
-      singleQuote: false
+      singleQuote: true
     });
   } catch (e) {
     console.error(`代码格式化报错！${e.toString()}\n代码为：${fileContent}`);
