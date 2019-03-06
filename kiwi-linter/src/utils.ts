@@ -38,7 +38,11 @@ export function findPositionInCode(text: string, code: string) {
     return null;
   }
 
-  const chNum = lines[lineNum].indexOf(text);
+  let chNum = lines[lineNum].indexOf(text);
+
+  if (text.startsWith(' ')) {
+    chNum += 1;
+  }
 
   return new vscode.Position(lineNum, chNum);
 }
