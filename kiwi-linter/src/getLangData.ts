@@ -3,7 +3,6 @@
  * @desc 获取语言文件
  */
 import * as vscode from 'vscode';
-import * as fJSON from 'fbbk-json';
 import { flatten } from './utils';
 import * as globby from 'globby';
 import * as fs from 'fs';
@@ -13,10 +12,11 @@ import { I18N_GLOB } from './const';
  */
 function getLangJson(fileName) {
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
-  const obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)[1];
+  let obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)[1];
+  obj = obj.replace(/\s*;\s*$/, '')
   let jsObj = {};
   try {
-    jsObj = fJSON.parse(obj.replace(/\s*;\s*$/, ''));
+    jsObj = eval("(" + obj + ")");
   } catch (err) {
     console.log(obj);
     console.error(err);
