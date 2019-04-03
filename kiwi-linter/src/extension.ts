@@ -3,9 +3,7 @@
  * @desc 插件主入口
  */
 import * as vscode from 'vscode';
-import * as minimatch from 'minimatch';
 import * as _ from 'lodash';
-import * as fs from 'fs';
 import { getSuggestLangObj } from './getLangData';
 import { I18N_GLOB } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';

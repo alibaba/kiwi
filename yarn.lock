@@ -5497,14 +5497,6 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "http://registry.npm.alibaba-inc.com/kind-of/download/kind-of-6.0.2.tgz#01146b36a6218e64e58f3a8d66de5d7fc6f6d051"
   integrity sha1-ARRrNqYhjmTljzqNZt5df8b20FE=
 
-kiwi-intl@^0.0.1:
-  version "0.0.1"
-  resolved "http://registry.npm.alibaba-inc.com/kiwi-intl/download/kiwi-intl-0.0.1.tgz#6a0078edef69d503abbf4ce553e2d2cf1f0d5360"
-  integrity sha1-agB47e9p1QOrv0zlU+LSzx8NU2A=
-  dependencies:
-    intl-messageformat "^2.2.0"
-    lodash.get "^4.4.2"
-
 klaw@^1.0.0:
   version "1.3.1"
   resolved "http://registry.npm.alibaba-inc.com/klaw/download/klaw-1.3.1.tgz#4088433b46b3b1ba259d78785d8e96f73ba02439"
