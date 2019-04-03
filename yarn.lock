@@ -3367,11 +3367,6 @@ fb-watchman@^2.0.0:
   dependencies:
     bser "^2.0.0"
 
-fbbk-json@^1.1.1:
-  version "1.1.1"
-  resolved "http://registry.npm.alibaba-inc.com/fbbk-json/download/fbbk-json-1.1.1.tgz#a3d0ae4b505f1d6996ef7648369779cccd9e39fa"
-  integrity sha1-o9CuS1BfHWmW73ZINpd5zM2eOfo=
-
 fd-slicer@~1.1.0:
   version "1.1.0"
   resolved "http://registry.npm.alibaba-inc.com/fd-slicer/download/fd-slicer-1.1.0.tgz#25c7c89cb1f9077f8891bbe61d8f390eae256f1e"
