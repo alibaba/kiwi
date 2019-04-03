@@ -16,7 +16,12 @@ var defineReactive = function (obj, key) {
     var childObj = observe(obj[key]);
     Object.defineProperty(obj, key, {
         get: function () {
-            return obj.__data__[key];
+            if (obj.__data__[key]) {
+                return obj.__data__[key];
+            }
+            else if (obj.__metas__['zh-CN'][key]) {
+                return obj.__metas__['zh-CN'][key];
+            }
         },
         set: function (newVal) {
             if (obj[key] === newVal) {

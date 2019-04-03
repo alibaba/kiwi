@@ -5,9 +5,10 @@ export interface I18NAPI {
     get(name: string, args?: object): string;
 }
 declare const IntlFormat: {
-    init: (lang: string, metas: object) => I18NAPI & {
-        [key: string]: string;
-    };
+    init: <T>(lang: string, metas: {
+        [key: string]: Object;
+        'zh-CN': T;
+    }) => I18NAPI & T;
 };
 export { IntlFormat };
 export default IntlFormat;
