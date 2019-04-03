@@ -1,3 +1,8 @@
+/**
+ * @file 值处理
+ * @author linhuiw
+ */
+
 const Observer = obj => {
   Object.keys(obj.__data__ || obj).forEach(key => {
     defineReactive(obj, key);
@@ -16,7 +21,11 @@ var defineReactive = (obj, key) => {
   var childObj = observe(obj[key]);
   Object.defineProperty(obj, key, {
     get() {
-      return obj.__data__[key];
+      if (obj.__data__[key]) {
+        return obj.__data__[key];
+      } else if (obj.__metas__['zh-CN'][key]) {
+        return obj.__metas__['zh-CN'][key];
+      }
     },
     set(newVal) {
       if (obj[key] === newVal) {
