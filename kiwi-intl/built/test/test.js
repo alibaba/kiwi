@@ -7,12 +7,16 @@ describe('IntlFormat', function () {
     before(function () {
         intlFormat = index_1.default.init('zh-CN', {
             'zh-CN': {
+                value: '值',
                 test: '测试',
                 testTemplate: '你有{value}条未读通知',
                 foo: {
                     bar: 'foobar'
                 },
                 photo: '我{num, plural, =0 {没有照片} =1 {有1张照片} other {有#张照片}}'
+            },
+            'en-US': {
+                value: 'value'
             }
         });
     });
@@ -55,6 +59,11 @@ describe('IntlFormat', function () {
             assert.equal(intlFormat2.test, 'secondvalue');
         });
         it('Get deep value', function () {
+            assert.equal(intlFormat.foo.bar, 'foobar');
+            assert.equal(intlFormat.get('foo.bar'), 'foobar');
+        });
+        it('获取默认中文值', function () {
+            intlFormat.setLang('en-US');
             assert.equal(intlFormat.foo.bar, 'foobar');
             assert.equal(intlFormat.get('foo.bar'), 'foobar');
         });

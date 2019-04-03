@@ -45,11 +45,14 @@ var I18N = (function () {
             return '';
         }
         return str.replace(/\{(.+?)\}/g, function (match, p1) {
-            return _this.getProp(__assign({}, args, _this.__data__), p1);
+            return _this.getProp(__assign({}, _this.__data__, args), p1);
         });
     };
     I18N.prototype.get = function (str, args) {
-        var msg = lodashGet(this.__data__, str, str);
+        var msg = lodashGet(this.__data__, str);
+        if (!msg) {
+            msg = lodashGet(this.__metas__['zh-CN'], str, str);
+        }
         if (args) {
             try {
                 msg = new intl_messageformat_1.default(msg, this.__lang__);
@@ -57,7 +60,7 @@ var I18N = (function () {
                 return msg;
             }
             catch (err) {
-                console.warn("intl-format format message failed for key='" + str + "'", err);
+                console.warn("kiwi-intl format message failed for key='" + str + "'", err);
                 return '';
             }
         }
