@@ -4,6 +4,8 @@
  */
 import * as _ from 'lodash';
 import * as vscode from 'vscode';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 /**
  * 将对象拍平
@@ -56,3 +58,17 @@ export function findMatchKey(langObj, text) {
 
   return null;
 }
+
+
+/**
+ * 获取文件夹下所有文件
+ * @function getAllFiles
+ * @param  {string} dir Dir path string.
+ * @return {string[]} Array with all file names that are inside the directory.
+ */
+export const getAllFiles = dir =>
+  fs.readdirSync(dir).reduce((files, file) => {
+    const name = path.join(dir, file);
+    const isDirectory = fs.statSync(name).isDirectory();
+    return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
+  }, []);
