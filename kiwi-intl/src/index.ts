@@ -1,7 +1,8 @@
 /**
- * I18N Tools
- * @author @linhuiw
+ * @file I18N Tools
+ * @author linhuiw
  */
+
 import IntlMessageFormat from 'intl-messageformat';
 import * as lodashGet from 'lodash.get';
 import Observer from './Observer';
@@ -68,22 +69,25 @@ class I18N {
     return str.replace(/\{(.+?)\}/g, (match, p1) => {
       return this.getProp(
         {
-          ...args,
-          ...this.__data__
+          ...this.__data__,
+          ...args
         },
         p1
       );
     });
   }
   get(str, args?) {
-    let msg = lodashGet(this.__data__, str, str);
+    let msg = lodashGet(this.__data__, str);
+    if (!msg) {
+      msg = lodashGet(this.__metas__['zh-CN'], str, str);
+    }
     if (args) {
       try {
         msg = new IntlMessageFormat(msg, this.__lang__);
         msg = msg.format(args);
         return msg;
       } catch (err) {
-        console.warn(`intl-format format message failed for key='${str}'`, err);
+        console.warn(`kiwi-intl format message failed for key='${str}'`, err);
         return '';
       }
     } else {
@@ -93,9 +97,10 @@ class I18N {
 }
 
 const IntlFormat = {
-  init: (lang: string, metas: object): I18NAPI & {
-    [key: string]: string;
-  } => {
+  init: <T>(lang: string, metas: {
+    'zh-CN': T,
+    [key: string]: Object
+  }): I18NAPI & T => {
     const i18n = new I18N(lang, metas);
     return Observer(i18n);
   }
