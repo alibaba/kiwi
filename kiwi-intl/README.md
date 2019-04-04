@@ -13,9 +13,9 @@
 初始化国际化框架
 
 ```javascript
-import IntlFormat from 'kiwi-intl';
+import KiwiIntl from 'kiwi-intl';
 
-const intlFormat = IntlFormat.init('en-UK', {
+const kiwiIntl = KiwiIntl.init('en-UK', {
   'en-UK': {
     test: 'testvalue',
     testTemplate: 'you have {value} unread message',
@@ -28,23 +28,23 @@ const intlFormat = IntlFormat.init('en-UK', {
 });
 ```
 
-在组件中直接使用，支持模板, 单复数。同时支持 `intlFormat.test`,直接取对应 Key 值。
+在组件中直接使用，支持模板, 单复数。同时支持 `kiwiIntl.test`,直接取对应 Key 值。
 
 ```javascript
 
-intlFormat.test; // testvalue;
+kiwiIntl.test; // testvalue;
 
-intlFormat.get('test'); // testvalue;
+kiwiIntl.get('test'); // testvalue;
 
-intlFormat.get('testTemplate', {
+kiwiIntl.get('testTemplate', {
   value: three
 }); // 值是 'you have three unread message'
 
-intlFormat.template(intlFormat.testTemplate, {
+kiwiIntl.template(kiwiIntl.testTemplate, {
   value: three
 }); // 值是 'you have three unread message'
 
-intlFormat.get('photo', {
+kiwiIntl.get('photo', {
   num: 0
 }); // 值是 'You have no photos.'
 ```
@@ -52,7 +52,7 @@ intlFormat.get('photo', {
 切换语言
 
 ```javascript
-intlFormat.setLang('zh-cn'); // 切换到中文语言
+kiwiIntl.setLang('zh-CN'); // 切换到中文语言
 ```
 
 ### License
