@@ -15,7 +15,7 @@ import * as _ from 'lodash';
 
 function getLangUnTranslate(lang?: string) {
   const messagesToTranslate = [];
-  const srcLangDir = path.resolve(getKiwiDir(), 'zh_CN');
+  const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
 

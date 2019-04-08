@@ -10,8 +10,8 @@ import { getAllFiles } from './utils';
  * 适配不同的语言文件夹位置
  */
 function dirAdaptor() {
-  let firstLangPerfix = `${vscode.workspace.rootPath}/.kiwi/zh_CN/`;
-  const backupLangPrefix = `${vscode.workspace.rootPath}/langs/zh_CN/`;
+  let firstLangPerfix = `${vscode.workspace.rootPath}/.kiwi/zh-CN/`;
+  const backupLangPrefix = `${vscode.workspace.rootPath}/langs/zh-CN/`;
 
   if (fs.existsSync(firstLangPerfix)) {
     return firstLangPerfix;
@@ -20,7 +20,7 @@ function dirAdaptor() {
   } else {
     const files = getAllFiles(`${vscode.workspace.rootPath}/`);
     const matchFiles = files.filter((fileName) => {
-      if (fileName.includes('/.kiwi/zh_CN/index.ts') || fileName.includes('/langs/zh_CN/index.ts')) {
+      if (fileName.includes('/.kiwi/zh-CN/index.ts') || fileName.includes('/langs/zh-CN/index.ts')) {
         return true;
       }
       return false;

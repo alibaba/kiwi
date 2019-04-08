@@ -1,8 +1,8 @@
 {
-  "srcLang": "zh_CN",
+  "srcLang": "zh-CN",
   "distLangs": [
-    "en_US",
-    "zh_TW"
+    "en-US",
+    "zh-TW"
   ],
   "googleApiKey": ""
 }

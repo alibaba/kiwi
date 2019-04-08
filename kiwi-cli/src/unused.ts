@@ -9,7 +9,7 @@ import { getKiwiDir, getLangDir, traverse } from "./utils";
 const lookingForString = "";
 
 function findUnUsed() {
-  const srcLangDir = path.resolve(getKiwiDir(), 'zh_CN');
+  const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
   const unUnsedKeys = [];

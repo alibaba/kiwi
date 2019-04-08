@@ -21,9 +21,9 @@ class App extends React.Component {
           点击切换语言
         </p>
         <div className="btns">
-          <span className="btn" onClick={this.changeLang.bind(this, 'zh_CN')}>中文简体</span>
-          <span className="btn" onClick={this.changeLang.bind(this, 'en_US')}>English</span>
-          <span className="btn" onClick={this.changeLang.bind(this, 'zh_TW')}>中文繁体</span>
+          <span className="btn" onClick={this.changeLang.bind(this, 'zh-CN')}>中文简体</span>
+          <span className="btn" onClick={this.changeLang.bind(this, 'en-US')}>English</span>
+          <span className="btn" onClick={this.changeLang.bind(this, 'zh-TW')}>中文繁体</span>
         </div>
         <br/>
         <p>
