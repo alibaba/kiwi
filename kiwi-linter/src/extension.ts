@@ -4,8 +4,9 @@
  */
 import * as vscode from 'vscode';
 import * as _ from 'lodash';
+import * as fs from 'fs-extra';
 import { getSuggestLangObj } from './getLangData';
-import { I18N_GLOB } from './const';
+import { I18N_GLOB, LANG_PREFIX } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
@@ -17,10 +18,10 @@ import { replaceAndUpdate } from './replaceAndUpdate';
  * @param context
  */
 export function activate(context: vscode.ExtensionContext) {
-  // if (!fs.existsSync(`${vscode.workspace.rootPath}/.kiwi/config.json`)) {
-  //   /** 存在配置文件则开启 */
-  //   return;
-  // }
+  if (!fs.existsSync(LANG_PREFIX)) {
+    /** 存在配置文件则开启 */
+    return;
+  }
   console.log('Congratulations, your extension "kiwi-linter" is now active!');
   context.subscriptions.push(
     vscode.commands.registerCommand(
