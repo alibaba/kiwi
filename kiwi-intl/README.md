@@ -54,7 +54,17 @@ kiwiIntl.get('photo', {
 ```javascript
 kiwiIntl.setLang('zh-CN'); // 切换到中文语言
 ```
+## 语言编码
+【强制】区别不同语言的 language tag 遵循 [BCP47](https://en.wikipedia.org/wiki/IETF_language_tag) 规范。
 
-### License
+根据目前的国际业务情况，不同地区的同种语言在同一地区不会同使用两种写法。比如新加坡只使用是简体中文，台湾和香港只使用繁体中文，所以我们约定在 BCP 47规范中，仅使用 language-region  的组合方式。
+
+正例：zh-CN
+
+反例：~~zh、zh_hans、zh-cn~~
+
+
+
+## License
 
 MIT
