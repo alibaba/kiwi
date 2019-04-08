@@ -10,7 +10,7 @@ import { getAllFiles } from './utils';
  * 适配不同的语言文件夹位置
  */
 function dirAdaptor() {
-  let firstLangPerfix = `${vscode.workspace.rootPath}/.kiwi/zh-CN/`;
+  const firstLangPerfix = `${vscode.workspace.rootPath}/.kiwi/zh-CN/`;
   const backupLangPrefix = `${vscode.workspace.rootPath}/langs/zh-CN/`;
 
   if (fs.existsSync(firstLangPerfix)) {
