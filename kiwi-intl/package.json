@@ -1,6 +1,6 @@
 {
   "name": "kiwi-intl",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "I18N tools for universal javascrit apps, easy use & better api;",
   "main": "built/src/index.js",
   "types": "built/src/index.d.ts",
