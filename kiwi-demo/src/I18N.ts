@@ -4,9 +4,9 @@
  */
 
 import kiwiIntl from 'kiwi-intl';
-import enUsLangs from '../.kiwi/en_US/';
-import zhCNLangs from '../.kiwi/zh_CN/';
-import zhTWLangs from '../.kiwi/zh_TW/';
+import enUsLangs from '../.kiwi/en-US/';
+import zhCNLangs from '../.kiwi/zh-CN/';
+import zhTWLangs from '../.kiwi/zh-TW/';
 
 export enum LangEnum {
   "zh-CN" = 'zh-CN',
@@ -19,7 +19,7 @@ export enum LangEnum {
  */
 export function getCurrentLang(): LangEnum {
   const urlLang = new URL(window.location.href).searchParams.get('lang');
-  const cookieLang = (document.cookie.match(/kiwi-locale=([^;$]+)/) || [null, 'zh_CN'])[1];
+  const cookieLang = (document.cookie.match(/kiwi-locale=([^;$]+)/) || [null, 'zh-CN'])[1];
   const lang = (cookieLang as string).split(' ')[0];
   if (Object.keys(LangEnum).includes(urlLang as string)) {
     return urlLang as LangEnum;
@@ -32,7 +32,7 @@ const langs = {
   "zh-CN": zhCNLangs,
   "zh-TW": zhTWLangs
 };
-// 从 Cookie 中取语言值, 默认为 zh_CN
+// 从 Cookie 中取语言值, 默认为 zh-CN
 const defaultLang = getCurrentLang();
 
 let curLang;

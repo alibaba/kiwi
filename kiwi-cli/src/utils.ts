@@ -43,7 +43,7 @@ function traverse(obj, cb) {
  * 获取所有文案
  */
 function getAllMessages() {
-  const srcLangDir = path.resolve(getKiwiDir(), 'zh_CN');
+  const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts').map(file => path.resolve(srcLangDir, file));
 

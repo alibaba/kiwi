@@ -7,13 +7,12 @@ export const PROJECT_CONFIG = {
   dir: './.kiwi',
   configFile: './.kiwi/config.json',
   defaultConfig: {
-    srcLang: 'zh_CN',
-    distLangs: ['en_US', 'zh_TW'],
+    srcLang: 'zh-CN',
+    distLangs: ['en-US', 'zh-TW'],
     googleApiKey: ''
   },
   langMap: {
-    ['en_US']: 'en',
-    ['zh_TW']: 'zh-TW'
+    ['en-US']: 'en'
   },
   zhIndexFile: `import common from './common';
 

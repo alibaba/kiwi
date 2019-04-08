@@ -17,7 +17,7 @@ function creteConfigFile() {
 }
 
 function createCnFile() {
-  const cnDir = `${PROJECT_CONFIG.dir}/zh_CN`;
+  const cnDir = `${PROJECT_CONFIG.dir}/zh-CN`;
   if (!fs.existsSync(cnDir)) {
     fs.mkdirSync(cnDir);
     fs.writeFile(`${cnDir}/index.ts`, PROJECT_CONFIG.zhIndexFile, (err) => {
