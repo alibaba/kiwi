@@ -14,12 +14,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/nefe/kiwi.git"
+    "url": "https://github.com/alibaba/kiwi.git"
   },
   "bugs": {
-    "url": "https://github.com/nefe/kiwi/issues"
+    "url": "https://github.com/alibaba/kiwi/issues"
   },
-  "homepage": "https://github.com/nefe/kiwi",
+  "homepage": "https://github.com/alibaba/kiwi",
   "scripts": {
     "lint": "tslint src",
     "autofix": "tslint src --fix",
