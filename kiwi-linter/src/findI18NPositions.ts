@@ -3,7 +3,6 @@
  */
 
 import * as ts from 'typescript';
-import * as vscode from 'vscode';
 import * as _ from 'lodash';
 import { getI18N } from './getLangData';
 

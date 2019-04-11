@@ -3,7 +3,6 @@
  * @desc 工具方法
  */
 import * as _ from 'lodash';
-import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -46,7 +45,7 @@ export function findPositionInCode(text: string, code: string) {
     chNum += 1;
   }
 
-  return new vscode.Position(lineNum, chNum);
+  return { lineNum, chNum };
 }
 
 export function findMatchKey(langObj, text) {
@@ -72,3 +71,41 @@ export const getAllFiles = dir =>
     const isDirectory = fs.statSync(name).isDirectory();
     return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
   }, []);
+
+
+/**
+* 适配不同的语言文件夹位置
+*/
+export function dirAdaptor(rootPath) {
+  const kiwiLangPerfix = `${rootPath}/.kiwi/zh-CN/`;
+  const langPrefix = `${rootPath}/langs/zh-CN/`;
+
+  /** 兼容 zh_CN 情况 */
+  const _kiwiLangPerfix = `${rootPath}/.kiwi/zh_CN/`;
+  const _langPrefix = `${rootPath}/langs/zh_CN/`;
+
+  if (fs.existsSync(kiwiLangPerfix)) {
+    return kiwiLangPerfix;
+  } else if (fs.existsSync(langPrefix)) {
+    return langPrefix;
+  } else if (fs.existsSync(_kiwiLangPerfix)) {
+    return _kiwiLangPerfix;
+  } else if (fs.existsSync(_langPrefix)) {
+    return _langPrefix;
+  } else {
+    const files = getAllFiles(`${rootPath}/`);
+    const matchFiles = files.filter((fileName) => {
+      if (fileName.includes('/.kiwi/zh-CN/index.ts')
+        || fileName.includes('/langs/zh-CN/index.ts')
+        || fileName.includes('/.kiwi/zh_CN/index.ts')
+        || fileName.includes('/langs/zh_CN/index.ts')) {
+        return true;
+      }
+      return false;
+    });
+
+    if (matchFiles.length) {
+      return matchFiles[0].replace('index.ts', '');
+    }
+  }
+}

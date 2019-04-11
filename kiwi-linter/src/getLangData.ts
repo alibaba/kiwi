@@ -2,7 +2,6 @@
  * @author linhuiw
  * @desc 获取语言文件
  */
-import * as vscode from 'vscode';
 import { flatten } from './utils';
 import * as globby from 'globby';
 import * as fs from 'fs';
@@ -48,7 +47,7 @@ export function getI18N() {
     let jsObj = fileContent;
 
     if (Object.keys(jsObj).length === 0) {
-      vscode.window.showWarningMessage(
+      console.error(
         `\`${curr}\` 解析失败，该文件包含的文案无法自动补全`
       );
     }

@@ -5,7 +5,7 @@
 
 import { TargetStr } from "./define";
 import * as vscode from 'vscode';
-import { updateLangFiles } from "./file";
+import { updateLangFiles } from "./vscodeBridge";
 /**
    * 更新文件
    * @param arg  目标字符串对象

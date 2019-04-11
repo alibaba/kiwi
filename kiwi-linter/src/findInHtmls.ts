@@ -5,7 +5,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { findPositionInCode } from './utils';
+import { findPositionInCode } from './vscodeBridge';
 
 
 export async function findInHtmls(text: string, fsPath = path.join(vscode.workspace.rootPath, 'src')): Promise<Array<vscode.Location>> {

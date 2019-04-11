@@ -8,7 +8,7 @@ import * as path from 'path';
 import { getLangData, getSuggestLangObj, getI18N } from './getLangData';
 import { Item } from './define';
 import { LANG_PREFIX } from './const';
-import { findPositionInCode } from './utils';
+import { findPositionInCode } from './vscodeBridge';
 import { findInHtmls } from './findInHtmls';
 import { findI18NPositions } from './findI18NPositions';
 import { transformPosition } from './lineAnnotation';
