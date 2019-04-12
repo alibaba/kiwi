@@ -115,6 +115,7 @@
     "lodash": "^4.17.4",
     "minimatch": "^3.0.4",
     "prettier": "^1.16.4",
+    "randomstring": "^1.1.5",
     "ts-node": "^6.0.3",
     "typescript": "^2.8.3"
   }
