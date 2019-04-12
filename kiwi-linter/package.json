@@ -71,6 +71,10 @@
       {
         "command": "vscode-i18n-linter.findAllI18N",
         "title": "Search inside All Files for I18N Strings"
+      },
+      {
+        "command": "vscode-i18n-linter.kiwigo",
+        "title": "Kiwi Go!"
       }
     ],
     "keybindings": [

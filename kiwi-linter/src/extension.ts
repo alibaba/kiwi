@@ -38,7 +38,33 @@ export function activate(context: vscode.ExtensionContext) {
       targetStrs = newTargetStrs;
     });
   }
+  const currentFilename = activeEditor.document.fileName;
+  const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
 
+  let suggestion = [];
+  if (currentFilename.includes('/pages/')) {
+    suggestion = currentFilename.match(suggestPageRegex);
+  }
+  if (suggestion) {
+    suggestion.shift();
+  }
+  /** 如果没有匹配到 Key */
+  if (!(suggestion && suggestion.length)) {
+    const names = currentFilename.split('/');
+    const fileName = _.last(names);
+    const fileKey = fileName
+      .split('.')[0]
+      .replace(new RegExp('-', 'g'), '_');
+    const dir = names[names.length - 2].replace(
+      new RegExp('-', 'g'),
+      '_'
+    );
+    if (dir === fileKey) {
+      suggestion = [dir];
+    } else {
+      suggestion = [dir, fileKey];
+    }
+  }
   context.subscriptions.push(
     vscode.commands.registerTextEditorCommand(
       'vscode-i18n-linter.findI18N',
@@ -123,34 +149,6 @@ export function activate(context: vscode.ExtensionContext) {
         if (args.varName) {
           return resolve(args.varName);
         }
-
-        const currentFilename = activeEditor.document.fileName;
-        const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
-
-        let suggestion = [];
-        if (currentFilename.includes('/pages/')) {
-          suggestion = currentFilename.match(suggestPageRegex);
-        }
-        if (suggestion) {
-          suggestion.shift();
-        }
-        /** 如果没有匹配到 Key */
-        if (!(suggestion && suggestion.length)) {
-          const names = currentFilename.split('/');
-          const fileName = _.last(names);
-          const fileKey = fileName
-            .split('.')[0]
-            .replace(new RegExp('-', 'g'), '_');
-          const dir = names[names.length - 2].replace(
-            new RegExp('-', 'g'),
-            '_'
-          );
-          if (dir === fileKey) {
-            suggestion = [dir];
-          } else {
-            suggestion = [dir, fileKey];
-          }
-        }
         // 否则要求用户输入变量名
         return resolve(
           vscode.window.showInputBox({
@@ -203,6 +201,56 @@ export function activate(context: vscode.ExtensionContext) {
         k.includes('common.')
       );
       if (targetStrs.length === 0 || commandKeys.length === 0) {
+        vscode.window.showInformationMessage('没有找到可替换的公共文案');
+        return;
+      }
+
+      const replaceableStrs = targetStrs.reduce((prev, curr) => {
+        const key = findMatchKey(finalLangObj, curr.text);
+        if (key && key.startsWith('common.')) {
+          return prev.concat({
+            target: curr,
+            key
+          });
+        }
+
+        return prev;
+      }, []);
+
+      if (replaceableStrs.length === 0) {
+        vscode.window.showInformationMessage('没有找到可替换的公共文案');
+        return;
+      }
+
+      vscode.window
+        .showInformationMessage(
+          `共找到 ${replaceableStrs.length} 处可自动替换的文案，是否替换？`,
+          { modal: true },
+          'Yes'
+        )
+        .then(action => {
+          if (action === 'Yes') {
+            replaceableStrs
+              .reduce((prev: Promise<any>, obj) => {
+                return prev.then(() => {
+                  return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
+                });
+              }, Promise.resolve())
+              .then(() => {
+                vscode.window.showInformationMessage('替换完成');
+              })
+              .catch(e => {
+                vscode.window.showErrorMessage(e.message);
+              });
+          }
+        });
+    })
+  );
+
+  // 一键替换所有中文
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
+      if (targetStrs.length === 0) {
         vscode.window.showInformationMessage('没有找到可替换的公共文案');
         return;
       }
