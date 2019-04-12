@@ -23,7 +23,7 @@
   },
   "lint-staged": {
     "*.(t|j)s": [
-      "npm run prettier",
+      "node ./scripts/lint-prettier.js",
       "git add"
     ]
   },
