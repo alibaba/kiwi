@@ -13,10 +13,10 @@ import { I18N_GLOB } from './const';
 function getLangJson(fileName) {
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
   let obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)[1];
-  obj = obj.replace(/\s*;\s*$/, '')
+  obj = obj.replace(/\s*;\s*$/, '');
   let jsObj = {};
   try {
-    jsObj = eval("(" + obj + ")");
+    jsObj = eval('(' + obj + ')');
   } catch (err) {
     console.log(obj);
     console.error(err);
@@ -48,9 +48,7 @@ export function getI18N() {
     let jsObj = fileContent;
 
     if (Object.keys(jsObj).length === 0) {
-      vscode.window.showWarningMessage(
-        `\`${curr}\` 解析失败，该文件包含的文案无法自动补全`
-      );
+      vscode.window.showWarningMessage(`\`${curr}\` 解析失败，该文件包含的文案无法自动补全`);
     }
 
     if (filename === 'common') {

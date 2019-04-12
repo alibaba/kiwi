@@ -9,11 +9,7 @@ import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
 import { LANG_PREFIX } from './const';
 
-export function updateLangFiles(
-  lang: string,
-  text: string,
-  validateDuplicate: boolean
-) {
+export function updateLangFiles(lang: string, text: string, validateDuplicate: boolean) {
   if (!lang.startsWith('I18N.')) {
     return;
   }
@@ -32,24 +28,17 @@ export function updateLangFiles(
     const obj = mainContent;
 
     if (Object.keys(obj).length === 0) {
-      vscode.window.showWarningMessage(
-        `${filename} 解析失败，该文件包含的文案无法自动补全`
-      );
+      vscode.window.showWarningMessage(`${filename} 解析失败，该文件包含的文案无法自动补全`);
     }
 
     if (validateDuplicate && _.get(obj, fullKey) !== undefined) {
-      vscode.window.showErrorMessage(
-        `${targetFilename} 中已存在 key 为 \`${fullKey}\` 的翻译，请重新命名变量`
-      );
+      vscode.window.showErrorMessage(`${targetFilename} 中已存在 key 为 \`${fullKey}\` 的翻译，请重新命名变量`);
       throw new Error('duplicate');
     }
     // \n 会被自动转义成 \\n，这里转回来
     text = text.replace(/\\n/gm, '\n');
     _.set(obj, fullKey, text);
-    fs.writeFileSync(
-      targetFilename,
-      prettierFile(`export default ${JSON.stringify(obj, null, 2)}`)
-    );
+    fs.writeFileSync(targetFilename, prettierFile(`export default ${JSON.stringify(obj, null, 2)}`));
   }
 }
 /**
@@ -77,10 +66,7 @@ export function generateNewLangFile(key: string, value: string) {
 
 export function addImportToMainLangFile(newFilename: string) {
   let mainContent = fs.readFileSync(`${LANG_PREFIX}index.ts`, 'utf8');
-  mainContent = mainContent.replace(
-    /^(\s*import.*?;)$/m,
-    `$1\nimport ${newFilename} from './${newFilename}';`
-  );
+  mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
   if (/\,\n(}\);)/.test(mainContent)) {
     /** 最后一行包含,号 */
     mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);

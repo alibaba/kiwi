@@ -7,8 +7,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { findPositionInCode } from './utils';
 
-
-export async function findInHtmls(text: string, fsPath = path.join(vscode.workspace.rootPath, 'src')): Promise<Array<vscode.Location>> {
+export async function findInHtmls(
+  text: string,
+  fsPath = path.join(vscode.workspace.rootPath, 'src')
+): Promise<Array<vscode.Location>> {
   const info = await fs.lstat(fsPath);
 
   if (!info.isDirectory()) {
@@ -31,4 +33,3 @@ export async function findInHtmls(text: string, fsPath = path.join(vscode.worksp
 
   return locationses.reduce((pre, next) => pre.concat(next), []);
 }
-

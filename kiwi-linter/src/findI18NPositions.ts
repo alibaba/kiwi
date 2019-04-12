@@ -57,7 +57,7 @@ function getRegexMatches(I18N, code: string) {
       exps = exps.split(',')[0];
       exps = exps.split(';')[0];
       exps = exps.split('"')[0];
-      exps = exps.split('\'')[0];
+      exps = exps.split("'")[0];
       exps = exps.split(' ')[0];
       const code = `I18N.${exps}`;
       const position = new Position();
@@ -88,10 +88,8 @@ export function findI18NPositions(code: string) {
 
   const regexMatches = getRegexMatches(I18N, code);
   let matchPositions = positions.concat(regexMatches);
-  matchPositions = _.uniqBy(matchPositions, (position: Position & {
-    line: number
-  }) => {
-    return `${position.code}-${(position.line)}`;
+  matchPositions = _.uniqBy(matchPositions, (position: Position & { line: number }) => {
+    return `${position.code}-${position.line}`;
   });
 
   cache.addCache(code, matchPositions);
