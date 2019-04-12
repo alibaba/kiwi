@@ -10,7 +10,7 @@
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
     "publish-linter": "cd kiwi-linter && vsce publish",
-    "precommit": "node ./scripts/prettier.js && git add",
+    "precommit": "node ./scripts/prettier.js && git add .",
     "prettier": "node ./scripts/prettier.js"
   },
   "repository": {
