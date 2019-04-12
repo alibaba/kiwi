@@ -6,7 +6,7 @@ Kiwi 的 CLI 工具
 
 > yarn global add kiwi-clis
 
-> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/nefe/kiwi)结合使用
+> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/alibaba/kiwi)结合使用
 
 ## CLI 参数
 ### kiwi `--init`
