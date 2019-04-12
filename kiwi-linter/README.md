@@ -8,7 +8,7 @@ kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮�
 
 > VS Code 插件搜索 kiwi linter 安装
 
-> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/nefe/kiwi)结合使用
+> 推荐与[🐤 Kiwi-国际化全流程解决方案](https://github.com/alibaba/kiwi)结合使用
 
 
 ![演示](https://img.alicdn.com/tfs/TB1EYENfTnI8KJjy0FfXXcdoVXa-1006-368.gif)
