@@ -111,6 +111,7 @@
     "lodash": "^4.17.4",
     "minimatch": "^3.0.4",
     "prettier": "^1.16.4",
+    "slash2": "^2.0.0",
     "ts-node": "^6.0.3",
     "typescript": "^2.8.3"
   }
