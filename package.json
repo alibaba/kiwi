@@ -9,11 +9,23 @@
   ],
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
-    "publish-linter": "cd kiwi-linter && vsce publish"
+    "publish-linter": "cd kiwi-linter && vsce publish",
+    "prettier": "node ./scripts/prettier.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alibaba/kiwi.git"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.(t|j)s": [
+      "npm run prettier",
+      "git add"
+    ]
   },
   "author": "linhuiw",
   "license": "MIT",

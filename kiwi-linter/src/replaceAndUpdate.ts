@@ -3,20 +3,16 @@
  * @desc 更新文件
  */
 
-import { TargetStr } from "./define";
+import { TargetStr } from './define';
 import * as vscode from 'vscode';
-import { updateLangFiles } from "./file";
+import { updateLangFiles } from './file';
 /**
-   * 更新文件
-   * @param arg  目标字符串对象
-   * @param val  目标 key
-   * @param validateDuplicate 是否校验文件中已经存在要写入的 key
-   */
-export function replaceAndUpdate(
-  arg: TargetStr,
-  val: string,
-  validateDuplicate: boolean
-): Thenable<any> {
+ * 更新文件
+ * @param arg  目标字符串对象
+ * @param val  目标 key
+ * @param validateDuplicate 是否校验文件中已经存在要写入的 key
+ */
+export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate: boolean): Thenable<any> {
   let activeEditor = vscode.window.activeTextEditor;
   const currentFilename = activeEditor.document.fileName;
   const isHtmlFile = currentFilename.endsWith('.html');
@@ -52,10 +48,7 @@ export function replaceAndUpdate(
         finalReplaceVal = `I18N.template(${val}, { ${kvPair.join(',\n')} })`;
 
         varInStr.forEach((str, index) => {
-          finalReplaceText = finalReplaceText.replace(
-            str,
-            `{val${index + 1}}`
-          );
+          finalReplaceText = finalReplaceText.replace(str, `{val${index + 1}}`);
         });
       }
     }

@@ -17,15 +17,13 @@ import { findI18NPositions, Position } from './findI18NPositions';
 /**
  * I18N 中文显示位置
  */
-const annotationDecoration: TextEditorDecorationType = window.createTextEditorDecorationType(
-  {
-    after: {
-      margin: '0 0 0 3em',
-      textDecoration: 'none'
-    },
-    rangeBehavior: DecorationRangeBehavior.ClosedOpen
-  } as DecorationRenderOptions
-);
+const annotationDecoration: TextEditorDecorationType = window.createTextEditorDecorationType({
+  after: {
+    margin: '0 0 0 3em',
+    textDecoration: 'none'
+  },
+  rangeBehavior: DecorationRangeBehavior.ClosedOpen
+} as DecorationRenderOptions);
 
 /**
  * 转换位置

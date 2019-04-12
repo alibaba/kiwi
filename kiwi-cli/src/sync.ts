@@ -45,9 +45,7 @@ function writeTranslations(file, toLang, translations) {
   const fileNameWithoutExt = path.basename(file).split('.')[0];
   const srcLangDir = getLangDir(CONFIG.srcLang);
   const srcFile = path.resolve(srcLangDir, file);
-  const {
-    default: texts
-  } = require(srcFile);
+  const { default: texts } = require(srcFile);
   const rst = {};
 
   traverse(texts, (text, path) => {
@@ -95,9 +93,12 @@ function sync(callback?) {
       console.error(err);
     } else {
       files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts' && file !== 'mock.ts').map(file => file);
-      const translateFiles = toLang => Promise.all(files.map(file => {
-        translateFile(file, toLang);
-      }));
+      const translateFiles = toLang =>
+        Promise.all(
+          files.map(file => {
+            translateFile(file, toLang);
+          })
+        );
       Promise.all(CONFIG.distLangs.map(translateFiles)).then(
         () => {
           const langDirs = CONFIG.distLangs.map(getLangDir);
@@ -119,6 +120,4 @@ function sync(callback?) {
   });
 }
 
-export {
-  sync
-};
+export { sync };
