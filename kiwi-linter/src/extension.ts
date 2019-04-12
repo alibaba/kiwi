@@ -83,7 +83,6 @@ export function activate(context: vscode.ExtensionContext) {
                 t => t.text === targetStr.text
               );
               const text = targetStr.text;
-
               const actions = [];
               for (const key in finalLangObj) {
                 if (finalLangObj[key] === text) {
@@ -132,8 +131,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (currentFilename.includes('/pages/')) {
           suggestion = currentFilename.match(suggestPageRegex);
         }
-
-        suggestion.shift();
+        if (suggestion) {
+          suggestion.shift();
+        }
         /** 如果没有匹配到 Key */
         if (!(suggestion && suggestion.length)) {
           const names = currentFilename.split('/');
