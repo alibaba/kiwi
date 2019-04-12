@@ -65,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
     .get('enableReplaceSuggestion');
   if (hasLightBulb) {
     context.subscriptions.push(
-      vscode.languages.registerCodeActionsProvider(
+vscode.languages.registerCodeActionsProvider(
         [
           { scheme: 'file', language: 'typescriptreact' },
           { scheme: 'file', language: 'html' },
