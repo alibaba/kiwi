@@ -9,7 +9,14 @@
   ],
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
-    "publish-linter": "cd kiwi-linter && vsce publish"
+    "publish-linter": "cd kiwi-linter && vsce publish",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.(t|j)s": [
+      "prettier --trailing-comma all --single-quote --write",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
