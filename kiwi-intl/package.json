@@ -37,6 +37,7 @@
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.31",
     "babel-cli": "^6.18.0",
+    "lint-staged": "^8.1.5",
     "mocha": "^3.5.0",
     "ts-loader": "^2.3.0",
     "ts-node": "^3.3.0",
