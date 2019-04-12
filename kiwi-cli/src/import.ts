@@ -79,6 +79,4 @@ function importMessages(file, lang) {
   console.log(`Imported ${count} message(s).`);
 }
 
-export {
-  importMessages
-}
+export { importMessages };

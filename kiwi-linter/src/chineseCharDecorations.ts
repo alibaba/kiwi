@@ -12,22 +12,14 @@ import * as minimatch from 'minimatch';
  */
 function getChineseCharDecoration() {
   // 配置提示框样式
-  const hasOverviewRuler = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('showOverviewRuler');
-  const shouldMark = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('markStringLiterals');
-  const color = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('markColor');
+  const hasOverviewRuler = vscode.workspace.getConfiguration('vscode-i18n-linter').get('showOverviewRuler');
+  const shouldMark = vscode.workspace.getConfiguration('vscode-i18n-linter').get('markStringLiterals');
+  const color = vscode.workspace.getConfiguration('vscode-i18n-linter').get('markColor');
   return vscode.window.createTextEditorDecorationType({
     borderWidth: shouldMark ? '1px' : undefined,
     borderStyle: shouldMark ? 'dotted' : undefined,
     overviewRulerColor: hasOverviewRuler ? color : undefined,
-    overviewRulerLane: hasOverviewRuler
-      ? vscode.OverviewRulerLane.Right
-      : undefined,
+    overviewRulerLane: hasOverviewRuler ? vscode.OverviewRulerLane.Right : undefined,
     light: {
       borderColor: shouldMark ? color : undefined
     },
@@ -63,28 +55,13 @@ export function triggerUpdateDecorations(callback?) {
  */
 function matchPattern() {
   const activeEditor = vscode.window.activeTextEditor;
-  const pattern = vscode.workspace
-        .getConfiguration('vscode-i18n-linter')
-        .get('i18nFilesPattern');
+  const pattern = vscode.workspace.getConfiguration('vscode-i18n-linter').get('i18nFilesPattern');
   if (
     activeEditor &&
     pattern !== '' &&
-    !minimatch(
-      activeEditor.document.uri.fsPath.replace(
-        vscode.workspace.rootPath + '/',
-        ''
-      ),
-      pattern
-    )
+    !minimatch(activeEditor.document.uri.fsPath.replace(vscode.workspace.rootPath + '/', ''), pattern)
   ) {
-    console.log(
-      activeEditor.document.uri.fsPath.replace(
-        vscode.workspace.rootPath + '/',
-        ''
-      ) +
-        ' 不匹配 ' +
-        pattern
-    );
+    console.log(activeEditor.document.uri.fsPath.replace(vscode.workspace.rootPath + '/', '') + ' 不匹配 ' + pattern);
     return false;
   } else {
     return true;
@@ -107,7 +84,7 @@ export function updateDecorations() {
   let chineseChars: vscode.DecorationOptions[] = [];
 
   targetStrs = findChineseText(text, currentFilename);
-  targetStrs.map((match) => {
+  targetStrs.map(match => {
     const decoration = {
       range: match.range,
       hoverMessage: `🐤 检测到中文文案🇨🇳 ： ${match.text}`
@@ -115,9 +92,7 @@ export function updateDecorations() {
     chineseChars.push(decoration);
   });
 
-  const shouldMark = vscode.workspace
-    .getConfiguration('vscode-i18n-linter')
-    .get('markStringLiterals');
+  const shouldMark = vscode.workspace.getConfiguration('vscode-i18n-linter').get('markStringLiterals');
   if (shouldMark !== true) {
     return;
   }

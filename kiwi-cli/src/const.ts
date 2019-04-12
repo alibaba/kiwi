@@ -22,4 +22,4 @@ export default Object.assign({}, {
   zhTestFile: `export default {
     test: '测试'
   }`
-}
+};

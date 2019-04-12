@@ -109,12 +109,4 @@ function withTimeout(promise, ms) {
   return Promise.race([promise, timeoutPromise]);
 }
 
-export {
-  getKiwiDir,
-  getLangDir,
-  traverse,
-  retry,
-  withTimeout,
-  getAllMessages,
-  getProjectConfig
-};
+export { getKiwiDir, getLangDir, traverse, retry, withTimeout, getAllMessages, getProjectConfig };

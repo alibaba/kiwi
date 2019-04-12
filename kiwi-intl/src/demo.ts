@@ -17,9 +17,12 @@ const intlFormat = IntlFormat.init('zh-CN', {
 
 console.log(intlFormat.test, 'intlFormat.test');
 
-console.log(intlFormat.template(intlFormat.testTemplate, {
-  value: '22'
-}), 'intlFormat.testTemplate');
+console.log(
+  intlFormat.template(intlFormat.testTemplate, {
+    value: '22'
+  }),
+  'intlFormat.testTemplate'
+);
 
 intlFormat.setLang('en-US');
 console.log(intlFormat.get('foo.bar'), 'get foo bar');
