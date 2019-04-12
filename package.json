@@ -10,7 +10,8 @@
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
     "publish-linter": "cd kiwi-linter && vsce publish",
-    "prettier": "node ./scripts/prettier.js"
+    "prettier": "node ./scripts/prettier.js",
+    "lint-staged": "lint-staged"
   },
   "repository": {
     "type": "git",
