@@ -10,16 +10,26 @@
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
     "publish-linter": "cd kiwi-linter && vsce publish",
-    "prettier": "node ./scripts/prettier.js"
+    "prettier": "node ./scripts/prettier.js",
+    "lint-staged": "lint-staged",
+    "lint:prettier": "check-prettier lint",
+    "lint": "npm run lint:prettier"
+  },
+  
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/src/*.{js,ts}": [
+      "node ./scripts/lint-prettier.js",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alibaba/kiwi.git"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "node ./scripts/lint-prettier.js && git add"
-    }
   },
   "author": "linhuiw",
   "license": "MIT",
