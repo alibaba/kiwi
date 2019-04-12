@@ -10,8 +10,7 @@
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
     "publish-linter": "cd kiwi-linter && vsce publish",
-    "prettier": "node ./scripts/prettier.js",
-    "lint-staged": "lint-staged"
+    "prettier": "node ./scripts/prettier.js"
   },
   "repository": {
     "type": "git",
@@ -19,14 +18,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint-staged"
+      "pre-commit": "node ./scripts/lint-prettier.js && git add"
     }
-  },
-  "lint-staged": {
-    "*.(t|j)s": [
-      "node ./scripts/lint-prettier.js",
-      "git add"
-    ]
   },
   "author": "linhuiw",
   "license": "MIT",
