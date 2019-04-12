@@ -10,16 +10,11 @@
   "scripts": {
     "watch": "cd kiwi-linter && npm run watch",
     "publish-linter": "cd kiwi-linter && vsce publish",
+    "precommit": "lint-staged",
     "prettier": "node ./scripts/prettier.js",
     "lint-staged": "lint-staged",
     "lint:prettier": "check-prettier lint",
     "lint": "npm run lint:prettier"
-  },
-  
-  "husky": {
-    "hooks": {
-      "pre-commit": "node ./scripts/lint-prettier.js"
-    }
   },
   "lint-staged": {
     "**/src/*.{js,ts}": [
