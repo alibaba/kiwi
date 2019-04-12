@@ -74,7 +74,7 @@ async function mockCurrentLang(dstLang) {
   });
   /** 调用 Google 翻译 */
   const translateAllTexts = Object.keys(untranslatedTexts).map(key => {
-    return translateText(untranslatedTexts[key], dstLang).then(translatedText => [key, translatedText])
+    return translateText(untranslatedTexts[key], dstLang).then(translatedText => [key, translatedText]);
   });
   /** 获取 Mocks 文案 */
   await Promise.all(translateAllTexts).then(res => {
@@ -110,12 +110,10 @@ function writeMockFile(dstLang, mocks) {
 async function mockLangs(lang?: string) {
   const CONFIG = getProjectConfig();
   const langs = lang ? [lang] : CONFIG.distLangs;
-  const mockPromise = langs.map((lang) => {
-    return mockCurrentLang(lang)
+  const mockPromise = langs.map(lang => {
+    return mockCurrentLang(lang);
   });
   return Promise.all(mockPromise);
 }
 
-export {
-  mockLangs
-};
+export { mockLangs };

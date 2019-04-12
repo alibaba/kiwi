@@ -19,7 +19,7 @@ function getLangUnTranslate(lang?: string) {
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
 
-  files.map((file) => {
+  files.map(file => {
     const srcFile = path.resolve(srcLangDir, file);
     const { default: messages } = require(srcFile);
     const distFile = path.resolve(getLangDir(lang), file);
@@ -33,7 +33,7 @@ function getLangUnTranslate(lang?: string) {
       if (distText === text) {
         messagesToTranslate.push([path, text]);
       }
-    })
+    });
   });
   return messagesToTranslate;
 }
@@ -41,7 +41,7 @@ function getLangUnTranslate(lang?: string) {
 function exportMessages(lang?: string) {
   const CONFIG = getProjectConfig();
   const langs = lang ? [lang] : CONFIG.distLangs;
-  langs.map((lang) => {
+  langs.map(lang => {
     const unTranslateMessages = getLangUnTranslate(lang);
     if (unTranslateMessages.length === 0) {
       console.log(`${lang} 该语言文件以及全部被翻译`);
@@ -49,9 +49,7 @@ function exportMessages(lang?: string) {
     const content = tsvFormatRows(unTranslateMessages);
     fs.writeFileSync(`./export-${lang}`, content);
     console.log(`${lang} 该语言导出 ${unTranslateMessages.length} 未翻译文案.`);
-  })
+  });
 }
 
-export {
-  exportMessages
-}
+export { exportMessages };
