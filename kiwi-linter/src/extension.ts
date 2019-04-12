@@ -4,6 +4,7 @@
  */
 import * as vscode from 'vscode';
 import * as _ from 'lodash';
+import * as randomstring from 'randomstring'
 import * as fs from 'fs-extra';
 import { getSuggestLangObj } from './getLangData';
 import { I18N_GLOB, LANG_PREFIX } from './const';
@@ -100,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
           { scheme: 'file', language: 'javascript' }
         ],
         {
-          provideCodeActions: function(document, range, context, token) {
+          provideCodeActions: function (document, range, context, token) {
             const targetStr = targetStrs.find(
               t => range.intersection(t.range) !== undefined
             );
@@ -156,7 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
               '请输入变量名，格式 `I18N.[page].[key]`，按 <回车> 启动替换',
             value: `I18N.${
               suggestion.length ? suggestion.join('.') + '.' : ''
-            }`,
+              }`,
             validateInput(input) {
               if (!input.match(/^I18N\.\w+\.\w+/)) {
                 return '变量名格式 `I18N.[page].[key]`，如 `I18N.dim.new`，[key] 中可包含更多 `.`';
@@ -246,7 +247,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
     })
   );
-
+  const virtualMemory = {};
   // 一键替换所有中文
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
@@ -254,17 +255,35 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('没有找到可替换的公共文案');
         return;
       }
-
       const replaceableStrs = targetStrs.reduce((prev, curr) => {
         const key = findMatchKey(finalLangObj, curr.text);
-        if (key && key.startsWith('common.')) {
+        if (!virtualMemory[curr.text]) {
+          if (key) {
+            virtualMemory[curr.text] = key;
+            return prev.concat({
+              target: curr,
+              key
+            });
+          }
+          const uuidKey = `${
+            suggestion.length ? suggestion.join('.') + '.' : ''
+            }${randomstring.generate({
+              length: 4,
+              charset: 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
+            })}`
+          virtualMemory[curr.text] = uuidKey;
           return prev.concat({
             target: curr,
-            key
+            key: uuidKey
+          });
+        } else {
+          return prev.concat({
+            target: curr,
+            key: virtualMemory[curr.text]
           });
         }
 
-        return prev;
+
       }, []);
 
       if (replaceableStrs.length === 0) {
