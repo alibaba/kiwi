@@ -59,7 +59,6 @@ export function findMatchKey(langObj, text) {
   return null;
 }
 
-
 /**
  * 获取文件夹下所有文件
  * @function getAllFiles

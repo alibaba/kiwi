@@ -52,9 +52,7 @@ export function findAllI18N() {
 
     const [target, ...restKeys] = foundItem.keys;
     const uri = vscode.Uri.file(path.join(LANG_PREFIX, target + '.ts'));
-    const content = (await fs.readFile(
-      path.join(LANG_PREFIX, target + '.ts')
-    )).toString('utf8');
+    const content = (await fs.readFile(path.join(LANG_PREFIX, target + '.ts'))).toString('utf8');
 
     const preCodeContent = '"' + restKeys[restKeys.length - 1] + '"';
     const newCodeContent = ' ' + restKeys[restKeys.length - 1] + ':';
@@ -67,13 +65,13 @@ export function findAllI18N() {
     await vscode.workspace.openTextDocument(uri);
 
     try {
-      const tsLocations = await vscode.commands.executeCommand<
-        vscode.Location[]
-      >('vscode.executeReferenceProvider', uri, pos);
-
-      const templateLocations = await findInHtmls(
-        'I18N.' + foundItem.keys.join('.')
+      const tsLocations = await vscode.commands.executeCommand<vscode.Location[]>(
+        'vscode.executeReferenceProvider',
+        uri,
+        pos
       );
+
+      const templateLocations = await findInHtmls('I18N.' + foundItem.keys.join('.'));
       const locations = [...tsLocations.slice(1), ...templateLocations];
 
       if (locations.length === 1) {
@@ -83,39 +81,21 @@ export function findAllI18N() {
         const doc = await vscode.workspace.openTextDocument(uri);
         await vscode.window.showTextDocument(doc);
 
-        vscode.window.activeTextEditor.selection = new vscode.Selection(
-          range.start,
-          range.end
-        );
-        vscode.window.activeTextEditor.revealRange(
-          range,
-          vscode.TextEditorRevealType.InCenter
-        );
+        vscode.window.activeTextEditor.selection = new vscode.Selection(range.start, range.end);
+        vscode.window.activeTextEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
       } else if (locations.length > 1) {
         vscode.window
-          .showQuickPick(
-            locations.map(real =>
-              path.relative(vscode.workspace.rootPath, real.uri.fsPath)
-            )
-          )
+          .showQuickPick(locations.map(real => path.relative(vscode.workspace.rootPath, real.uri.fsPath)))
           .then(async item => {
-            const index = locations.findIndex(real =>
-              real.uri.fsPath.includes(item)
-            );
+            const index = locations.findIndex(real => real.uri.fsPath.includes(item));
 
             const uri = locations[index].uri;
             const range = locations[index].range;
             const doc = await vscode.workspace.openTextDocument(uri);
             await vscode.window.showTextDocument(doc);
 
-            vscode.window.activeTextEditor.selection = new vscode.Selection(
-              range.start,
-              range.end
-            );
-            vscode.window.activeTextEditor.revealRange(
-              range,
-              vscode.TextEditorRevealType.InCenter
-            );
+            vscode.window.activeTextEditor.selection = new vscode.Selection(range.start, range.end);
+            vscode.window.activeTextEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
           });
       } else {
         vscode.window.showInformationMessage('未被使用！');
@@ -134,19 +114,11 @@ export function findI18N() {
   const code = document.getText();
   const positions = findI18NPositions(code);
 
-  vscode.window
-    .showQuickPick(positions.map(pos => `${pos.cn}  ${pos.code}`))
-    .then(item => {
-      const foundPos = positions.find(pos => `${pos.cn}  ${pos.code}` === item);
+  vscode.window.showQuickPick(positions.map(pos => `${pos.cn}  ${pos.code}`)).then(item => {
+    const foundPos = positions.find(pos => `${pos.cn}  ${pos.code}` === item);
 
-      const range = transformPosition(foundPos, code);
-      vscode.window.activeTextEditor.selection = new vscode.Selection(
-        range.start,
-        range.end
-      );
-      vscode.window.activeTextEditor.revealRange(
-        range,
-        vscode.TextEditorRevealType.InCenter
-      );
-    });
+    const range = transformPosition(foundPos, code);
+    vscode.window.activeTextEditor.selection = new vscode.Selection(range.start, range.end);
+    vscode.window.activeTextEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+  });
 }

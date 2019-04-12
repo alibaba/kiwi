@@ -2,21 +2,21 @@
  * @author linhuiw
  * @desc 查找未使用的 key
  */
-import * as fs from "fs";
-import * as path from "path";
-import { getKiwiDir, getLangDir, traverse } from "./utils";
+import * as fs from 'fs';
+import * as path from 'path';
+import { getKiwiDir, getLangDir, traverse } from './utils';
 
-const lookingForString = "";
+const lookingForString = '';
 
 function findUnUsed() {
   const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
   const unUnsedKeys = [];
-  files.map((file) => {
+  files.map(file => {
     const srcFile = path.resolve(srcLangDir, file);
     const { default: messages } = require(srcFile);
-    const filename = path.basename(file, ".ts");
+    const filename = path.basename(file, '.ts');
 
     traverse(messages, (text, path) => {
       const key = `I18N.${filename}.${path}`;
@@ -24,7 +24,7 @@ function findUnUsed() {
       if (!hasKey) {
         unUnsedKeys.push(key);
       }
-    })
+    });
   });
   console.log(unUnsedKeys, 'unUnsedKeys');
 }
@@ -41,10 +41,10 @@ function recursiveReadFile(fileName, text) {
     });
   }
   if (isDirectory(fileName)) {
-    var files = fs.readdirSync(fileName).filter((file) => {
+    var files = fs.readdirSync(fileName).filter(file => {
       return !file.startsWith('.') && !['node_modules', 'build', 'dist'].includes(file);
     });
-    files.forEach(function (val, key) {
+    files.forEach(function(val, key) {
       var temp = path.join(fileName, val);
       if (isDirectory(temp) && !hasText) {
         hasText = recursiveReadFile(temp, text);
@@ -54,7 +54,7 @@ function recursiveReadFile(fileName, text) {
           hasText = true;
         });
       }
-    })
+    });
   }
   return hasText;
 }
@@ -97,10 +97,8 @@ function isFile(fileName) {
  */
 function readFile(fileName) {
   if (fs.existsSync(fileName)) {
-    return fs.readFileSync(fileName, "utf-8");
+    return fs.readFileSync(fileName, 'utf-8');
   }
 }
 
-export {
-  findUnUsed
-}
+export { findUnUsed };

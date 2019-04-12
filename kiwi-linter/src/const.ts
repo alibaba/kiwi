@@ -27,11 +27,13 @@ function dirAdaptor() {
     return _langPrefix;
   } else {
     const files = getAllFiles(`${vscode.workspace.rootPath}/`);
-    const matchFiles = files.filter((fileName) => {
-      if (fileName.includes('/.kiwi/zh-CN/index.ts')
-        || fileName.includes('/langs/zh-CN/index.ts')
-        || fileName.includes('/.kiwi/zh_CN/index.ts')
-        || fileName.includes('/langs/zh_CN/index.ts')) {
+    const matchFiles = files.filter(fileName => {
+      if (
+        fileName.includes('/.kiwi/zh-CN/index.ts') ||
+        fileName.includes('/langs/zh-CN/index.ts') ||
+        fileName.includes('/.kiwi/zh_CN/index.ts') ||
+        fileName.includes('/langs/zh_CN/index.ts')
+      ) {
         return true;
       }
       return false;
@@ -46,8 +48,4 @@ function dirAdaptor() {
 const LANG_PREFIX = dirAdaptor();
 const I18N_GLOB = `${LANG_PREFIX}**/*.ts`;
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
-export {
-  LANG_PREFIX,
-  I18N_GLOB,
-  DOUBLE_BYTE_REGEX
-};
+export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX };

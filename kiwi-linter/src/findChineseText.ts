@@ -17,16 +17,10 @@ function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
 
-  const ast = ts.createSourceFile(
-    '',
-    code,
-    ts.ScriptTarget.ES2015,
-    true,
-    ts.ScriptKind.TSX
-  );
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   function visit(node: ts.Node) {
-    switch(node.kind) {
+    switch (node.kind) {
       case ts.SyntaxKind.StringLiteral: {
         /** 判断 Ts 中的字符串含有中文 */
         const { text } = node as ts.StringLiteral;
@@ -111,14 +105,17 @@ function findTextInHtml(code) {
   });
   function visit(node) {
     const value = node.value;
-    if (value && (typeof value === 'string') && value.match(DOUBLE_BYTE_REGEX)) {
+    if (value && typeof value === 'string' && value.match(DOUBLE_BYTE_REGEX)) {
       const valueSpan = node.valueSpan || node.sourceSpan;
-      let { start: { offset: startOffset }, end: { offset: endOffset } } = valueSpan;
+      let {
+        start: { offset: startOffset },
+        end: { offset: endOffset }
+      } = valueSpan;
       const nodeValue = code.slice(startOffset, endOffset);
       let startPos, endPos;
       let isString = false;
       /** 处理带引号的情况 */
-      if (nodeValue.charAt(0) === '"' || nodeValue.charAt(0) === '\'') {
+      if (nodeValue.charAt(0) === '"' || nodeValue.charAt(0) === "'") {
         startPos = activeEditor.document.positionAt(startOffset + 1);
         endPos = activeEditor.document.positionAt(endOffset - 1);
         isString = true;
@@ -133,14 +130,17 @@ function findTextInHtml(code) {
         text: value,
         isString
       });
-    } else if (value && typeof value === "object" && value.source && value.source.match(DOUBLE_BYTE_REGEX)) {
+    } else if (value && typeof value === 'object' && value.source && value.source.match(DOUBLE_BYTE_REGEX)) {
       /**
        * <span>{{expression}}中文</span> 这种情况的兼容
        */
       const chineseMatches = value.source.match(DOUBLE_BYTE_REGEX);
-      chineseMatches.map((match) => {
+      chineseMatches.map(match => {
         const valueSpan = node.valueSpan || node.sourceSpan;
-        let { start: { offset: startOffset }, end: { offset: endOffset } } = valueSpan;
+        let {
+          start: { offset: startOffset },
+          end: { offset: endOffset }
+        } = valueSpan;
         const nodeValue = code.slice(startOffset, endOffset);
         const start = nodeValue.indexOf(match);
         const end = start + match.length;
