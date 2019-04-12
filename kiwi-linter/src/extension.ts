@@ -5,6 +5,7 @@
 import * as vscode from 'vscode';
 import * as _ from 'lodash';
 import * as fs from 'fs-extra';
+import * as slash from 'slash2';
 import { getSuggestLangObj } from './getLangData';
 import { I18N_GLOB, LANG_PREFIX } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
@@ -114,7 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         /** 如果没有匹配到 Key */
         if (!(suggestion && suggestion.length)) {
-          const names = currentFilename.split('/');
+          const names = slash(currentFilename).split('/') as string[];
           const fileName = _.last(names);
           const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
           const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
