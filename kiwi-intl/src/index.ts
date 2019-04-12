@@ -97,10 +97,13 @@ class I18N {
 }
 
 const IntlFormat = {
-  init: <T>(lang: string, metas: {
-    'zh-CN': T,
-    [key: string]: Object
-  }): I18NAPI & T => {
+  init: <T>(
+    lang: string,
+    metas: {
+      'zh-CN': T;
+      [key: string]: Object;
+    }
+  ): I18NAPI & T => {
     const i18n = new I18N(lang, metas);
     return Observer(i18n);
   }

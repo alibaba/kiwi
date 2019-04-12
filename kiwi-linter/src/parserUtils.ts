@@ -29,12 +29,12 @@ export function trimWhiteSpace(code: string, startPos: vscode.Position, endPos: 
     columnOfLine[i] = [colStart, colEnd];
   }
   const startLine = Math.min(...hasContentLines);
-  const startCol = Math.min(...(columnOfLine[startLine]));
+  const startCol = Math.min(...columnOfLine[startLine]);
   const endLine = Math.max(...hasContentLines);
-  const endCol = Math.max(...(columnOfLine[endLine]));
+  const endCol = Math.max(...columnOfLine[endLine]);
 
   return {
     trimStart: new vscode.Position(startLine, startCol),
     trimEnd: new vscode.Position(endLine, endCol)
-  }
+  };
 }
