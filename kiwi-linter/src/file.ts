@@ -9,12 +9,12 @@ import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
 import { LANG_PREFIX } from './const';
 
-export function updateLangFiles(lang: string, text: string, validateDuplicate: boolean) {
-  if (!lang.startsWith('I18N.')) {
+export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
+  if (!keyValue.startsWith('I18N.')) {
     return;
   }
 
-  const [, filename, ...restPath] = lang.split('.');
+  const [, filename, ...restPath] = keyValue.split('.');
   const fullKey = restPath.join('.');
   const targetFilename = `${LANG_PREFIX}${filename}.ts`;
 
