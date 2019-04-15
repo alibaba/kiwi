@@ -76,7 +76,7 @@ export function setLineDecorations(activeEditor) {
       renderOptions: {
         after: {
           color: '#999999',
-          contentText: `🐤 🇨🇳 ${pos.cn} 🐤`,
+          contentText: `🐤 🇨🇳 ${pos.cn.replace('\n', ' \\n')} 🐤`,
           fontWeight: 'normal',
           fontStyle: 'normal',
           textDecoration: 'none;'
