@@ -78,15 +78,3 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
     return Promise.reject(e.message);
   }
 }
-
-/**
- * 更新 Range 的 offset, 修复跨行显示替换的问题
- * @param range
- * @param offset
- */
-export function updateSelectionRange(range, line) {
-  let startPostion = range.start.translate(line, 0);
-  let endPostion = range.end.translate(line, 0);
-
-  return new vscode.Range(startPostion, endPostion);
-}

@@ -13,7 +13,7 @@ import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
-import { replaceAndUpdate, updateSelectionRange } from './replaceAndUpdate';
+import { replaceAndUpdate } from './replaceAndUpdate';
 
 /**
  * 主入口文件
@@ -218,7 +218,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
       if (targetStrs.length === 0) {
-        vscode.window.showInformationMessage('没有找到可替换的公共文案');
+        vscode.window.showInformationMessage('没有找到可替换的文案');
         return;
       }
       const replaceableStrs = targetStrs.reduce((prev, curr) => {
@@ -249,7 +249,7 @@ export function activate(context: vscode.ExtensionContext) {
       }, []);
 
       if (replaceableStrs.length === 0) {
-        vscode.window.showInformationMessage('没有找到可替换的公共文案');
+        vscode.window.showInformationMessage('没有找到可替换的文案');
         return;
       }
 
