@@ -143,19 +143,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const finalArgs = Array.isArray(args.targets) ? args.targets : [args.targets];
         return finalArgs
+          .reverse()
           .reduce((prev: Promise<any>, curr: TargetStr, index: number) => {
             return prev.then(() => {
               const isEditCommon = val.startsWith('I18N.common.');
-              const line = (curr.range.start.line - curr.range.end.line) * index;
-              const newRange = updateSelectionRange(curr.range, line);
-              return replaceAndUpdate(
-                {
-                  ...curr,
-                  range: newRange
-                },
-                val,
-                !isEditCommon && index === 0 ? !args.varName : false
-              );
+              return replaceAndUpdate(curr, val, !isEditCommon && index === 0 ? !args.varName : false);
             });
           }, Promise.resolve())
           .then(
@@ -205,6 +197,7 @@ export function activate(context: vscode.ExtensionContext) {
         .then(action => {
           if (action === 'Yes') {
             replaceableStrs
+              .reverse()
               .reduce((prev: Promise<any>, obj) => {
                 return prev.then(() => {
                   return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
@@ -269,6 +262,7 @@ export function activate(context: vscode.ExtensionContext) {
         .then(action => {
           if (action === 'Yes') {
             replaceableStrs
+              .reverse()
               .reduce((prev: Promise<any>, obj) => {
                 return prev.then(() => {
                   return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
