@@ -12,7 +12,7 @@ import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
-import { replaceAndUpdate } from './replaceAndUpdate';
+import { replaceAndUpdate, updateSelectionRange } from './replaceAndUpdate';
 
 /**
  * 主入口文件
@@ -147,7 +147,16 @@ export function activate(context: vscode.ExtensionContext) {
           .reduce((prev: Promise<any>, curr: TargetStr, index: number) => {
             return prev.then(() => {
               const isEditCommon = val.startsWith('I18N.common.');
-              return replaceAndUpdate(curr, val, !isEditCommon && index === 0 ? !args.varName : false);
+              const line = (curr.range.start.line - curr.range.end.line) * index;
+              const newRange = updateSelectionRange(curr.range, line);
+              return replaceAndUpdate(
+                {
+                  ...curr,
+                  range: newRange
+                },
+                val,
+                !isEditCommon && index === 0 ? !args.varName : false
+              );
             });
           }, Promise.resolve())
           .then(
