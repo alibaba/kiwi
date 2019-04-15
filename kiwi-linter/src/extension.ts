@@ -4,6 +4,7 @@
  */
 import * as vscode from 'vscode';
 import * as _ from 'lodash';
+import * as randomstring from 'randomstring';
 import * as fs from 'fs-extra';
 import * as slash from 'slash2';
 import { getSuggestLangObj } from './getLangData';
@@ -12,7 +13,7 @@ import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
-import { replaceAndUpdate, updateSelectionRange } from './replaceAndUpdate';
+import { replaceAndUpdate } from './replaceAndUpdate';
 
 /**
  * 主入口文件
@@ -34,7 +35,28 @@ export function activate(context: vscode.ExtensionContext) {
       targetStrs = newTargetStrs;
     });
   }
+  const currentFilename = activeEditor.document.fileName;
+  const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
 
+  let suggestion = [];
+  if (currentFilename.includes('/pages/')) {
+    suggestion = currentFilename.match(suggestPageRegex);
+  }
+  if (suggestion) {
+    suggestion.shift();
+  }
+  /** 如果没有匹配到 Key */
+  if (!(suggestion && suggestion.length)) {
+    const names = currentFilename.split('/');
+    const fileName = _.last(names);
+    const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
+    const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
+    if (dir === fileKey) {
+      suggestion = [dir];
+    } else {
+      suggestion = [dir, fileKey];
+    }
+  }
   context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
 
   // 监听 langs/ 文件夹下的变化，重新生成 finalLangObj
@@ -102,29 +124,6 @@ export function activate(context: vscode.ExtensionContext) {
         if (args.varName) {
           return resolve(args.varName);
         }
-
-        const currentFilename = activeEditor.document.fileName;
-        const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
-
-        let suggestion = [];
-        if (currentFilename.includes('/pages/')) {
-          suggestion = currentFilename.match(suggestPageRegex);
-        }
-        if (suggestion) {
-          suggestion.shift();
-        }
-        /** 如果没有匹配到 Key */
-        if (!(suggestion && suggestion.length)) {
-          const names = slash(currentFilename).split('/') as string[];
-          const fileName = _.last(names);
-          const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
-          const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
-          if (dir === fileKey) {
-            suggestion = [dir];
-          } else {
-            suggestion = [dir, fileKey];
-          }
-        }
         // 否则要求用户输入变量名
         return resolve(
           vscode.window.showInputBox({
@@ -144,19 +143,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const finalArgs = Array.isArray(args.targets) ? args.targets : [args.targets];
         return finalArgs
+          .reverse()
           .reduce((prev: Promise<any>, curr: TargetStr, index: number) => {
             return prev.then(() => {
               const isEditCommon = val.startsWith('I18N.common.');
-              const line = (curr.range.start.line - curr.range.end.line) * index;
-              const newRange = updateSelectionRange(curr.range, line);
-              return replaceAndUpdate(
-                {
-                  ...curr,
-                  range: newRange
-                },
-                val,
-                !isEditCommon && index === 0 ? !args.varName : false
-              );
+              return replaceAndUpdate(curr, val, !isEditCommon && index === 0 ? !args.varName : false);
             });
           }, Promise.resolve())
           .then(
@@ -206,6 +197,72 @@ export function activate(context: vscode.ExtensionContext) {
         .then(action => {
           if (action === 'Yes') {
             replaceableStrs
+              .reverse()
+              .reduce((prev: Promise<any>, obj) => {
+                return prev.then(() => {
+                  return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
+                });
+              }, Promise.resolve())
+              .then(() => {
+                vscode.window.showInformationMessage('替换完成');
+              })
+              .catch(e => {
+                vscode.window.showErrorMessage(e.message);
+              });
+          }
+        });
+    })
+  );
+  const virtualMemory = {};
+  // 一键替换所有中文
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
+      if (targetStrs.length === 0) {
+        vscode.window.showInformationMessage('没有找到可替换的文案');
+        return;
+      }
+      const replaceableStrs = targetStrs.reduce((prev, curr) => {
+        const key = findMatchKey(finalLangObj, curr.text);
+        if (!virtualMemory[curr.text]) {
+          if (key) {
+            virtualMemory[curr.text] = key;
+            return prev.concat({
+              target: curr,
+              key
+            });
+          }
+          const uuidKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${randomstring.generate({
+            length: 4,
+            charset: 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
+          })}`;
+          virtualMemory[curr.text] = uuidKey;
+          return prev.concat({
+            target: curr,
+            key: uuidKey
+          });
+        } else {
+          return prev.concat({
+            target: curr,
+            key: virtualMemory[curr.text]
+          });
+        }
+      }, []);
+
+      if (replaceableStrs.length === 0) {
+        vscode.window.showInformationMessage('没有找到可替换的文案');
+        return;
+      }
+
+      vscode.window
+        .showInformationMessage(
+          `共找到 ${replaceableStrs.length} 处可自动替换的文案，是否替换？`,
+          { modal: true },
+          'Yes'
+        )
+        .then(action => {
+          if (action === 'Yes') {
+            replaceableStrs
+              .reverse()
               .reduce((prev: Promise<any>, obj) => {
                 return prev.then(() => {
                   return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
