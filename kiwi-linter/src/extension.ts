@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
   /** 如果没有匹配到 Key */
   if (!(suggestion && suggestion.length)) {
-    const names = currentFilename.split('/');
+    const names = slash(currentFilename).split('/') as string[];
     const fileName = _.last(names);
     const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
     const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
