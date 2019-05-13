@@ -30,8 +30,7 @@
   },
   "dependencies": {
     "intl-messageformat": "^2.2.0",
-    "lodash.get": "^4.4.2",
-    "webpack-dev-server": "2.9.1"
+    "lodash.get": "^4.4.2"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.42",
