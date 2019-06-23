@@ -3,7 +3,7 @@
   <h2>🐤 Kiwi - Well-established internationalization solution</h2>
 </div>
 
-[中文](/alibaba/kiwi) | English
+[中文](https://github.com/alibaba/kiwi) | English
 
 ## Installation
 
