@@ -3,7 +3,7 @@
   <h2>🐤 Kiwi-国际化全流程解决方案</h2>
 </div>
 
-中文 | [English](/alibaba/kiwi/blob/master/README-en.md)
+中文 | [English](https://github.com/alibaba/kiwi/blob/master/README-en.md)
 
 ## 如何使用
 
