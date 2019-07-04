@@ -15,7 +15,7 @@ class App extends React.Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
-        <p className="App-intro">Hello kiwi 🐤 点击切换语言</p>
+        <p className="App-intro">{I18N.src.App.a}</p>
         <div className="btns">
           <span className="btn" onClick={this.changeLang.bind(this, 'zh-CN')}>
             中文简体
@@ -28,9 +28,7 @@ class App extends React.Component {
           </span>
         </div>
         <br />
-        <p>
-          <span>{I18N.common.test}</span>
-        </p>
+        <p>{/* <span>{I18N.common.test}</span> */}</p>
       </div>
     );
   }
