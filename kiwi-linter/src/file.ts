@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
 import { LANG_PREFIX } from './const';
+import { getConfiguration } from './utils';
 
 export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
   if (!keyValue.startsWith('I18N.')) {
@@ -19,7 +20,7 @@ export function updateLangFiles(keyValue: string, text: string, validateDuplicat
   const targetFilename = `${LANG_PREFIX}${filename}.ts`;
 
   if (!fs.existsSync(targetFilename)) {
-    fs.writeFileSync(targetFilename, generateNewLangFile(fullKey, text));
+    fs.outputFileSync(targetFilename, generateNewLangFile(fullKey, text));
     addImportToMainLangFile(filename);
     vscode.window.showInformationMessage(`成功新建语言文件 ${targetFilename}`);
   } else {
@@ -65,14 +66,20 @@ export function generateNewLangFile(key: string, value: string) {
 }
 
 export function addImportToMainLangFile(newFilename: string) {
-  let mainContent = fs.readFileSync(`${LANG_PREFIX}index.ts`, 'utf8');
-  mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
-  if (/\,\n(}\);)/.test(mainContent)) {
-    /** 最后一行包含,号 */
-    mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
+  let mainContent = '';
+  if (fs.existsSync(`${LANG_PREFIX}index.ts`)) {
+    mainContent = fs.readFileSync(`${LANG_PREFIX}index.ts`, 'utf8');
+    mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
+    if (/\,\n(}\);)/.test(mainContent)) {
+      /** 最后一行包含,号 */
+      mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
+    } else {
+      /** 最后一行不包含,号 */
+      mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
+    }
   } else {
-    /** 最后一行不包含,号 */
-    mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
+    mainContent = `import ${newFilename} from './${newFilename}';\n\nexport default Object.assign({}, {\n  ${newFilename},\n});`;
   }
-  fs.writeFileSync(`${LANG_PREFIX}index.ts`, mainContent);
+
+  fs.outputFileSync(`${LANG_PREFIX}index.ts`, mainContent);
 }

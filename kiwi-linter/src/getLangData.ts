@@ -3,26 +3,11 @@
  * @desc 获取语言文件
  */
 import * as vscode from 'vscode';
-import { flatten } from './utils';
+import { flatten, getLangJson } from './utils';
 import * as globby from 'globby';
 import * as fs from 'fs';
 import { I18N_GLOB } from './const';
-/**
- * 获取文件 Json
- */
-function getLangJson(fileName) {
-  const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
-  let obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)[1];
-  obj = obj.replace(/\s*;\s*$/, '');
-  let jsObj = {};
-  try {
-    jsObj = eval('(' + obj + ')');
-  } catch (err) {
-    console.log(obj);
-    console.error(err);
-  }
-  return jsObj;
-}
+
 /**
  * 获取对应文件的语言
  */
