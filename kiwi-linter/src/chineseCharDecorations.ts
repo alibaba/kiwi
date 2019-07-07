@@ -6,15 +6,16 @@ import * as vscode from 'vscode';
 import { setLineDecorations } from './lineAnnotation';
 import { findChineseText } from './findChineseText';
 import * as minimatch from 'minimatch';
+import { getConfiguration } from './utils';
 
 /**
  * 中文的标记，红框样式
  */
 function getChineseCharDecoration() {
   // 配置提示框样式
-  const hasOverviewRuler = vscode.workspace.getConfiguration('vscode-i18n-linter').get('showOverviewRuler');
-  const shouldMark = vscode.workspace.getConfiguration('vscode-i18n-linter').get('markStringLiterals');
-  const color = vscode.workspace.getConfiguration('vscode-i18n-linter').get('markColor');
+  const hasOverviewRuler = getConfiguration('showOverviewRuler');
+  const shouldMark = getConfiguration('markStringLiterals');
+  const color = getConfiguration('markColor');
   return vscode.window.createTextEditorDecorationType({
     borderWidth: shouldMark ? '1px' : undefined,
     borderStyle: shouldMark ? 'dotted' : undefined,
@@ -55,7 +56,7 @@ export function triggerUpdateDecorations(callback?) {
  */
 function matchPattern() {
   const activeEditor = vscode.window.activeTextEditor;
-  const pattern = vscode.workspace.getConfiguration('vscode-i18n-linter').get('i18nFilesPattern');
+  const pattern = getConfiguration('i18nFilesPattern');
   if (
     activeEditor &&
     pattern !== '' &&
@@ -92,7 +93,7 @@ export function updateDecorations() {
     chineseChars.push(decoration);
   });
 
-  const shouldMark = vscode.workspace.getConfiguration('vscode-i18n-linter').get('markStringLiterals');
+  const shouldMark = getConfiguration('markStringLiterals');
   if (shouldMark !== true) {
     return;
   }
