@@ -4,7 +4,7 @@
  */
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
-import { getAllFiles } from './utils';
+import { getAllFiles, getConfiguration } from './utils';
 
 /**
  * 适配不同的语言文件夹位置
@@ -45,7 +45,20 @@ function dirAdaptor() {
   }
 }
 
-const LANG_PREFIX = dirAdaptor();
+function getDefaultDir() {
+  const dir = dirAdaptor();
+  if (!dir) {
+    const preFix = getConfiguration('langPrefix');
+    if (preFix) {
+      return `${vscode.workspace.rootPath}/${preFix}`;
+    }
+  }
+  return dir;
+}
+
+const LANG_PREFIX = getDefaultDir();
+const DIR_ADAPTOR = dirAdaptor();
 const I18N_GLOB = `${LANG_PREFIX}**/*.ts`;
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
-export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX };
+
+export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX, DIR_ADAPTOR };

@@ -37,6 +37,11 @@
           "default": true,
           "description": "Mark string literals in editor so you can quickly spot on them"
         },
+        "vscode-i18n-linter.langPrefix": {
+          "type": "string",
+          "default": ".kiwi/zh-CN/",
+          "description": "Language store path"
+        },
         "vscode-i18n-linter.showOverviewRuler": {
           "type": "boolean",
           "default": true,

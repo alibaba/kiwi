@@ -8,19 +8,20 @@ import * as randomstring from 'randomstring';
 import * as fs from 'fs-extra';
 import * as slash from 'slash2';
 import { getSuggestLangObj } from './getLangData';
-import { I18N_GLOB, LANG_PREFIX } from './const';
+import { I18N_GLOB, DIR_ADAPTOR } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
+import { getConfiguration, getConfigFile } from './utils';
 
 /**
  * 主入口文件
  * @param context
  */
 export function activate(context: vscode.ExtensionContext) {
-  if (!fs.existsSync(LANG_PREFIX)) {
+  if (!fs.existsSync(DIR_ADAPTOR) && !getConfigFile()) {
     /** 存在配置文件则开启 */
     return;
   }
@@ -67,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
   finalLangObj = getSuggestLangObj();
 
   // 识别到出错时点击小灯泡弹出的操作
-  const hasLightBulb = vscode.workspace.getConfiguration('vscode-i18n-linter').get('enableReplaceSuggestion');
+  const hasLightBulb = getConfiguration('enableReplaceSuggestion');
   if (hasLightBulb) {
     context.subscriptions.push(
       vscode.languages.registerCodeActionsProvider(
