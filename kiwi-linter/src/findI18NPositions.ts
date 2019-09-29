@@ -62,7 +62,7 @@ function getRegexMatches(I18N, code: string) {
       const code = `I18N.${exps}`;
       const position = new Position();
       const transformedCn = _.get(I18N, exps.split('.'));
-      if (transformedCn) {
+      if (typeof transformedCn === 'string') {
         position.cn = transformedCn;
         (position as any).line = index;
         position.code = code;
