@@ -18,6 +18,11 @@ Kiwi 的 CLI 工具
 ### kiwi `--export`
 导出未翻译的文案
 
+```shell script
+# 导出指定语言的文案
+kiwi --export=zh_CN
+```
+
 ### kiwi `--sync`
 同步各种语言的文案，同步未翻译文件
 
