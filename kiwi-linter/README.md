@@ -17,6 +17,14 @@ kiwi 的 `VS Code`插件工具，主要用于检测代码中的中文，高亮�
 
 ## 配置项
 
+### vscode-i18n-linter.langPrefix
+
+default: `.kiwi/zh-CN/`
+
+多语言文件的位置, kiwi linter将根据目录内的多语言文件提取对应语言(默认为中文`zh-CN`)高亮.
+可以参考的目录结构如下:
+![示例目录结构](./assets/i18n-folder-structure.gif)
+
 ### vscode-i18n-linter.i18nFilesPattern
 
 default: `**/src/**/ts*`
