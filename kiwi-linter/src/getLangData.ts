@@ -36,12 +36,6 @@ export function getI18N() {
       vscode.window.showWarningMessage(`\`${curr}\` 解析失败，该文件包含的文案无法自动补全`);
     }
 
-    if (filename === 'common') {
-      return {
-        ...prev,
-        ...jsObj
-      };
-    }
     return {
       ...prev,
       [filename]: jsObj
