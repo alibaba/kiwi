@@ -77,7 +77,8 @@ export function activate(context: vscode.ExtensionContext) {
           { scheme: 'file', language: 'html' },
           { scheme: 'file', language: 'typescript' },
           { scheme: 'file', language: 'javascriptreact' },
-          { scheme: 'file', language: 'javascript' }
+          { scheme: 'file', language: 'javascript' },
+          { scheme: '*', language: 'vue' }
         ],
         {
           provideCodeActions: function(document, range, context, token) {

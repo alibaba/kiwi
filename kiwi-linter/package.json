@@ -21,6 +21,7 @@
     "onLanguage:javascriptreact",
     "onLanguage:javascript",
     "onLanguage:html",
+    "onLanguage:vue",
     "onCommand:vscode-i18n-linter.replaceCommon",
     "onCommand:vscode-i18n-linter.findI18N",
     "onCommand:vscode-i18n-linter.findAllI18N"
@@ -59,7 +60,7 @@
         },
         "vscode-i18n-linter.i18nFilesPattern": {
           "type": "string",
-          "default": "**/src/**/*.+(js*|html|ts*)",
+          "default": "**/src/**/*.+(vue|js*|html|ts*)",
           "description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
         }
       }
@@ -115,6 +116,8 @@
   },
   "dependencies": {
     "@angular/compiler": "^7.2.0",
+    "@babel/core": "^7.5.5",
+    "@babel/types": "^7.5.5",
     "find-in-files": "^0.5.0",
     "fs-extra": "^7.0.1",
     "globby": "^7.1.1",
@@ -124,6 +127,7 @@
     "randomstring": "^1.1.5",
     "slash2": "^2.0.0",
     "ts-node": "^6.0.3",
-    "typescript": "^2.8.3"
+    "typescript": "^2.8.3",
+    "vue-template-compiler": "^2.6.11"
   }
 }
