@@ -86,6 +86,23 @@ function findTextInTs(code: string, fileName: string) {
           });
         }
       }
+      case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+        const { pos, end } = node;
+        const templateContent = code.slice(pos, end);
+
+        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+          const start = node.getStart();
+          const end = node.getEnd();
+          /** 加一，减一的原因是，去除`号 */
+          const startPos = activeEditor.document.positionAt(start + 1);
+          const endPos = activeEditor.document.positionAt(end - 1);
+          const range = new vscode.Range(startPos, endPos);
+          matches.push({
+            range,
+            text: code.slice(start + 1, end - 1),
+            isString: true
+          });
+        }
     }
 
     ts.forEachChild(node, visit);

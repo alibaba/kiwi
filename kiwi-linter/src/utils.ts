@@ -120,3 +120,76 @@ export const getConfigFile = () => {
   }
   return kiwiConfigJson;
 };
+
+/**
+ * 获得项目配置信息中的 googleApiKey
+ */
+function getGoogleApiKey() {
+  const configFile = './.kiwi/config.json';
+  let googleApiKey = '';
+
+  try {
+    if (fs.existsSync(configFile)) {
+      googleApiKey = JSON.parse(fs.readFileSync(configFile, 'utf8')).googleApiKey;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return googleApiKey;
+}
+
+/**
+ * 重试方法
+ * @param asyncOperation
+ * @param times
+ */
+function retry(asyncOperation, times = 1) {
+  let runTimes = 1;
+  const handleReject = e => {
+    if (runTimes++ < times) {
+      return asyncOperation().catch(handleReject);
+    } else {
+      throw e;
+    }
+  };
+  return asyncOperation().catch(handleReject);
+}
+
+/**
+ * 设置超时
+ * @param promise
+ * @param ms
+ */
+function withTimeout(promise, ms) {
+  const timeoutPromise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(`Promise timed out after ${ms} ms.`);
+    }, ms);
+  });
+  return Promise.race([promise, timeoutPromise]);
+}
+
+/**
+ * 翻译中文
+ */
+export function translateText(text) {
+  const googleApiKey = getGoogleApiKey();
+  const { translate: googleTranslate } = require('google-translate')(googleApiKey);
+
+  function _translateText() {
+    return withTimeout(
+      new Promise((resolve, reject) => {
+        googleTranslate(text, 'zh', 'en', (err, translation) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(translation.translatedText);
+          }
+        });
+      }),
+      3000
+    );
+  }
+
+  return retry(_translateText, 3);
+}
