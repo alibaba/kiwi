@@ -83,6 +83,7 @@ function findTextInTs(code: string, fileName: string) {
             isString: true
           });
         }
+        break;
       }
       case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
         const { pos, end } = node;
