@@ -199,12 +199,10 @@ function findTextInVue (code) {
   const matches = [];
   var result;
   const { document } = activeTextEditor;
-  // console.log(compilerVue.compile(code))
   const vueObejct = compilerVue.compile(code.toString());
   let outcode = vueObejct.render
   .toString()
   .replace("with(this)", "function a()");
-  // console.log(outcode)
   let vueTemp = transerI18n(outcode, 'as.vue');
   const sfc = compilerVue.parseComponent(code.toString());
   let scriptarr = transerI18n(sfc.script.content, 'filename.vue');
@@ -226,7 +224,6 @@ function findTextInVue (code) {
           
       }
   })
-  // console.log(matches)
   return matches
 }
 /**
