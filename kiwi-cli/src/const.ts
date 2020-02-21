@@ -16,7 +16,8 @@ export const PROJECT_CONFIG = {
     ignoreFile: ''
   },
   langMap: {
-    ['en-US']: 'en'
+    ['en-US']: 'en',
+    ['en_US']: 'en'
   },
   zhIndexFile: `import common from './common';
 

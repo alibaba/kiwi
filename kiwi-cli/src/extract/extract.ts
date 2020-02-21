@@ -82,71 +82,77 @@ function extractAll(dirPath?: string) {
       const reg = /[^a-zA-Z\x00-\xff]+/g;
       const findText = curr.text.match(reg);
       const transText = findText ? findText.join('').slice(0, 4) : '中文符号';
-      return prev.concat(translateText(transText, 'en'));
+      return prev.concat(translateText(transText, 'en_US'));
     }, []);
 
-    Promise.all(translatePromises).then(([...translateTexts]) => {
-      const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
-        const key = findMatchKey(finalLangObj, curr.text);
-        if (!virtualMemory[curr.text]) {
-          if (key) {
-            virtualMemory[curr.text] = key;
+    Promise.all(translatePromises)
+      .then(([...translateTexts]) => {
+        const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
+          const key = findMatchKey(finalLangObj, curr.text);
+          if (!virtualMemory[curr.text]) {
+            if (key) {
+              virtualMemory[curr.text] = key;
+              return prev.concat({
+                target: curr,
+                key
+              });
+            }
+            const uuidKey = `${randomstring.generate({
+              length: 4,
+              charset: 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
+            })}`;
+            const transText = translateTexts[i] ? _.camelCase(translateTexts[i] as string) : uuidKey;
+            let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
+            let occurTime = 1;
+            // 防止出现前四位相同但是整体文案不同的情况
+            while (
+              findMatchValue(finalLangObj, transKey) !== curr.text &&
+              _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
+            ) {
+              occurTime++;
+            }
+            if (occurTime >= 2) {
+              transKey = `${transKey}${occurTime}`;
+            }
+            virtualMemory[curr.text] = transKey;
+            finalLangObj[transKey] = curr.text;
             return prev.concat({
               target: curr,
-              key
+              key: transKey
+            });
+          } else {
+            return prev.concat({
+              target: curr,
+              key: virtualMemory[curr.text]
             });
           }
-          const uuidKey = `${randomstring.generate({
-            length: 4,
-            charset: 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
-          })}`;
-          const transText = translateTexts[i] ? _.camelCase(translateTexts[i] as string) : uuidKey;
-          let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
-          let occurTime = 1;
-          // 防止出现前四位相同但是整体文案不同的情况
-          while (
-            findMatchValue(finalLangObj, transKey) !== curr.text &&
-            _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
-          ) {
-            occurTime++;
-          }
-          if (occurTime >= 2) {
-            transKey = `${transKey}${occurTime}`;
-          }
-          virtualMemory[curr.text] = transKey;
-          finalLangObj[transKey] = curr.text;
-          return prev.concat({
-            target: curr,
-            key: transKey
+        }, []);
+
+        replaceableStrs
+          .reverse()
+          .reduce((prev, obj) => {
+            return prev.then(() => {
+              return replaceAndUpdate(currentFilename, obj.target, `I18N.${obj.key}`, false);
+            });
+          }, Promise.resolve())
+          .then(() => {
+            // 添加 import I18N
+            if (!hasImportI18N(currentFilename)) {
+              const code = createImportI18N(currentFilename);
+
+              writeFile(currentFilename, code);
+            }
+            console.log(`${currentFilename}替换完成！`);
+          })
+          .catch(e => {
+            console.log(e.message);
           });
-        } else {
-          return prev.concat({
-            target: curr,
-            key: virtualMemory[curr.text]
-          });
+      })
+      .catch(err => {
+        if (err) {
+          console.log('google翻译出问题了...');
         }
-      }, []);
-
-      replaceableStrs
-        .reverse()
-        .reduce((prev, obj) => {
-          return prev.then(() => {
-            return replaceAndUpdate(currentFilename, obj.target, `I18N.${obj.key}`, false);
-          });
-        }, Promise.resolve())
-        .then(() => {
-          // 添加 import I18N
-          if (!hasImportI18N(currentFilename)) {
-            const code = createImportI18N(currentFilename);
-
-            writeFile(currentFilename, code);
-          }
-          console.log(`${currentFilename}替换完成！`);
-        })
-        .catch(e => {
-          console.log(e.message);
-        });
-    });
+      });
   });
 }
 

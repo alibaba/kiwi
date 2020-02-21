@@ -21,7 +21,7 @@ function updateLangFiles(keyValue, text, validateDuplicate) {
 
   const [, filename, ...restPath] = keyValue.split('.');
   const fullKey = restPath.join('.');
-  const targetFilename = `${srcLangDir}${filename}.ts`;
+  const targetFilename = `${srcLangDir}/${filename}.ts`;
 
   if (!fs.existsSync(targetFilename)) {
     fs.writeFileSync(targetFilename, generateNewLangFile(fullKey, text));
