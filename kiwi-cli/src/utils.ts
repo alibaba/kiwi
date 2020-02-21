@@ -71,8 +71,9 @@ function getAllMessages() {
  */
 function getProjectConfig() {
   let obj = PROJECT_CONFIG.defaultConfig;
-  const configFile = PROJECT_CONFIG.configFile || `${PROJECT_CONFIG.existDir}/config.json`;
   try {
+    const langsCongifFile = `${PROJECT_CONFIG.existDir}/config.json`;
+    const configFile = fs.existsSync(langsCongifFile) ? langsCongifFile : PROJECT_CONFIG.configFile;
     if (fs.existsSync(configFile)) {
       obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
     }

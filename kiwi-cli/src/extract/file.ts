@@ -24,13 +24,15 @@ function getSpecifiedFiles(dir, ignoreDirectory = '', ignoreFile = '') {
     }
 
     const isIgnoreDirectory =
-      ignoreDirectory &&
-      !path
-        .dirname(name)
-        .split('/')
-        .includes(ignoreDirectory);
+      !ignoreDirectory ||
+      (ignoreDirectory &&
+        !path
+          .dirname(name)
+          .split('/')
+          .includes(ignoreDirectory));
+    const isIgnoreFile = !ignoreFile || (ignoreFile && path.basename(name) !== ignoreFile);
 
-    if (isFile && isIgnoreDirectory && path.basename(name) !== ignoreFile) {
+    if (isFile && isIgnoreDirectory && isIgnoreFile) {
       return files.concat(name);
     }
     return files;

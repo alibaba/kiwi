@@ -5,10 +5,11 @@
 import * as fs from 'fs';
 import { PROJECT_CONFIG } from './const';
 
-function creteConfigFile(dir: string) {
-  if (!fs.existsSync(`${dir}/config.json`)) {
+function creteConfigFile() {
+  if (!(fs.existsSync(`${PROJECT_CONFIG.existDir}/config.json`) || fs.existsSync(PROJECT_CONFIG.configFile))) {
     const config = JSON.stringify(PROJECT_CONFIG.defaultConfig, null, 2);
-    fs.writeFile(`${dir || PROJECT_CONFIG.dir}/config.json`, config, err => {
+    const writePath = fs.existsSync(PROJECT_CONFIG.existDir) ? PROJECT_CONFIG.existDir : PROJECT_CONFIG.dir;
+    fs.writeFile(`${writePath}/config.json`, config, err => {
       if (err) {
         console.log(err);
       }
@@ -34,12 +35,11 @@ function createCnFile() {
 }
 
 function initProject() {
-  const existDir = PROJECT_CONFIG.dir || PROJECT_CONFIG.existDir;
   /** 初始化配置文件夹 */
-  if (!fs.existsSync(existDir)) {
+  if (!(fs.existsSync(PROJECT_CONFIG.dir) || fs.existsSync(PROJECT_CONFIG.existDir))) {
     fs.mkdirSync(PROJECT_CONFIG.dir);
   }
-  creteConfigFile(existDir);
+  creteConfigFile();
   if (!fs.existsSync(PROJECT_CONFIG.existDir)) {
     createCnFile();
   }
