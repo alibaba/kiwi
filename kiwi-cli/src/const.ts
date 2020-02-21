@@ -5,11 +5,15 @@
 
 export const PROJECT_CONFIG = {
   dir: './.kiwi',
+  existDir: './langs',
   configFile: './.kiwi/config.json',
   defaultConfig: {
     srcLang: 'zh-CN',
     distLangs: ['en-US', 'zh-TW'],
-    googleApiKey: ''
+    googleApiKey: '',
+    importI18N: `import I18N from 'src/utils/I18N';`,
+    ignoreDir: '',
+    ignoreFile: ''
   },
   langMap: {
     ['en-US']: 'en'
