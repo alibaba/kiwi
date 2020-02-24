@@ -6,7 +6,6 @@
 import * as _ from 'lodash';
 import * as randomstring from 'randomstring';
 import * as slash from 'slash2';
-import * as path from 'path';
 import { getSpecifiedFiles, readFile, writeFile } from './file';
 import { findChineseText } from './findChineseText';
 import { getSuggestLangObj } from './getLangData';
@@ -20,8 +19,7 @@ const CONFIG = getProjectConfig();
  * 递归匹配项目中所有的代码的中文
  */
 function findAllChineseText(dir: string) {
-  const dirPath = path.join(__dirname, dir);
-  const files = getSpecifiedFiles(dirPath, CONFIG.ignoreDir, CONFIG.ignoreFile);
+  const files = getSpecifiedFiles(dir, CONFIG.ignoreDir, CONFIG.ignoreFile);
   const filterFiles = files.filter(file => {
     return file.endsWith('.ts') || file.endsWith('.tsx');
   });
