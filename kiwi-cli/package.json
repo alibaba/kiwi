@@ -1,6 +1,6 @@
 {
   "name": "kiwi-clis",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "a cli for kiwi",
   "main": "dist/index.js",
   "scripts": {
@@ -31,6 +31,11 @@
     "@types/node": "^10.12.14",
     "commander": "^2.19.0",
     "d3-dsv": "^1.0.10",
+    "randomstring": "^1.1.5",
+    "slash2": "^2.0.0",
+    "fs-extra": "^7.0.1",
+    "globby": "^7.1.1",
+    "prettier": "^1.16.4",
     "google-translate": "^2.2.0",
     "lodash": "^4.17.11",
     "ora": "^3.0.0",

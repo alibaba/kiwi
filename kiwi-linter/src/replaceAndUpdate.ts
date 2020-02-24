@@ -35,11 +35,9 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
     if (last2Char === '=') {
       if (isHtmlFile) {
         finalReplaceVal = '{{' + val + '}}';
-      }
-      else if (isVueFile) {
+      } else if (isVueFile) {
         finalReplaceVal = '{{' + val + '}}';
-      }
-      else {
+      } else {
         finalReplaceVal = '{' + val + '}';
       }
     }
@@ -69,11 +67,9 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
   } else {
     if (isHtmlFile) {
       edit.replace(document.uri, arg.range, '{{' + val + '}}');
-    }
-    else if (isVueFile) {
+    } else if (isVueFile) {
       edit.replace(document.uri, arg.range, '{{' + val + '}}');
-   }
-    else {
+    } else {
       edit.replace(document.uri, arg.range, '{' + val + '}');
     }
   }

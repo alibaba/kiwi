@@ -8,7 +8,7 @@ import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
 import { removeFileComment } from './astUtils';
-import {transerI18n} from './babelUtil';
+import { transerI18n } from './babelUtil';
 import * as compilerVue from 'vue-template-compiler';
 /**
  * 查找 Ts 文件中的中文
@@ -192,40 +192,41 @@ function findTextInHtml(code) {
 
 /**
  * vue文件查找
- * @param code 
- * @param fileName 
+ * @param code
+ * @param fileName
  */
-function findTextInVue (code) {
+function findTextInVue(code) {
   const activeTextEditor = vscode.window.activeTextEditor;
   const matches = [];
   var result;
   const { document } = activeTextEditor;
   const vueObejct = compilerVue.compile(code.toString());
-  let outcode = vueObejct.render
-  .toString()
-  .replace("with(this)", "function a()");
+  let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp = transerI18n(outcode, 'as.vue');
   const sfc = compilerVue.parseComponent(code.toString());
   let scriptarr = transerI18n(sfc.script.content, 'filename.vue');
 
-  vueTemp = vueTemp.concat(scriptarr)
-  vueTemp = [...new Set(vueTemp)]
+  vueTemp = vueTemp.concat(scriptarr);
+  vueTemp = [...new Set(vueTemp)];
   vueTemp.forEach(item => {
-      let rex = new RegExp(item,'g')
-      while ((result = rex.exec(code)))  {     
-          let res = result
-          let last = rex.lastIndex
-          last = last - (res[0].length - res[0].trimRight().length) 
-          const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
-          matches.push({
-              range,
-              text: res[0].trimRight(),
-              isString: ((code.substr(res.index-1,1) === '"' && code.substr(last,1) === '"') || (code.substr(res.index-1,1) === "'" && code.substr(last,1) === "'")) ? true : false
-          });
-          
-      }
-  })
-  return matches
+    let rex = new RegExp(item, 'g');
+    while ((result = rex.exec(code))) {
+      let res = result;
+      let last = rex.lastIndex;
+      last = last - (res[0].length - res[0].trimRight().length);
+      const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
+      matches.push({
+        range,
+        text: res[0].trimRight(),
+        isString:
+          (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
+          (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
+            ? true
+            : false
+      });
+    }
+  });
+  return matches;
 }
 /**
  * 递归匹配代码的中文
@@ -235,7 +236,7 @@ export function findChineseText(code: string, fileName: string) {
   if (fileName.endsWith('.html')) {
     return findTextInHtml(code);
   }
-  if (fileName.endsWith('.vue')) {     
+  if (fileName.endsWith('.vue')) {
     return findTextInVue(code);
   }
   return findTextInTs(code, fileName);
