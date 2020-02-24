@@ -6,6 +6,7 @@
 import * as _ from 'lodash';
 import * as randomstring from 'randomstring';
 import * as slash from 'slash2';
+import * as path from 'path';
 import { getSpecifiedFiles, readFile, writeFile } from './file';
 import { findChineseText } from './findChineseText';
 import { getSuggestLangObj } from './getLangData';
@@ -19,13 +20,18 @@ const CONFIG = getProjectConfig();
  * 递归匹配项目中所有的代码的中文
  */
 function findAllChineseText(dir: string) {
-  const files = getSpecifiedFiles(dir, CONFIG.ignoreDir, CONFIG.ignoreFile);
+  const dirPath = path.resolve(process.cwd(), dir);
+  const files = getSpecifiedFiles(dirPath, CONFIG.ignoreDir, CONFIG.ignoreFile);
   const filterFiles = files.filter(file => {
     return file.endsWith('.ts') || file.endsWith('.tsx');
   });
   const allTexts = filterFiles.reduce((pre, file) => {
     const code = readFile(file);
     const texts = findChineseText(code, file);
+
+    if (texts.length > 0) {
+      console.log(`${file} 发现中文文案`);
+    }
 
     return texts.length > 0 ? pre.concat({ file, texts }) : pre;
   }, []);
@@ -38,6 +44,11 @@ function findAllChineseText(dir: string) {
  * @param {dirPath} 文件夹路径
  */
 function extractAll(dirPath?: string) {
+  if (!CONFIG.googleApiKey) {
+    console.log('请配置googleApiKey');
+    return;
+  }
+
   const dir = dirPath || './';
   const allTargetStrs = findAllChineseText(dir);
 

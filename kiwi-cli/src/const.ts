@@ -3,11 +3,14 @@
  * @desc 项目配置文件配置信息
  */
 
+export const KIWI_CONFIG_FILE = 'kiwi-config.json';
+
 export const PROJECT_CONFIG = {
   dir: './.kiwi',
-  existDir: './langs',
-  configFile: './.kiwi/config.json',
+  configFile: `./.kiwi/${KIWI_CONFIG_FILE}`,
   defaultConfig: {
+    kiwiDir: './.kiwi',
+    configFile: `./.kiwi/${KIWI_CONFIG_FILE}`,
     srcLang: 'zh-CN',
     distLangs: ['en-US', 'zh-TW'],
     googleApiKey: '',

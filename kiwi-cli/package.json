@@ -41,6 +41,7 @@
     "lodash": "^4.17.11",
     "ora": "^3.0.0",
     "ts-node": "^7.0.1",
-    "typescript": "^3.2.2"
+    "typescript": "^3.2.2",
+    "inquirer": "^5.2.0"
   }
 }
