@@ -5,15 +5,51 @@
 import * as path from 'path';
 import * as _ from 'lodash';
 import * as fs from 'fs';
-import { PROJECT_CONFIG } from './const';
+import { PROJECT_CONFIG, KIWI_CONFIG_FILE } from './const';
+
+function lookForFiles(dir: string, fileName: string): string {
+  const files = fs.readdirSync(dir);
+
+  for (let file of files) {
+    const currName = path.join(dir, file);
+    const info = fs.statSync(currName);
+    if (info.isDirectory()) {
+      if (file === '.git' || file === 'node_modules') {
+        continue;
+      }
+      const result = lookForFiles(currName, fileName);
+      if (result) {
+        return result;
+      }
+    } else if (info.isFile() && file === fileName) {
+      return currName;
+    }
+  }
+}
+
+/**
+ * 获得项目配置信息
+ */
+function getProjectConfig() {
+  const rootDir = path.resolve(process.cwd(), `./`);
+  const configFile = lookForFiles(rootDir, KIWI_CONFIG_FILE);
+  let obj = PROJECT_CONFIG.defaultConfig;
+
+  if (configFile && fs.existsSync(configFile)) {
+    obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+  }
+  return obj;
+}
+
 /**
  * 获取语言资源的根目录
  */
 function getKiwiDir() {
-  if (fs.existsSync(PROJECT_CONFIG.existDir)) {
-    return path.resolve(process.cwd(), `${PROJECT_CONFIG.existDir}`);
+  const config = getProjectConfig();
+
+  if (config) {
+    return config.kiwiDir;
   }
-  return path.resolve(process.cwd(), `${PROJECT_CONFIG.dir}`);
 }
 
 /**
@@ -64,23 +100,6 @@ function getAllMessages() {
   });
 
   return Object.assign({}, ...allMessages);
-}
-
-/**
- * 获得项目配置信息
- */
-function getProjectConfig() {
-  let obj = PROJECT_CONFIG.defaultConfig;
-  try {
-    const langsCongifFile = `${PROJECT_CONFIG.existDir}/config.json`;
-    const configFile = fs.existsSync(langsCongifFile) ? langsCongifFile : PROJECT_CONFIG.configFile;
-    if (fs.existsSync(configFile)) {
-      obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-    }
-  } catch (error) {
-    console.log(error);
-  }
-  return obj;
 }
 
 /**
@@ -181,5 +200,6 @@ export {
   translateText,
   findMatchKey,
   findMatchValue,
-  flatten
+  flatten,
+  lookForFiles
 };

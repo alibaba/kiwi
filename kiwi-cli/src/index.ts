@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import * as commander from 'commander';
+import * as inquirer from 'inquirer';
 import { initProject } from './init';
 import { sync } from './sync';
 import { exportMessages } from './export';
@@ -34,9 +35,29 @@ commander
   .parse(process.argv);
 
 if (commander.init) {
-  spining('初始化项目', () => {
-    initProject();
-  });
+  (async () => {
+    const result = await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirm',
+      default: true,
+      message: '项目中是否已存在kiwi相关目录？'
+    });
+
+    if (!result.confirm) {
+      spining('初始化项目', async () => {
+        initProject();
+      });
+    } else {
+      const value = await inquirer.prompt({
+        type: 'input',
+        name: 'dir',
+        message: '请输入相关目录：'
+      });
+      spining('初始化项目', async () => {
+        initProject(value.dir);
+      });
+    }
+  })();
 }
 
 if (commander.import) {

@@ -8,14 +8,47 @@ const path = require("path");
 const _ = require("lodash");
 const fs = require("fs");
 const const_1 = require("./const");
+function lookForFiles(dir, fileName) {
+    const files = fs.readdirSync(dir);
+    for (let file of files) {
+        const currName = path.join(dir, file);
+        const info = fs.statSync(currName);
+        if (info.isDirectory()) {
+            if (file === '.git' || file === 'node_modules') {
+                continue;
+            }
+            const result = lookForFiles(currName, fileName);
+            if (result) {
+                return result;
+            }
+        }
+        else if (info.isFile() && file === fileName) {
+            return currName;
+        }
+    }
+}
+exports.lookForFiles = lookForFiles;
+/**
+ * 获得项目配置信息
+ */
+function getProjectConfig() {
+    const rootDir = path.resolve(process.cwd(), `./`);
+    const configFile = lookForFiles(rootDir, const_1.KIWI_CONFIG_FILE);
+    let obj = const_1.PROJECT_CONFIG.defaultConfig;
+    if (configFile && fs.existsSync(configFile)) {
+        obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    }
+    return obj;
+}
+exports.getProjectConfig = getProjectConfig;
 /**
  * 获取语言资源的根目录
  */
 function getKiwiDir() {
-    if (fs.existsSync(const_1.PROJECT_CONFIG.existDir)) {
-        return path.resolve(process.cwd(), `${const_1.PROJECT_CONFIG.existDir}`);
+    const config = getProjectConfig();
+    if (config) {
+        return config.kiwiDir;
     }
-    return path.resolve(process.cwd(), `${const_1.PROJECT_CONFIG.dir}`);
 }
 exports.getKiwiDir = getKiwiDir;
 /**
@@ -64,24 +97,6 @@ function getAllMessages() {
     return Object.assign({}, ...allMessages);
 }
 exports.getAllMessages = getAllMessages;
-/**
- * 获得项目配置信息
- */
-function getProjectConfig() {
-    let obj = const_1.PROJECT_CONFIG.defaultConfig;
-    try {
-        const langsCongifFile = `${const_1.PROJECT_CONFIG.existDir}/config.json`;
-        const configFile = fs.existsSync(langsCongifFile) ? langsCongifFile : const_1.PROJECT_CONFIG.configFile;
-        if (fs.existsSync(configFile)) {
-            obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-        }
-    }
-    catch (error) {
-        console.log(error);
-    }
-    return obj;
-}
-exports.getProjectConfig = getProjectConfig;
 /**
  * 重试方法
  * @param asyncOperation
