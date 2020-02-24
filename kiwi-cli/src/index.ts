@@ -74,14 +74,9 @@ if (commander.mock) {
 }
 
 if (commander.extract) {
-  const spinner = ora('替换中...').start();
-  sync(async () => {
-    if (commander.extract === true) {
-      await extractAll();
-      spinner.succeed('全部替换成功！');
-    } else {
-      await extractAll(commander.extract);
-      spinner.succeed('全部替换成功！');
-    }
-  });
+  if (commander.extract === true) {
+    extractAll();
+  } else {
+    extractAll(commander.extract);
+  }
 }
