@@ -75,16 +75,11 @@ if (commander.mock) {
     }));
 }
 if (commander.extract) {
-    const spinner = ora('替换中...').start();
-    sync_1.sync(() => __awaiter(this, void 0, void 0, function* () {
-        if (commander.extract === true) {
-            yield extract_1.extractAll();
-            spinner.succeed('全部替换成功！');
-        }
-        else {
-            yield extract_1.extractAll(commander.extract);
-            spinner.succeed('全部替换成功！');
-        }
-    }));
+    if (commander.extract === true) {
+        extract_1.extractAll();
+    }
+    else {
+        extract_1.extractAll(commander.extract);
+    }
 }
 //# sourceMappingURL=index.js.map
