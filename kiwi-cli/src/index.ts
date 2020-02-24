@@ -6,6 +6,7 @@ import { sync } from './sync';
 import { exportMessages } from './export';
 import { findUnUsed } from './unused';
 import { mockLangs } from './mock';
+import { extractAll } from './extract/extract';
 import * as ora from 'ora';
 
 /**
@@ -29,6 +30,7 @@ commander
   .option('--sync', '同步各种语言的文案')
   .option('--mock', '使用 Google 翻译')
   .option('--unused', '导出未使用的文案')
+  .option('--extract [dirPath]', '一键替换指定文件夹下的所有中文文案')
   .parse(process.argv);
 
 if (commander.init) {
@@ -68,5 +70,18 @@ if (commander.mock) {
   sync(async () => {
     await mockLangs();
     spinner.succeed('使用 Google 翻译成功');
+  });
+}
+
+if (commander.extract) {
+  const spinner = ora('替换中...').start();
+  sync(async () => {
+    if (commander.extract === true) {
+      await extractAll();
+      spinner.succeed('全部替换成功！');
+    } else {
+      await extractAll(commander.extract);
+      spinner.succeed('全部替换成功！');
+    }
   });
 }
