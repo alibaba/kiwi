@@ -7,16 +7,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const utils_1 = require("./utils");
-const lookingForString = "";
+const lookingForString = '';
 function findUnUsed() {
-    const srcLangDir = path.resolve(utils_1.getKiwiDir(), 'zh_CN');
+    const srcLangDir = path.resolve(utils_1.getKiwiDir(), 'zh-CN');
     let files = fs.readdirSync(srcLangDir);
     files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
     const unUnsedKeys = [];
-    files.map((file) => {
+    files.map(file => {
         const srcFile = path.resolve(srcLangDir, file);
         const { default: messages } = require(srcFile);
-        const filename = path.basename(file, ".ts");
+        const filename = path.basename(file, '.ts');
         utils_1.traverse(messages, (text, path) => {
             const key = `I18N.${filename}.${path}`;
             const hasKey = recursiveReadFile('./src', key);
@@ -42,7 +42,7 @@ function recursiveReadFile(fileName, text) {
         });
     }
     if (isDirectory(fileName)) {
-        var files = fs.readdirSync(fileName).filter((file) => {
+        var files = fs.readdirSync(fileName).filter(file => {
             return !file.startsWith('.') && !['node_modules', 'build', 'dist'].includes(file);
         });
         files.forEach(function (val, key) {
@@ -94,7 +94,7 @@ function isFile(fileName) {
  */
 function readFile(fileName) {
     if (fs.existsSync(fileName)) {
-        return fs.readFileSync(fileName, "utf-8");
+        return fs.readFileSync(fileName, 'utf-8');
     }
 }
 //# sourceMappingURL=unused.js.map

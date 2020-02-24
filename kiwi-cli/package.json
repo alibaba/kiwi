@@ -1,6 +1,6 @@
 {
   "name": "kiwi-clis",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a cli for kiwi",
   "main": "dist/index.js",
   "scripts": {

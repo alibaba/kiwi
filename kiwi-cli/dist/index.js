@@ -15,6 +15,7 @@ const sync_1 = require("./sync");
 const export_1 = require("./export");
 const unused_1 = require("./unused");
 const mock_1 = require("./mock");
+const extract_1 = require("./extract/extract");
 const ora = require("ora");
 /**
  * 进度条加载
@@ -36,6 +37,7 @@ commander
     .option('--sync', '同步各种语言的文案')
     .option('--mock', '使用 Google 翻译')
     .option('--unused', '导出未使用的文案')
+    .option('--extract [dirPath]', '一键替换指定文件夹下的所有中文文案')
     .parse(process.argv);
 if (commander.init) {
     spining('初始化项目', () => {
@@ -70,6 +72,19 @@ if (commander.mock) {
     sync_1.sync(() => __awaiter(this, void 0, void 0, function* () {
         yield mock_1.mockLangs();
         spinner.succeed('使用 Google 翻译成功');
+    }));
+}
+if (commander.extract) {
+    const spinner = ora('替换中...').start();
+    sync_1.sync(() => __awaiter(this, void 0, void 0, function* () {
+        if (commander.extract === true) {
+            yield extract_1.extractAll();
+            spinner.succeed('全部替换成功！');
+        }
+        else {
+            yield extract_1.extractAll(commander.extract);
+            spinner.succeed('全部替换成功！');
+        }
     }));
 }
 //# sourceMappingURL=index.js.map

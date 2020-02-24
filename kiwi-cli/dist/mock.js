@@ -118,7 +118,7 @@ function mockLangs(lang) {
     return __awaiter(this, void 0, void 0, function* () {
         const CONFIG = utils_1.getProjectConfig();
         const langs = lang ? [lang] : CONFIG.distLangs;
-        const mockPromise = langs.map((lang) => {
+        const mockPromise = langs.map(lang => {
             return mockCurrentLang(lang);
         });
         return Promise.all(mockPromise);
