@@ -12,6 +12,9 @@ const const_1 = require("./const");
  * 获取语言资源的根目录
  */
 function getKiwiDir() {
+    if (fs.existsSync(const_1.PROJECT_CONFIG.existDir)) {
+        return path.resolve(process.cwd(), `${const_1.PROJECT_CONFIG.existDir}`);
+    }
     return path.resolve(process.cwd(), `${const_1.PROJECT_CONFIG.dir}`);
 }
 exports.getKiwiDir = getKiwiDir;
@@ -45,7 +48,7 @@ exports.traverse = traverse;
  * 获取所有文案
  */
 function getAllMessages() {
-    const srcLangDir = path.resolve(getKiwiDir(), 'zh_CN');
+    const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
     let files = fs.readdirSync(srcLangDir);
     files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts').map(file => path.resolve(srcLangDir, file));
     const allMessages = files.map(file => {
@@ -67,8 +70,10 @@ exports.getAllMessages = getAllMessages;
 function getProjectConfig() {
     let obj = const_1.PROJECT_CONFIG.defaultConfig;
     try {
-        if (fs.existsSync(const_1.PROJECT_CONFIG.configFile)) {
-            obj = JSON.parse(fs.readFileSync(const_1.PROJECT_CONFIG.configFile, 'utf8'));
+        const langsCongifFile = `${const_1.PROJECT_CONFIG.existDir}/config.json`;
+        const configFile = fs.existsSync(langsCongifFile) ? langsCongifFile : const_1.PROJECT_CONFIG.configFile;
+        if (fs.existsSync(configFile)) {
+            obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
         }
     }
     catch (error) {
@@ -109,4 +114,57 @@ function withTimeout(promise, ms) {
     return Promise.race([promise, timeoutPromise]);
 }
 exports.withTimeout = withTimeout;
+/**
+ * 使用google翻译
+ */
+function translateText(text, toLang) {
+    const CONFIG = getProjectConfig();
+    const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey);
+    return withTimeout(new Promise((resolve, reject) => {
+        googleTranslate(text, 'zh', const_1.PROJECT_CONFIG.langMap[toLang], (err, translation) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(translation.translatedText);
+            }
+        });
+    }), 5000);
+}
+exports.translateText = translateText;
+function findMatchKey(langObj, text) {
+    for (const key in langObj) {
+        if (langObj[key] === text) {
+            return key;
+        }
+    }
+    return null;
+}
+exports.findMatchKey = findMatchKey;
+function findMatchValue(langObj, key) {
+    return langObj[key];
+}
+exports.findMatchValue = findMatchValue;
+/**
+ * 将对象拍平
+ * @param obj 原始对象
+ * @param prefix
+ */
+function flatten(obj, prefix = '') {
+    var propName = prefix ? prefix + '.' : '', ret = {};
+    for (var attr in obj) {
+        if (_.isArray(obj[attr])) {
+            var len = obj[attr].length;
+            ret[attr] = obj[attr].join(',');
+        }
+        else if (typeof obj[attr] === 'object') {
+            _.extend(ret, flatten(obj[attr], propName + attr));
+        }
+        else {
+            ret[propName + attr] = obj[attr];
+        }
+    }
+    return ret;
+}
+exports.flatten = flatten;
 //# sourceMappingURL=utils.js.map

@@ -16,10 +16,10 @@ const utils_1 = require("./utils");
 const _ = require("lodash");
 function getLangUnTranslate(lang) {
     const messagesToTranslate = [];
-    const srcLangDir = path.resolve(utils_1.getKiwiDir(), 'zh_CN');
+    const srcLangDir = path.resolve(utils_1.getKiwiDir(), 'zh-CN');
     let files = fs.readdirSync(srcLangDir);
     files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts');
-    files.map((file) => {
+    files.map(file => {
         const srcFile = path.resolve(srcLangDir, file);
         const { default: messages } = require(srcFile);
         const distFile = path.resolve(utils_1.getLangDir(lang), file);
@@ -39,7 +39,7 @@ function getLangUnTranslate(lang) {
 function exportMessages(lang) {
     const CONFIG = utils_1.getProjectConfig();
     const langs = lang ? [lang] : CONFIG.distLangs;
-    langs.map((lang) => {
+    langs.map(lang => {
         const unTranslateMessages = getLangUnTranslate(lang);
         if (unTranslateMessages.length === 0) {
             console.log(`${lang} 该语言文件以及全部被翻译`);

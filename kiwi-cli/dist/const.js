@@ -6,15 +6,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PROJECT_CONFIG = {
     dir: './.kiwi',
+    existDir: './langs',
     configFile: './.kiwi/config.json',
     defaultConfig: {
-        srcLang: 'zh_CN',
-        distLangs: ['en_US', 'zh_TW'],
-        googleApiKey: ''
+        srcLang: 'zh-CN',
+        distLangs: ['en-US', 'zh-TW'],
+        googleApiKey: '',
+        importI18N: `import I18N from 'src/utils/I18N';`,
+        ignoreDir: '',
+        ignoreFile: ''
     },
     langMap: {
-        ['en_US']: 'en',
-        ['zh_TW']: 'zh-TW'
+        ['en-US']: 'en',
+        ['en_US']: 'en'
     },
     zhIndexFile: `import common from './common';
 
