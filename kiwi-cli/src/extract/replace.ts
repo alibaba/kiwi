@@ -72,8 +72,8 @@ function generateNewLangFile(key, value) {
 
 function addImportToMainLangFile(newFilename) {
   let mainContent = '';
-  if (fs.existsSync(`${srcLangDir}index.ts`)) {
-    mainContent = fs.readFileSync(`${srcLangDir}index.ts`, 'utf8');
+  if (fs.existsSync(`${srcLangDir}/index.ts`)) {
+    mainContent = fs.readFileSync(`${srcLangDir}/index.ts`, 'utf8');
     mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
     if (/\,\n(}\);)/.test(mainContent)) {
       /** 最后一行包含,号 */
@@ -86,7 +86,7 @@ function addImportToMainLangFile(newFilename) {
     mainContent = `import ${newFilename} from './${newFilename}';\n\nexport default Object.assign({}, {\n  ${newFilename},\n});`;
   }
 
-  fs.writeFileSync(`${srcLangDir}index.ts`, mainContent);
+  fs.writeFileSync(`${srcLangDir}/index.ts`, mainContent);
 }
 
 /**
