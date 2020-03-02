@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import { getKiwiDir, flatten } from '../utils';
 
 const LANG_PREFIX = getKiwiDir();
-const I18N_GLOB = `${LANG_PREFIX}**/*.ts`;
+const I18N_GLOB = `${LANG_PREFIX}/**/*.ts`;
 
 /**
  * 获取对应文件的语言
