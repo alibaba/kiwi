@@ -8,8 +8,6 @@ import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
 import { removeFileComment } from './astUtils';
-import { transerI18n } from './babelUtil';
-import * as compilerVue from 'vue-template-compiler';
 /**
  * 查找 Ts 文件中的中文
  * @param code
@@ -18,8 +16,8 @@ import * as compilerVue from 'vue-template-compiler';
 function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
-
-  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
+  const isVue = fileName.endsWith('.vue');
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, isVue ? ts.ScriptKind.TS : ts.ScriptKind.TSX);
 
   function visit(node: ts.Node) {
     switch (node.kind) {
@@ -196,37 +194,7 @@ function findTextInHtml(code) {
  * @param fileName
  */
 function findTextInVue(code) {
-  const activeTextEditor = vscode.window.activeTextEditor;
-  const matches = [];
-  var result;
-  const { document } = activeTextEditor;
-  const vueObejct = compilerVue.compile(code.toString());
-  let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
-  let vueTemp = transerI18n(outcode, 'as.vue');
-  const sfc = compilerVue.parseComponent(code.toString());
-  let scriptarr = transerI18n(sfc.script.content, 'filename.vue');
-
-  vueTemp = vueTemp.concat(scriptarr);
-  vueTemp = [...new Set(vueTemp)];
-  vueTemp.forEach(item => {
-    let rex = new RegExp(item, 'g');
-    while ((result = rex.exec(code))) {
-      let res = result;
-      let last = rex.lastIndex;
-      last = last - (res[0].length - res[0].trimRight().length);
-      const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
-      matches.push({
-        range,
-        text: res[0].trimRight(),
-        isString:
-          (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
-          (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
-            ? true
-            : false
-      });
-    }
-  });
-  return matches;
+  return [...findTextInHtml(code), ...findTextInTs(code, 'ast.vue')];
 }
 /**
  * 递归匹配代码的中文

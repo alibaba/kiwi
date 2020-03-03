@@ -128,7 +128,6 @@
     "slash2": "^2.0.0",
     "ts-node": "^6.0.3",
     "typescript": "^2.8.3",
-    "vue-template-compiler": "^2.6.11",
     "google-translate": "^2.2.0"
   }
 }
