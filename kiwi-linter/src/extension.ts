@@ -230,11 +230,7 @@ export function activate(context: vscode.ExtensionContext) {
           if (action === 'Yes') {
             // 翻译中文文案
             const translatePromises = targetStrs.reduce((prev, curr) => {
-              // 避免翻译的字符里包含数字或者特殊字符等情况
-              const reg = /[^a-zA-Z\x00-\xff]+/g;
-              const findText = curr.text.match(reg);
-              const transText = findText.join('').slice(0, 4);
-              return prev.concat(translateText(transText));
+              return prev.concat(translateText(curr.text.slice(0, 4)));
             }, []);
 
             Promise.all(translatePromises).then(([...translateTexts]) => {
