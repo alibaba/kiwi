@@ -18,8 +18,7 @@ import * as compilerVue from 'vue-template-compiler';
 function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
-  const isVue = fileName.endsWith('.vue');
-  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, isVue ? ts.ScriptKind.TS : ts.ScriptKind.TSX);
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   function visit(node: ts.Node) {
     switch (node.kind) {
@@ -112,7 +111,39 @@ function findTextInTs(code: string, fileName: string) {
 
   return matches;
 }
+function findTextInVueTs(code: string, fileName: string, startNum: number) {
+  const matches = [];
+  const activeEditor = vscode.window.activeTextEditor;
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
 
+  function visit(node: ts.Node) {
+    switch (node.kind) {
+      case ts.SyntaxKind.StringLiteral: {
+        /** 判断 Ts 中的字符串含有中文 */
+        const { text } = node as ts.StringLiteral;
+        if (text.match(DOUBLE_BYTE_REGEX)) {
+          const start = node.getStart();
+          const end = node.getEnd();
+          /** 加一，减一的原因是，去除引号 */
+          const startPos = activeEditor.document.positionAt(start + 1 + startNum);
+          const endPos = activeEditor.document.positionAt(end - 1 + startNum);
+          const range = new vscode.Range(startPos, endPos);
+          matches.push({
+            range,
+            text,
+            isString: true
+          });
+        }
+        break;
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+  ts.forEachChild(ast, visit);
+
+  return matches;
+}
 /**
  * 查找 HTML 文件中的中文
  * @param code
@@ -237,7 +268,8 @@ function findTextInVue(code,fileName) {
     }) 
     if(canBe) return item
   })
-  return matchesTempResult.concat(findTextInTs(code,fileName));
+  const sfc = compilerVue.parseComponent(code.toString());
+  return matchesTempResult.concat(findTextInVueTs(sfc.script.content,fileName,sfc.script.start));
 }
 /**
  * 递归匹配代码的中文
