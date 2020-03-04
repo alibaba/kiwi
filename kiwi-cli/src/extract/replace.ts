@@ -75,13 +75,6 @@ function addImportToMainLangFile(newFilename) {
   if (fs.existsSync(`${srcLangDir}/index.ts`)) {
     mainContent = fs.readFileSync(`${srcLangDir}/index.ts`, 'utf8');
     mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
-    if (/\,\n(}\);)/.test(mainContent)) {
-      /** 最后一行包含,号 */
-      mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
-    } else {
-      /** 最后一行不包含,号 */
-      mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
-    }
     if (/(}\);)/.test(mainContent)) {
       if (/\,\n(}\);)/.test(mainContent)) {
         /** 最后一行包含,号 */
