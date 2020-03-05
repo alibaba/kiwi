@@ -110,7 +110,14 @@ function extractAll(dirPath?: string) {
               length: 4,
               charset: 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
             })}`;
-            const transText = translateTexts[i] ? _.camelCase(translateTexts[i] as string) : uuidKey;
+            const handleText = translateTexts[i] ? _.camelCase(translateTexts[i] as string) : uuidKey;
+            const reg = /[a-zA-Z]+/;
+            // 对于翻译后的英文再次过滤，只保留英文字符
+            const purifyText = handleText
+              .split('')
+              .filter(letter => reg.test(letter))
+              .join('');
+            const transText = purifyText || 'chineseSymbols';
             let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
             let occurTime = 1;
             // 防止出现前四位相同但是整体文案不同的情况
