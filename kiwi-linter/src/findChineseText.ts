@@ -18,7 +18,6 @@ import * as compilerVue from 'vue-template-compiler';
 function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
-
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   function visit(node: ts.Node) {
@@ -112,7 +111,39 @@ function findTextInTs(code: string, fileName: string) {
 
   return matches;
 }
+function findTextInVueTs(code: string, fileName: string, startNum: number) {
+  const matches = [];
+  const activeEditor = vscode.window.activeTextEditor;
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
 
+  function visit(node: ts.Node) {
+    switch (node.kind) {
+      case ts.SyntaxKind.StringLiteral: {
+        /** 判断 Ts 中的字符串含有中文 */
+        const { text } = node as ts.StringLiteral;
+        if (text.match(DOUBLE_BYTE_REGEX)) {
+          const start = node.getStart();
+          const end = node.getEnd();
+          /** 加一，减一的原因是，去除引号 */
+          const startPos = activeEditor.document.positionAt(start + 1 + startNum);
+          const endPos = activeEditor.document.positionAt(end - 1 + startNum);
+          const range = new vscode.Range(startPos, endPos);
+          matches.push({
+            range,
+            text,
+            isString: true
+          });
+        }
+        break;
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+  ts.forEachChild(ast, visit);
+
+  return matches;
+}
 /**
  * 查找 HTML 文件中的中文
  * @param code
@@ -195,18 +226,18 @@ function findTextInHtml(code) {
  * @param code
  * @param fileName
  */
-function findTextInVue(code) {
+function findTextInVue(code,fileName) {
   const activeTextEditor = vscode.window.activeTextEditor;
   const matches = [];
   var result;
   const { document } = activeTextEditor;
   const vueObejct = compilerVue.compile(code.toString());
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
-  let vueTemp = transerI18n(outcode, 'as.vue');
-  const sfc = compilerVue.parseComponent(code.toString());
-  let scriptarr = transerI18n(sfc.script.content, 'filename.vue');
-
-  vueTemp = vueTemp.concat(scriptarr);
+  let vueTemp = transerI18n(outcode, 'as.vue', null);
+  /**删除所有的html中的头部空格 */
+  vueTemp = vueTemp.map((item)=>{
+    return item.trim()
+  })
   vueTemp = [...new Set(vueTemp)];
   vueTemp.forEach(item => {
     let rex = new RegExp(item, 'g');
@@ -216,6 +247,7 @@ function findTextInVue(code) {
       last = last - (res[0].length - res[0].trimRight().length);
       const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
       matches.push({
+        arrf:[res.index,last],
         range,
         text: res[0].trimRight(),
         isString:
@@ -226,7 +258,18 @@ function findTextInVue(code) {
       });
     }
   });
-  return matches;
+  let matchesTemp = matches
+  let matchesTempResult =  matchesTemp.filter((item,index) => {
+    let canBe = true
+    matchesTemp.forEach(items=>{
+      if((item.arrf[0]>items.arrf[0]&&item.arrf[1]<=items.arrf[1])||(item.arrf[0]>=items.arrf[0]&&item.arrf[1]<items.arrf[1])|| (item.arrf[0]>items.arrf[0]&&item.arrf[1]<items.arrf[1])){
+        canBe = false
+      }
+    }) 
+    if(canBe) return item
+  })
+  const sfc = compilerVue.parseComponent(code.toString());
+  return matchesTempResult.concat(findTextInVueTs(sfc.script.content,fileName,sfc.script.start));
 }
 /**
  * 递归匹配代码的中文
@@ -237,7 +280,7 @@ export function findChineseText(code: string, fileName: string) {
     return findTextInHtml(code);
   }
   if (fileName.endsWith('.vue')) {
-    return findTextInVue(code);
+    return findTextInVue(code,fileName);
   }
   return findTextInTs(code, fileName);
 }
