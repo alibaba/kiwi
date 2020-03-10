@@ -226,7 +226,7 @@ function findTextInHtml(code) {
  * @param code
  * @param fileName
  */
-function findTextInVue(code,fileName) {
+function findTextInVue(code, fileName) {
   const activeTextEditor = vscode.window.activeTextEditor;
   const matches = [];
   var result;
@@ -235,9 +235,9 @@ function findTextInVue(code,fileName) {
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp = transerI18n(outcode, 'as.vue', null);
   /**删除所有的html中的头部空格 */
-  vueTemp = vueTemp.map((item)=>{
-    return item.trim()
-  })
+  vueTemp = vueTemp.map(item => {
+    return item.trim();
+  });
   vueTemp = [...new Set(vueTemp)];
   vueTemp.forEach(item => {
     let rex = new RegExp(item, 'g');
@@ -247,7 +247,7 @@ function findTextInVue(code,fileName) {
       last = last - (res[0].length - res[0].trimRight().length);
       const range = new vscode.Range(document.positionAt(res.index), document.positionAt(last));
       matches.push({
-        arrf:[res.index,last],
+        arrf: [res.index, last],
         range,
         text: res[0].trimRight(),
         isString:
@@ -258,18 +258,22 @@ function findTextInVue(code,fileName) {
       });
     }
   });
-  let matchesTemp = matches
-  let matchesTempResult =  matchesTemp.filter((item,index) => {
-    let canBe = true
-    matchesTemp.forEach(items=>{
-      if((item.arrf[0]>items.arrf[0]&&item.arrf[1]<=items.arrf[1])||(item.arrf[0]>=items.arrf[0]&&item.arrf[1]<items.arrf[1])|| (item.arrf[0]>items.arrf[0]&&item.arrf[1]<items.arrf[1])){
-        canBe = false
+  let matchesTemp = matches;
+  let matchesTempResult = matchesTemp.filter((item, index) => {
+    let canBe = true;
+    matchesTemp.forEach(items => {
+      if (
+        (item.arrf[0] > items.arrf[0] && item.arrf[1] <= items.arrf[1]) ||
+        (item.arrf[0] >= items.arrf[0] && item.arrf[1] < items.arrf[1]) ||
+        (item.arrf[0] > items.arrf[0] && item.arrf[1] < items.arrf[1])
+      ) {
+        canBe = false;
       }
-    }) 
-    if(canBe) return item
-  })
+    });
+    if (canBe) return item;
+  });
   const sfc = compilerVue.parseComponent(code.toString());
-  return matchesTempResult.concat(findTextInVueTs(sfc.script.content,fileName,sfc.script.start));
+  return matchesTempResult.concat(findTextInVueTs(sfc.script.content, fileName, sfc.script.start));
 }
 /**
  * 递归匹配代码的中文
@@ -280,7 +284,7 @@ export function findChineseText(code: string, fileName: string) {
     return findTextInHtml(code);
   }
   if (fileName.endsWith('.vue')) {
-    return findTextInVue(code,fileName);
+    return findTextInVue(code, fileName);
   }
   return findTextInTs(code, fileName);
 }
