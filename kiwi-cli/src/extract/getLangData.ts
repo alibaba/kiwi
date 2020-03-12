@@ -5,10 +5,12 @@
 
 import * as globby from 'globby';
 import * as fs from 'fs';
-import { getKiwiDir, flatten } from '../utils';
+import * as path from 'path';
+import { getProjectConfig, flatten } from '../utils';
 
-const LANG_PREFIX = getKiwiDir();
-const I18N_GLOB = `${LANG_PREFIX}/**/*.ts`;
+const CONFIG = getProjectConfig();
+const LANG_DIR = path.resolve(CONFIG.kiwiDir, CONFIG.srcLang);
+const I18N_GLOB = `${LANG_DIR}/**/*.ts`;
 
 /**
  * 获取对应文件的语言
