@@ -7,17 +7,15 @@ require('ts-node').register({
     module: 'commonjs'
   }
 });
-import { readFileSync, writeFileSync } from 'fs';
+import * as fs from 'fs';
 import * as path from 'path';
-import { tsvParseRows } from 'd3-dsv';
 import * as _ from 'lodash';
-import { getAllMessages, getKiwiDir } from './utils';
+import { tsvParseRows } from 'd3-dsv';
+import { getAllMessages, getProjectConfig, traverse } from './utils';
 
-const file = process.argv[2];
-const lang = process.argv[3];
-
-function getMessagesToImport(file) {
-  const content = readFileSync(file).toString();
+function getMessagesToImport(file: string) {
+  console.log(file);
+  const content = fs.readFileSync(file).toString();
   const messages = tsvParseRows(content, ([key, value]) => {
     try {
       // value 的形式和 JSON 中的字符串值一致，其中的特殊字符是以转义形式存在的，
@@ -44,39 +42,34 @@ function getMessagesToImport(file) {
   return rst;
 }
 
-function sortObject(obj) {
+function writeMessagesToFile(messages: any, file: string, lang: string) {
+  const CONFIG = getProjectConfig();
+  const kiwiDir = CONFIG.kiwiDir;
+  const srcMessages = require(path.resolve(kiwiDir, CONFIG.srcLang, file)).default;
+  const dstFile = path.resolve(kiwiDir, lang, file);
+  const oldDstMessages = require(dstFile).default;
   const rst = {};
-  Object.keys(obj)
-    .sort()
-    .forEach(key => {
-      rst[key] = obj[key];
-    });
-  return rst;
+  traverse(srcMessages, (message, key) => {
+    _.setWith(rst, key, _.get(messages, key) || _.get(oldDstMessages, key), Object);
+  });
+  fs.writeFileSync(dstFile + '.ts', 'export default ' + JSON.stringify(rst, null, 2));
 }
 
-function importMessages(file, lang) {
-  const messagesToImport = getMessagesToImport(file);
-  const allMessages = getAllMessages();
-  const translationFilePath = path.resolve(getKiwiDir(), `text_${lang}.json`);
-  const oldTranslations = require(translationFilePath);
-  const newTranslations = {
-    ...oldTranslations
-  };
-  let count = 0;
-  _.forEach(messagesToImport, (message, key) => {
-    if (allMessages.hasOwnProperty(key)) {
-      count++;
-      newTranslations[key] = message;
-    }
+function importMessages(file: string, lang: string) {
+  let messagesToImport = getMessagesToImport(file);
+  const allMessages = getAllMessages(lang);
+  messagesToImport = _.pickBy(messagesToImport, (message, key) => allMessages.hasOwnProperty(key));
+  const keysByFiles = _.groupBy(Object.keys(messagesToImport), key => key.split('.')[0]);
+  const messagesByFiles = _.mapValues(keysByFiles, (keys, file) => {
+    const rst = {};
+    _.forEach(keys, key => {
+      _.setWith(rst, key.substr(file.length + 1), messagesToImport[key], Object);
+    });
+    return rst;
   });
-  if (count === 0) {
-    console.log('No messages need to be imported.');
-    return;
-  }
-
-  const fileContent = JSON.stringify(sortObject(newTranslations), null, 2);
-  writeFileSync(translationFilePath, fileContent);
-  console.log(`Imported ${count} message(s).`);
+  _.forEach(messagesByFiles, (messages, file) => {
+    writeMessagesToFile(messages, file, lang);
+  });
 }
 
 export { importMessages };

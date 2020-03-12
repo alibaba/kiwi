@@ -81,8 +81,8 @@ function traverse(obj, cb) {
 /**
  * 获取所有文案
  */
-function getAllMessages() {
-  const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
+function getAllMessages(lang: string, filter = (message: string, key: string) => true) {
+  const srcLangDir = getLangDir(lang);
   let files = fs.readdirSync(srcLangDir);
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts').map(file => path.resolve(srcLangDir, file));
 
@@ -93,7 +93,9 @@ function getAllMessages() {
 
     traverse(messages, (message, path) => {
       const key = fileNameWithoutExt + '.' + path;
-      flattenedMessages[key] = message;
+      if (filter(message, key)) {
+        flattenedMessages[key] = message;
+      }
     });
 
     return flattenedMessages;
