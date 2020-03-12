@@ -62,8 +62,8 @@ kiwi --import [filePath] en-US
 导出未翻译的文案
 
 ```shell script
-# 导出指定语言的文案
-kiwi --export [filePath] zh-CN
+# 导出指定语言的文案，lang取值为配置中distLangs值，如en-US导出还未翻译成英文的中文文案
+kiwi --export [filePath] en-US
 ```
 
 ### kiwi `--sync`

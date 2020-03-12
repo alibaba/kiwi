@@ -13,8 +13,9 @@ import * as _ from 'lodash';
 import { tsvParseRows } from 'd3-dsv';
 import { getAllMessages, getProjectConfig, traverse } from './utils';
 
+const CONFIG = getProjectConfig();
+
 function getMessagesToImport(file: string) {
-  console.log(file);
   const content = fs.readFileSync(file).toString();
   const messages = tsvParseRows(content, ([key, value]) => {
     try {
@@ -43,7 +44,6 @@ function getMessagesToImport(file: string) {
 }
 
 function writeMessagesToFile(messages: any, file: string, lang: string) {
-  const CONFIG = getProjectConfig();
   const kiwiDir = CONFIG.kiwiDir;
   const srcMessages = require(path.resolve(kiwiDir, CONFIG.srcLang, file)).default;
   const dstFile = path.resolve(kiwiDir, lang, file);
@@ -57,7 +57,7 @@ function writeMessagesToFile(messages: any, file: string, lang: string) {
 
 function importMessages(file: string, lang: string) {
   let messagesToImport = getMessagesToImport(file);
-  const allMessages = getAllMessages(lang);
+  const allMessages = getAllMessages(CONFIG.srcLang);
   messagesToImport = _.pickBy(messagesToImport, (message, key) => allMessages.hasOwnProperty(key));
   const keysByFiles = _.groupBy(Object.keys(messagesToImport), key => key.split('.')[0]);
   const messagesByFiles = _.mapValues(keysByFiles, (keys, file) => {
