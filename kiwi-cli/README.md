@@ -14,7 +14,7 @@ Kiwi 的 CLI 工具
 
 初始化项目，生成 kiwi 的配置文件 `kiwi-config.json`
 
-```json
+```js
 {
   // kiwi文件根目录，用于放置提取的langs文件
   "kiwiDir": "./.kiwi",
