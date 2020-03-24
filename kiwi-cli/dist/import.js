@@ -9,15 +9,14 @@ require('ts-node').register({
         module: 'commonjs'
     }
 });
-const fs_1 = require("fs");
+const fs = require("fs");
 const path = require("path");
-const d3_dsv_1 = require("d3-dsv");
 const _ = require("lodash");
+const d3_dsv_1 = require("d3-dsv");
 const utils_1 = require("./utils");
-const file = process.argv[2];
-const lang = process.argv[3];
+const CONFIG = utils_1.getProjectConfig();
 function getMessagesToImport(file) {
-    const content = fs_1.readFileSync(file).toString();
+    const content = fs.readFileSync(file).toString();
     const messages = d3_dsv_1.tsvParseRows(content, ([key, value]) => {
         try {
             // value 的形式和 JSON 中的字符串值一致，其中的特殊字符是以转义形式存在的，
@@ -44,35 +43,32 @@ function getMessagesToImport(file) {
     }
     return rst;
 }
-function sortObject(obj) {
+function writeMessagesToFile(messages, file, lang) {
+    const kiwiDir = CONFIG.kiwiDir;
+    const srcMessages = require(path.resolve(kiwiDir, CONFIG.srcLang, file)).default;
+    const dstFile = path.resolve(kiwiDir, lang, file);
+    const oldDstMessages = require(dstFile).default;
     const rst = {};
-    Object.keys(obj)
-        .sort()
-        .forEach(key => {
-        rst[key] = obj[key];
+    utils_1.traverse(srcMessages, (message, key) => {
+        _.setWith(rst, key, _.get(messages, key) || _.get(oldDstMessages, key), Object);
     });
-    return rst;
+    fs.writeFileSync(dstFile + '.ts', 'export default ' + JSON.stringify(rst, null, 2));
 }
 function importMessages(file, lang) {
-    const messagesToImport = getMessagesToImport(file);
-    const allMessages = utils_1.getAllMessages();
-    const translationFilePath = path.resolve(utils_1.getKiwiDir(), `text_${lang}.json`);
-    const oldTranslations = require(translationFilePath);
-    const newTranslations = Object.assign({}, oldTranslations);
-    let count = 0;
-    _.forEach(messagesToImport, (message, key) => {
-        if (allMessages.hasOwnProperty(key)) {
-            count++;
-            newTranslations[key] = message;
-        }
+    let messagesToImport = getMessagesToImport(file);
+    const allMessages = utils_1.getAllMessages(CONFIG.srcLang);
+    messagesToImport = _.pickBy(messagesToImport, (message, key) => allMessages.hasOwnProperty(key));
+    const keysByFiles = _.groupBy(Object.keys(messagesToImport), key => key.split('.')[0]);
+    const messagesByFiles = _.mapValues(keysByFiles, (keys, file) => {
+        const rst = {};
+        _.forEach(keys, key => {
+            _.setWith(rst, key.substr(file.length + 1), messagesToImport[key], Object);
+        });
+        return rst;
     });
-    if (count === 0) {
-        console.log('No messages need to be imported.');
-        return;
-    }
-    const fileContent = JSON.stringify(sortObject(newTranslations), null, 2);
-    fs_1.writeFileSync(translationFilePath, fileContent);
-    console.log(`Imported ${count} message(s).`);
+    _.forEach(messagesByFiles, (messages, file) => {
+        writeMessagesToFile(messages, file, lang);
+    });
 }
 exports.importMessages = importMessages;
 //# sourceMappingURL=import.js.map

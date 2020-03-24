@@ -28,12 +28,14 @@ function findAllChineseText(dir: string) {
   const allTexts = filterFiles.reduce((pre, file) => {
     const code = readFile(file);
     const texts = findChineseText(code, file);
+    // 调整文案顺序，保证从后面的文案往前替换，避免位置更新导致替换出错
+    const sortTexts = _.sortBy(texts, obj => -obj.range.start);
 
     if (texts.length > 0) {
       console.log(`${file} 发现中文文案`);
     }
 
-    return texts.length > 0 ? pre.concat({ file, texts }) : pre;
+    return texts.length > 0 ? pre.concat({ file, texts: sortTexts }) : pre;
   }, []);
 
   return allTexts;
@@ -145,7 +147,6 @@ function extractAll(dirPath?: string) {
         }, []);
 
         replaceableStrs
-          .reverse()
           .reduce((prev, obj) => {
             return prev.then(() => {
               return replaceAndUpdate(currentFilename, obj.target, `I18N.${obj.key}`, false);

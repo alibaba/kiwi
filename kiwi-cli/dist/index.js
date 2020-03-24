@@ -14,6 +14,7 @@ const inquirer = require("inquirer");
 const init_1 = require("./init");
 const sync_1 = require("./sync");
 const export_1 = require("./export");
+const import_1 = require("./import");
 const unused_1 = require("./unused");
 const mock_1 = require("./mock");
 const extract_1 = require("./extract/extract");
@@ -34,7 +35,7 @@ commander
     .version('0.1.0')
     .option('--init', '初始化项目', { isDefault: true })
     .option('--import [file] [lang]', '导入翻译文案')
-    .option('--export [lang]', '导出未翻译的文案')
+    .option('--export [file] [lang]', '导出未翻译的文案')
     .option('--sync', '同步各种语言的文案')
     .option('--mock', '使用 Google 翻译')
     .option('--unused', '导出未使用的文案')
@@ -66,15 +67,22 @@ if (commander.init) {
     }))();
 }
 if (commander.import) {
-    // importMessages();
+    spining('导入翻译文案', () => {
+        if (commander.import === true || commander.args.length === 0) {
+            console.log('请按格式输入：--import [file] [lang]');
+        }
+        else if (commander.args) {
+            import_1.importMessages(commander.import, commander.args[0]);
+        }
+    });
 }
 if (commander.export) {
     spining('导出未翻译的文案', () => {
-        if (commander.export === true) {
+        if (commander.export === true && commander.args.length === 0) {
             export_1.exportMessages();
         }
-        else {
-            export_1.exportMessages(commander.export);
+        else if (commander.args) {
+            export_1.exportMessages(commander.export, commander.args[0]);
         }
     });
 }
