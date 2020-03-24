@@ -80,8 +80,8 @@ exports.traverse = traverse;
 /**
  * 获取所有文案
  */
-function getAllMessages() {
-    const srcLangDir = path.resolve(getKiwiDir(), 'zh-CN');
+function getAllMessages(lang, filter = (message, key) => true) {
+    const srcLangDir = getLangDir(lang);
     let files = fs.readdirSync(srcLangDir);
     files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts').map(file => path.resolve(srcLangDir, file));
     const allMessages = files.map(file => {
@@ -90,7 +90,9 @@ function getAllMessages() {
         const flattenedMessages = {};
         traverse(messages, (message, path) => {
             const key = fileNameWithoutExt + '.' + path;
-            flattenedMessages[key] = message;
+            if (filter(message, key)) {
+                flattenedMessages[key] = message;
+            }
         });
         return flattenedMessages;
     });
