@@ -8,7 +8,7 @@ import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
 import { removeFileComment } from './astUtils';
-import { transerI18n } from './babelUtil';
+import { transerI18n,findVueText } from './babelUtil';
 import * as compilerVue from 'vue-template-compiler';
 /**
  * 查找 Ts 文件中的中文
@@ -69,8 +69,8 @@ function findTextInTs(code: string, fileName: string) {
       }
       case ts.SyntaxKind.TemplateExpression: {
         const { pos, end } = node;
-        const templateContent = code.slice(pos, end);
-
+        let templateContent = code.slice(pos, end);
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
@@ -88,8 +88,8 @@ function findTextInTs(code: string, fileName: string) {
       }
       case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
         const { pos, end } = node;
-        const templateContent = code.slice(pos, end);
-
+        let templateContent = code.slice(pos, end);
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
@@ -131,6 +131,25 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
           matches.push({
             range,
             text,
+            isString: true
+          });
+        }
+        break;
+      }
+      case ts.SyntaxKind.TemplateExpression: {
+        const { pos, end } = node;
+        let templateContent = code.slice(pos, end);
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
+        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+          const start = node.getStart();
+          const end = node.getEnd();
+          /** 加一，减一的原因是，去除`号 */
+          const startPos = activeEditor.document.positionAt(start + 1 + startNum);
+          const endPos = activeEditor.document.positionAt(end - 1 + startNum);
+          const range = new vscode.Range(startPos, endPos);
+          matches.push({
+            range,
+            text: code.slice(start + 1, end - 1),
             isString: true
           });
         }
@@ -225,13 +244,29 @@ function findTextInHtml(code) {
  * vue文件查找
  * @param code
  * @param fileName
+ * @question $符敏感
  */
 function findTextInVue(code, fileName) {
+  
   const activeTextEditor = vscode.window.activeTextEditor;
   const matches = [];
   var result;
   const { document } = activeTextEditor;
-  const vueObejct = compilerVue.compile(code.toString());
+  const vueObejct = compilerVue.compile(code.toString(),{outputSourceRange: true});
+  let vueAst = vueObejct.ast
+  let expressTemp = findVueText(vueAst)
+  expressTemp.forEach(item=>{
+    const nodeValue = code.slice(item.start, item.end);
+    let startPos = document.positionAt(item.start+nodeValue.indexOf(item.text)+1);
+    let endPos = document.positionAt(item.start+nodeValue.indexOf(item.text)+(item.text.length-1));
+    const range = new vscode.Range(startPos, endPos);
+        matches.push({
+          arrf: [item.start, item.end],
+          range,
+          text: item.text.trimRight(),
+          isString: true
+        });     
+  })
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp = transerI18n(outcode, 'as.vue', null);
   /**删除所有的html中的头部空格 */
