@@ -34,6 +34,12 @@ function javascriptI18n(code, filename) {
       if (path.node.value.match(DOUBLE_BYTE_REGEX)) {
         arr.push(path.node.value);
       }
+    },
+    TemplateElement(path) {
+      
+      if (path.node.value.raw.match(DOUBLE_BYTE_REGEX)) {
+        // arr.push(path.node.value.raw);
+      }
     }
   };
   let arrayPlugin = { visitor };
@@ -43,4 +49,25 @@ function javascriptI18n(code, filename) {
   });
   return arr;
 }
-export { transerI18n };
+//必须将模板语法中的所有代翻译语句翻译完成才能进行ast的string解析
+function findVueText (ast) {
+  let arr = [];
+  const regex1 = /\`(.+?)\`/g; 
+  function emun(ast){
+    if(ast.expression){
+      let text = ast.expression.match(regex1)
+      if(text && text[0].match(DOUBLE_BYTE_REGEX)){
+        text.forEach(itemText=>{
+          itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:itemText,start:ast.start,end:ast.end)
+        }) 
+      }
+    } else {
+      ast.children&&ast.children.forEach(item=>{
+        emun(item)
+      })
+    }
+  }
+  emun(ast)
+  return arr
+}
+export { transerI18n, findVueText };
