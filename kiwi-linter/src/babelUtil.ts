@@ -34,12 +34,6 @@ function javascriptI18n(code, filename) {
       if (path.node.value.match(DOUBLE_BYTE_REGEX)) {
         arr.push(path.node.value);
       }
-    },
-    TemplateElement(path) {
-      
-      if (path.node.value.raw.match(DOUBLE_BYTE_REGEX)) {
-        // arr.push(path.node.value.raw);
-      }
     }
   };
   let arrayPlugin = { visitor };
@@ -58,7 +52,7 @@ function findVueText (ast) {
       let text = ast.expression.match(regex1)
       if(text && text[0].match(DOUBLE_BYTE_REGEX)){
         text.forEach(itemText=>{
-          itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:itemText,start:ast.start,end:ast.end)
+          itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:itemText,start:ast.start,end:ast.end})
         }) 
       }
     } else {
