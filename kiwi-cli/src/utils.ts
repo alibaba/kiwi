@@ -140,7 +140,8 @@ function withTimeout(promise, ms) {
  */
 function translateText(text, toLang) {
   const CONFIG = getProjectConfig();
-  const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey);
+  const options = CONFIG.translateOptions;
+  const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey, options);
   return withTimeout(
     new Promise((resolve, reject) => {
       googleTranslate(text, 'zh', PROJECT_CONFIG.langMap[toLang], (err, translation) => {

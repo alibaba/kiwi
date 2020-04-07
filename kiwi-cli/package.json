@@ -1,6 +1,6 @@
 {
   "name": "kiwi-clis",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "a cli for kiwi",
   "main": "dist/index.js",
   "scripts": {
@@ -37,7 +37,7 @@
     "globby": "^7.1.1",
     "@angular/compiler": "^7.2.0",
     "prettier": "^1.16.4",
-    "google-translate": "^2.2.0",
+    "google-translate": "^3.0.0",
     "lodash": "^4.17.11",
     "ora": "^3.0.0",
     "ts-node": "^7.0.1",
