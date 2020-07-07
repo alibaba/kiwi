@@ -247,7 +247,13 @@ function findTextInHtml(code) {
  * @question $符敏感
  */
 function findTextInVue(code, fileName) {
-  
+  let rexspace1 = new RegExp(/&ensp;/, 'g')
+  let rexspace2 = new RegExp(/&emsp;/, 'g')
+  let rexspace3 = new RegExp(/&nbsp;/, 'g')
+  code = code.replace(rexspace1,'ccsp&;').replace(rexspace2,'ecsp&;').replace(rexspace3,'ncsp&;')
+  let coverRex1 = new RegExp(/ccsp&;/, 'g')
+  let coverRex2 = new RegExp(/ecsp&;/, 'g')
+  let coverRex3 = new RegExp(/ncsp&;/, 'g')
   const activeTextEditor = vscode.window.activeTextEditor;
   const matches = [];
   var result;
@@ -275,7 +281,8 @@ function findTextInVue(code, fileName) {
   });
   vueTemp = [...new Set(vueTemp)];
   vueTemp.forEach(item => {
-    let rex = new RegExp(item, 'g');
+    let items = item.replace(/\{/g,'\\{').replace(/\}/g,'\\}').replace(/\$/g,'\\$').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\^/g,'\\^')
+    let rex = new RegExp(items, 'g');
     while ((result = rex.exec(code))) {
       let res = result;
       let last = rex.lastIndex;
@@ -284,7 +291,7 @@ function findTextInVue(code, fileName) {
       matches.push({
         arrf: [res.index, last],
         range,
-        text: res[0].trimRight(),
+        text: res[0].trimRight().replace(coverRex1,'&ensp;').replace(coverRex2,'&emsp;').replace(coverRex3,'&nbsp;'),
         isString:
           (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
           (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
