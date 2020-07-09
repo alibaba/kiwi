@@ -136,7 +136,8 @@ exports.withTimeout = withTimeout;
  */
 function translateText(text, toLang) {
     const CONFIG = getProjectConfig();
-    const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey);
+    const options = CONFIG.translateOptions;
+    const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey, options);
     return withTimeout(new Promise((resolve, reject) => {
         googleTranslate(text, 'zh', const_1.PROJECT_CONFIG.langMap[toLang], (err, translation) => {
             if (err) {
