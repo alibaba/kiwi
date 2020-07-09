@@ -69,6 +69,9 @@ default: `true`
 ![](https://img.alicdn.com/tfs/TB1dzf8rpOWBuNjy0FiXXXFxVXa-1256-700.png)
 
 ## Changelog
+### 1.3.9
+
+-  处理了部分特殊字符制表符的检测
 ### 1.3.8
 
 -  添加vue模板语法替换 优化模板语法中的函数等包含的中文处理`{name==1?'吃':'去'}`
