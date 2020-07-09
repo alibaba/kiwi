@@ -14,6 +14,10 @@ exports.PROJECT_CONFIG = {
         srcLang: 'zh-CN',
         distLangs: ['en-US', 'zh-TW'],
         googleApiKey: '',
+        translateOptions: {
+            concurrentLimit: 10,
+            requestOptions: {}
+        },
         importI18N: `import I18N from 'src/utils/I18N';`,
         ignoreDir: '',
         ignoreFile: ''

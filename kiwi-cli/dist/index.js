@@ -32,7 +32,7 @@ function spining(text, callback) {
     spinner.succeed(`${text}成功`);
 }
 commander
-    .version('0.1.0')
+    .version('0.2.0')
     .option('--init', '初始化项目', { isDefault: true })
     .option('--import [file] [lang]', '导入翻译文案')
     .option('--export [file] [lang]', '导出未翻译的文案')
