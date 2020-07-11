@@ -134,12 +134,16 @@ function createImportI18N(filePath) {
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
   const isTsFile = _.endsWith(filePath, '.ts');
   const isTsxFile = _.endsWith(filePath, '.tsx');
-
+  const isVueFile = _.endsWith(filePath, '.vue');
   if (isTsFile || isTsxFile) {
     const importStatement = `${CONFIG.importI18N}\n`;
     const pos = ast.getStart(ast, false);
     const updateCode = code.slice(0, pos) + importStatement + code.slice(pos);
 
+    return updateCode;
+  } else if (isVueFile) {
+    const importStatement = `${CONFIG.importI18N}\n`;
+    const updateCode = code.replace(/<script>/g, `<script>\n${importStatement}`)
     return updateCode;
   }
 }
@@ -154,6 +158,7 @@ function createImportI18N(filePath) {
 function replaceAndUpdate(filePath, arg, val, validateDuplicate) {
   const code = readFile(filePath);
   const isHtmlFile = _.endsWith(filePath, '.html');
+  const isVueFile = _.endsWith(filePath, '.vue');
   let newCode = code;
   let finalReplaceText = arg.text;
   const { start, end } = arg.range;
@@ -165,6 +170,8 @@ function replaceAndUpdate(filePath, arg, val, validateDuplicate) {
     let finalReplaceVal = val;
     if (last2Char === '=') {
       if (isHtmlFile) {
+        finalReplaceVal = '{{' + val + '}}';
+      } else if (isVueFile) {
         finalReplaceVal = '{{' + val + '}}';
       } else {
         finalReplaceVal = '{' + val + '}';
@@ -187,7 +194,7 @@ function replaceAndUpdate(filePath, arg, val, validateDuplicate) {
 
     newCode = `${code.slice(0, start)}${finalReplaceVal}${code.slice(end)}`;
   } else {
-    if (isHtmlFile) {
+    if (isHtmlFile || isVueFile) {
       newCode = `${code.slice(0, start)}{{${val}}}${code.slice(end)}`;
     } else {
       newCode = `${code.slice(0, start)}{${val}}${code.slice(end)}`;
