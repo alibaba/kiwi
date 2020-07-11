@@ -2,12 +2,11 @@
  * @author doubledream
  * @desc 利用 Ast 查找对应文件中的中文文案
  */
-
 import * as ts from 'typescript';
 import * as compiler from '@angular/compiler';
-
+import * as compilerVue from 'vue-template-compiler';
+import * as babel from '@babel/core';
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
-
 /**
  * 去掉文件中的注释
  * @param code
@@ -180,7 +179,90 @@ function findTextInHtml(code) {
   }
   return matches;
 }
+/**
+ * 递归匹配vue代码的中文
+ * @param code
+ */
+function findTextInVue (code: string) {
+  const vueObejct = compilerVue.compile(code.toString(),{outputSourceRange: true});
+  debugger
+  let TextaArr = findVueText(vueObejct.ast)
+  const sfc = compilerVue.parseComponent(code.toString());
+  let vueTemp = findTextInVueTs(sfc.script.content, 'fileName', sfc.script.start)
+  return vueTemp.concat(TextaArr)
+}
+function findTextInVueTs(code: string, fileName: string, startNum: number) {
+  const matches = [];
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
 
+  function visit(node: ts.Node) {
+    switch (node.kind) {
+      case ts.SyntaxKind.StringLiteral: {
+        /** 判断 Ts 中的字符串含有中文 */
+        const { text } = node as ts.StringLiteral;
+        if (text.match(DOUBLE_BYTE_REGEX)) {
+          const start = node.getStart();
+          const end = node.getEnd();
+          /** 加一，减一的原因是，去除引号 */
+         
+          const range = {start: start + startNum, end: end + startNum}
+          matches.push({
+            range,
+            text,
+            isString: true
+          });
+        }
+        break;
+      }
+      case ts.SyntaxKind.TemplateExpression: {
+        const { pos, end } = node;
+        let templateContent = code.slice(pos, end);
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
+        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+          const start = node.getStart();
+          const end = node.getEnd();
+          /** 加一，减一的原因是，去除`号 */
+          const range = code.indexOf('${')!==-1?{start: start + startNum, end: end + startNum}:{start: start + startNum + 1, end: end + startNum - 1}
+          matches.push({
+            range,
+            text: code.slice(start + 1, end - 1),
+            isString: true
+          });
+        }
+        break;
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+  ts.forEachChild(ast, visit);
+
+  return matches;
+}
+function findVueText (ast) {
+  let arr = [];
+  const regex1 = /\`(.+?)\`/g; 
+  function emun(ast){
+    if(ast.expression){
+      let text = ast.expression.match(regex1)
+      if(text && text[0].match(DOUBLE_BYTE_REGEX)){
+        text.forEach(itemText=>{
+          const varInStr = itemText.match(/(\$\{[^\}]+?\})/g);
+          if (varInStr) itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:' ' + itemText,range:{start:ast.start+2,end:ast.end-2},isString: true})
+          else itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:itemText,range:{start:ast.start,end:ast.end},isString: false})
+        }) 
+      }
+    } else if (!ast.expression&&ast.text) { 
+      ast.text.match(DOUBLE_BYTE_REGEX)&&arr.push({text:ast.text,range:{start:ast.start,end:ast.end},isString: false})
+    } else {
+      ast.children&&ast.children.forEach(item=>{
+        emun(item)
+      })
+    }
+  }
+  emun(ast)
+  return arr
+}
 /**
  * 递归匹配代码的中文
  * @param code
@@ -188,8 +270,12 @@ function findTextInHtml(code) {
 function findChineseText(code: string, fileName: string) {
   if (fileName.endsWith('.html')) {
     return findTextInHtml(code);
+  } else if (fileName.endsWith('.vue')) {
+    return findTextInVue(code)
+  } else {
+    return findTextInTs(code, fileName);
   }
-  return findTextInTs(code, fileName);
+  
 }
 
 export { findChineseText };

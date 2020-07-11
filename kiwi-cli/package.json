@@ -26,22 +26,24 @@
   },
   "homepage": "https://github.com/alibaba/kiwi#readme",
   "dependencies": {
+    "@angular/compiler": "^7.2.0",
+    "@babel/core": "^7.5.5",
     "@types/commander": "^2.12.2",
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.14",
     "commander": "^2.19.0",
     "d3-dsv": "^1.0.10",
-    "randomstring": "^1.1.5",
-    "slash2": "^2.0.0",
     "fs-extra": "^7.0.1",
     "globby": "^7.1.1",
-    "@angular/compiler": "^7.2.0",
-    "prettier": "^1.16.4",
     "google-translate": "^3.0.0",
+    "inquirer": "^5.2.0",
     "lodash": "^4.17.11",
     "ora": "^3.0.0",
+    "prettier": "^1.16.4",
+    "randomstring": "^1.1.5",
+    "slash2": "^2.0.0",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2",
-    "inquirer": "^5.2.0"
+    "vue-template-compiler": "^2.6.11"
   }
 }
