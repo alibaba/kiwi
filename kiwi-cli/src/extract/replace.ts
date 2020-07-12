@@ -112,10 +112,31 @@ function hasImportI18N(filePath) {
 
   function visit(node) {
     if (node.kind === ts.SyntaxKind.ImportDeclaration) {
-      const importPath = node.moduleSpecifier.getText();
+      const importClause = node.importClause;
 
-      if (importPath.includes('I18N')) {
-        hasImportI18N = true;
+      // import I18N from 'src/utils/I18N';
+      if (importClause.kind === ts.SyntaxKind.ImportClause) {
+        if (importClause.name) {
+          if (importClause.name.escapedText === 'I18N') {
+            hasImportI18N = true;
+          }
+        } else {
+          const namedBindings = importClause.namedBindings;
+          // import { I18N } from 'src/utils/I18N';
+          if (namedBindings.kind === ts.SyntaxKind.NamedImports) {
+            namedBindings.elements.forEach(element => {
+              if (element.kind === ts.SyntaxKind.ImportSpecifier && _.get(element, 'name.escapedText') === 'I18N') {
+                hasImportI18N = true;
+              }
+            });
+          }
+          // import * as I18N from 'src/utils/I18N';
+          if (namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+            if (_.get(namedBindings, 'name.escapedText') === 'I18N') {
+              hasImportI18N = true;
+            }
+          }
+        }
       }
     }
   }
