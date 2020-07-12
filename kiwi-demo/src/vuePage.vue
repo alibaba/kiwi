@@ -1,24 +1,26 @@
 <template>
     <div>
-        <span>vue中文文案测试</span>
-        <span attrs='中间'>{{`中文${pageName}`}}</span>
-        <span @click='meth("按钮")'>按钮中文</span>
-        <span @click='meth("按钮")'>{{`可以${pageName}的`}}</span>
-        <span @click='meth("按钮")'>测试{{this.pageName}}翻译</span>
+        <span>{{I18N.src.vuePage.chineseCopywriting}}</span>
+        <span attrs='中间'>{{I18N.template(I18N.src.vuePage.chinese, { val1: pageName })}}</span>
+        <span @click='meth("按钮")'>{{I18N.src.vuePage.buttonChinese}}</span>
+        <span @click='meth("按钮")'>{{I18N.template(I18N.src.vuePage.ok, { val1: pageName })}}</span>
+        <span @click='meth("按钮")'>{{I18N.common.test}}{{this.pageName}}{{I18N.src.vuePage.translation}}</span>
     </div>
 </template>
 <script>
+import I18N from 'src/utils/I18N';
+
 export default {
     name: 'vuepage',
     data () {
         return {
-            pageName: 'vuedata文案测试'
+            pageName: I18N.src.vuePage.copyTest
         }
     },
     methods: {
         meth (v) {
-            let c = `你说什么${this.pageName}`
-            let b = '不顾了haha1'
+            let c = I18N.template(I18N.src.vuePage.whatDidYouSay, { val1: this.pageName })
+            let b = I18N.src.vuePage.ignore
         }
     }
 }
