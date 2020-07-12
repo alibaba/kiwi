@@ -4,6 +4,7 @@
  * @desc 初始化 kiwi 项目的文件以及配置
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.initProject = void 0;
 const _ = require("lodash");
 const path = require("path");
 const fs = require("fs");
@@ -15,7 +16,7 @@ function creteConfigFile(existDir) {
             ? `${existDir}${const_1.KIWI_CONFIG_FILE}`
             : `${existDir}/${const_1.KIWI_CONFIG_FILE}`;
         if (existDir && fs.existsSync(existDir) && !fs.existsSync(existConfigFile)) {
-            const config = JSON.stringify(Object.assign({}, const_1.PROJECT_CONFIG.defaultConfig, { kiwiDir: existDir, configFile: existConfigFile }), null, 2);
+            const config = JSON.stringify(Object.assign(Object.assign({}, const_1.PROJECT_CONFIG.defaultConfig), { kiwiDir: existDir, configFile: existConfigFile }), null, 2);
             fs.writeFile(existConfigFile, config, err => {
                 if (err) {
                     console.log(err);

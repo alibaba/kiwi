@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.lookForFiles = exports.flatten = exports.findMatchValue = exports.findMatchKey = exports.translateText = exports.getProjectConfig = exports.getAllMessages = exports.withTimeout = exports.retry = exports.traverse = exports.getLangDir = exports.getKiwiDir = void 0;
 /**
  * @author linhuiw
  * @desc 工具方法
@@ -136,7 +137,8 @@ exports.withTimeout = withTimeout;
  */
 function translateText(text, toLang) {
     const CONFIG = getProjectConfig();
-    const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey);
+    const options = CONFIG.translateOptions;
+    const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey, options);
     return withTimeout(new Promise((resolve, reject) => {
         googleTranslate(text, 'zh', const_1.PROJECT_CONFIG.langMap[toLang], (err, translation) => {
             if (err) {
