@@ -185,7 +185,6 @@ function findTextInHtml(code) {
  */
 function findTextInVue (code: string) {
   const vueObejct = compilerVue.compile(code.toString(),{outputSourceRange: true});
-  debugger
   let TextaArr = findVueText(vueObejct.ast)
   const sfc = compilerVue.parseComponent(code.toString());
   let vueTemp = findTextInVueTs(sfc.script.content, 'fileName', sfc.script.start)
@@ -251,6 +250,12 @@ function findVueText (ast) {
           if (varInStr) itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:' ' + itemText,range:{start:ast.start+2,end:ast.end-2},isString: true})
           else itemText.match(DOUBLE_BYTE_REGEX)&&arr.push({text:itemText,range:{start:ast.start,end:ast.end},isString: false})
         }) 
+      } else {
+        ast.tokens && ast.tokens.forEach(element => {
+          if (typeof(element) === 'string' && element.match(DOUBLE_BYTE_REGEX)) {
+            arr.push({text:element,range:{start:ast.start + ast.text.indexOf(element),end:ast.start + ast.text.indexOf(element)+element.length},isString: false})
+          }
+        });
       }
     } else if (!ast.expression&&ast.text) { 
       ast.text.match(DOUBLE_BYTE_REGEX)&&arr.push({text:ast.text,range:{start:ast.start,end:ast.end},isString: false})

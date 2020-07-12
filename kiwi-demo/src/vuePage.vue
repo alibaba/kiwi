@@ -3,9 +3,8 @@
         <span>vue中文文案测试</span>
         <span attrs='中间'>{{`中文${pageName}`}}</span>
         <span @click='meth("按钮")'>按钮中文</span>
-        <span @click='meth("按钮")'>{{`可以的`}}</span>
-        `可以的`
-        <span @click='meth("按钮")'>{{`可以的`}}</span>
+        <span @click='meth("按钮")'>{{`可以${pageName}的`}}</span>
+        <span @click='meth("按钮")'>测试{{this.pageName}}翻译</span>
     </div>
 </template>
 <script>
