@@ -15,15 +15,17 @@ class App extends React.Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
-        <p className="App-intro">{I18N.src.App.Click}</p>
+        <p className="App-intro">Hello kiwi 🐤 点击切换语言</p>
         <div className="btns">
           <span className="btn" onClick={this.changeLang.bind(this, 'zh-CN')}>
-            {I18N.src.App.chineseSimplified}</span>
+            中文简体
+          </span>
           <span className="btn" onClick={this.changeLang.bind(this, 'en-US')}>
             English
           </span>
           <span className="btn" onClick={this.changeLang.bind(this, 'zh-TW')}>
-            {I18N.src.App.traditionalChinese}</span>
+            中文繁体
+          </span>
         </div>
         <br />
         <p>
