@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.sync = void 0;
 /**
  * @author linhuiw
  * @desc 翻译文件
