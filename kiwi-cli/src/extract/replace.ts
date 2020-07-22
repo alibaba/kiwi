@@ -115,7 +115,7 @@ function hasImportI18N(filePath) {
       const importClause = node.importClause;
 
       // import I18N from 'src/utils/I18N';
-      if (importClause.kind === ts.SyntaxKind.ImportClause) {
+      if (_.get(importClause, 'kind') === ts.SyntaxKind.ImportClause) {
         if (importClause.name) {
           if (importClause.name.escapedText === 'I18N') {
             hasImportI18N = true;
