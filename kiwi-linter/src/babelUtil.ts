@@ -43,7 +43,7 @@ function javascriptI18n(code, filename) {
   });
   return arr;
 }
-//必须将模板语法中的所有代翻译语句翻译完成才能进行ast的string解析
+//必须将模板语法中的所有待翻译语句翻译完成才能进行ast的string解析
 function findVueText (ast) {
   let arr = [];
   const regex1 = /\`(.+?)\`/g; 
