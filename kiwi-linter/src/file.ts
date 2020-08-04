@@ -7,25 +7,23 @@ import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
-import { LANG_PREFIX } from './const';
-import { getConfiguration } from './utils';
+import { getLangPrefix } from './utils';
 
 export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
   if (!keyValue.startsWith('I18N.')) {
     return;
   }
-
   const [, filename, ...restPath] = keyValue.split('.');
   const fullKey = restPath.join('.');
-  const targetFilename = `${LANG_PREFIX}${filename}.ts`;
+  const langPrefix = `${getLangPrefix()}${filename}.ts`;
 
-  if (!fs.existsSync(targetFilename)) {
-    fs.outputFileSync(targetFilename, generateNewLangFile(fullKey, text));
+  if (!fs.existsSync(langPrefix)) {
+    fs.outputFileSync(langPrefix, generateNewLangFile(fullKey, text));
     addImportToMainLangFile(filename);
-    vscode.window.showInformationMessage(`成功新建语言文件 ${targetFilename}`);
+    vscode.window.showInformationMessage(`成功新建语言文件 ${langPrefix}`);
   } else {
     // 清除 require 缓存，解决手动更新语言文件后再自动抽取，导致之前更新失效的问题
-    const mainContent = getLangData(targetFilename);
+    const mainContent = getLangData(langPrefix);
     const obj = mainContent;
 
     if (Object.keys(obj).length === 0) {
@@ -33,13 +31,13 @@ export function updateLangFiles(keyValue: string, text: string, validateDuplicat
     }
 
     if (validateDuplicate && _.get(obj, fullKey) !== undefined) {
-      vscode.window.showErrorMessage(`${targetFilename} 中已存在 key 为 \`${fullKey}\` 的翻译，请重新命名变量`);
+      vscode.window.showErrorMessage(`${langPrefix} 中已存在 key 为 \`${fullKey}\` 的翻译，请重新命名变量`);
       throw new Error('duplicate');
     }
     // \n 会被自动转义成 \\n，这里转回来
     text = text.replace(/\\n/gm, '\n');
     _.set(obj, fullKey, text);
-    fs.writeFileSync(targetFilename, prettierFile(`export default ${JSON.stringify(obj, null, 2)}`));
+    fs.writeFileSync(langPrefix, prettierFile(`export default ${JSON.stringify(obj, null, 2)}`));
   }
 }
 /**
@@ -67,8 +65,9 @@ export function generateNewLangFile(key: string, value: string) {
 
 export function addImportToMainLangFile(newFilename: string) {
   let mainContent = '';
-  if (fs.existsSync(`${LANG_PREFIX}index.ts`)) {
-    mainContent = fs.readFileSync(`${LANG_PREFIX}index.ts`, 'utf8');
+  const langPrefix = getLangPrefix();
+  if (fs.existsSync(`${langPrefix}index.ts`)) {
+    mainContent = fs.readFileSync(`${langPrefix}index.ts`, 'utf8');
     mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
     if (/\,\n(}\);)/.test(mainContent)) {
       /** 最后一行包含,号 */
@@ -81,5 +80,5 @@ export function addImportToMainLangFile(newFilename: string) {
     mainContent = `import ${newFilename} from './${newFilename}';\n\nexport default Object.assign({}, {\n  ${newFilename},\n});`;
   }
 
-  fs.outputFileSync(`${LANG_PREFIX}index.ts`, mainContent);
+  fs.outputFileSync(`${langPrefix}index.ts`, mainContent);
 }
