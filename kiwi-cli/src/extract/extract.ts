@@ -23,7 +23,7 @@ function findAllChineseText(dir: string) {
   const dirPath = path.resolve(process.cwd(), dir);
   const files = getSpecifiedFiles(dirPath, CONFIG.ignoreDir, CONFIG.ignoreFile);
   const filterFiles = files.filter(file => {
-    return file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.vue');
+    return file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.jsx') || file.endsWith('.vue');
   });
   const allTexts = filterFiles.reduce((pre, file) => {
     const code = readFile(file);
@@ -32,7 +32,7 @@ function findAllChineseText(dir: string) {
     const sortTexts = _.sortBy(texts, obj => -obj.range.start);
 
     if (texts.length > 0) {
-      console.log(`${file} 发现中文文案`);
+      console.log(`${file} 发现中文文案\n`);
     }
 
     return texts.length > 0 ? pre.concat({ file, texts: sortTexts }) : pre;
@@ -46,8 +46,8 @@ function findAllChineseText(dir: string) {
  * @param {dirPath} 文件夹路径
  */
 function extractAll(dirPath?: string) {
-  if (!CONFIG.googleApiKey) {
-    console.log('请配置googleApiKey');
+  if (!CONFIG.googleApiKey || !(CONFIG.baiduTranslate.appId && CONFIG.baiduTranslate.appKey)) {
+    console.log('请配置翻译服务（googleApiKey 或 baiduTranslate）');
     return;
   }
 
@@ -166,7 +166,7 @@ function extractAll(dirPath?: string) {
       })
       .catch(err => {
         if (err) {
-          console.log('google翻译出问题了...');
+          console.log(err);
         }
       });
   });
