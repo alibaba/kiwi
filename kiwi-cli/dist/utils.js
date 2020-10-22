@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lookForFiles = exports.flatten = exports.findMatchValue = exports.findMatchKey = exports.translateText = exports.getProjectConfig = exports.getAllMessages = exports.withTimeout = exports.retry = exports.traverse = exports.getLangDir = exports.getKiwiDir = void 0;
+exports.lookForFiles = exports.flatten = exports.findMatchValue = exports.findMatchKey = exports.translateText = exports.getProjectConfig = exports.getAllMessages = exports.withTimeout = exports.retry = exports.traverse = exports.getLangDir = exports.getKiwiDir = exports.wrapError = void 0;
 /**
  * @author linhuiw
  * @desc 工具方法
@@ -9,9 +9,18 @@ const path = require("path");
 const _ = require("lodash");
 const fs = require("fs");
 const axios_1 = require("axios");
+const pLimit = require("p-limit");
 const const_1 = require("./const");
 const baiduTranslateMd5Util_1 = require("./baiduTranslateMd5Util");
 const CONFIG = getProjectConfig();
+const limit = pLimit(CONFIG.translateOptions.concurrentLimit);
+/**
+ * 统一错误包装
+ */
+function wrapError(error, detail) {
+    return `${error}：${JSON.stringify(detail, undefined, 2)}`;
+}
+exports.wrapError = wrapError;
 function lookForFiles(dir, fileName) {
     const files = fs.readdirSync(dir);
     for (let file of files) {
@@ -127,10 +136,11 @@ exports.retry = retry;
  * @param ms
  */
 function withTimeout(promise, ms) {
+    const timeout = ms !== null && ms !== void 0 ? ms : const_1.KIWI_DEFAULT_TRANSLATE_TIMEOUT;
     const timeoutPromise = new Promise((resolve, reject) => {
         setTimeout(() => {
-            reject(`Promise timed out after ${ms} ms.`);
-        }, ms !== null && ms !== void 0 ? ms : const_1.KIWI_DEFAULT_TRANSLATE_TIMEOUT);
+            reject(`Promise timed out after ${timeout} ms.`);
+        }, timeout);
     });
     return Promise.race([promise, timeoutPromise]);
 }
@@ -144,8 +154,7 @@ function googleTranslate(text, toLang) {
     return withTimeout(new Promise((resolve, reject) => {
         googleTranslate(text, 'zh', const_1.PROJECT_CONFIG.langMap[toLang], (err, translation) => {
             if (err) {
-                // reject(err);
-                reject(`Google翻译出错啦：${err}`);
+                reject(wrapError("Google 翻译出错啦", err.body));
             }
             else {
                 resolve(translation.translatedText);
@@ -169,23 +178,31 @@ function baiduTranslate(text, toLang) {
     const to = const_1.PROJECT_CONFIG.langMap[toLang];
     const str1 = appid + query + salt + key;
     const sign = baiduTranslateMd5Util_1.default(str1);
-    return withTimeout(axios_1.default('https://fanyi-api.baidu.com/api/trans/vip/translate', {
-        method: 'GET',
-        withCredentials: true,
-        params: {
-            q: query,
-            appid: appid,
-            salt,
-            from,
-            to,
-            sign
-        }
-    }).then(response => response.data).then(resJson => {
-        if (resJson.error_code) {
-            throw Error(`百度翻译出错啦：{ error_code: ${resJson.error_code}, error_msg: ${resJson.error_msg} }`);
-        }
-        // 暂时只处理单 query 的情况，多 query 的结果除了第一个其余都会忽略
-        return resJson.trans_result[0].dst;
+    return limit(() => new Promise((resolve, reject) => {
+        setTimeout(() => {
+            axios_1.default('https://fanyi-api.baidu.com/api/trans/vip/translate', {
+                method: 'GET',
+                withCredentials: true,
+                params: {
+                    q: query,
+                    appid: appid,
+                    salt,
+                    from,
+                    to,
+                    sign
+                }
+            }).then(response => response.data).then(resJson => {
+                if (resJson.error_code) {
+                    reject(wrapError("百度翻译出错啦", resJson));
+                }
+                else {
+                    const [res] = resJson.trans_result;
+                    console.log(res);
+                    // 暂时只处理单 query 的情况，多 query 的结果除了第一个其余都会忽略
+                    resolve(res.dst);
+                }
+            });
+        }, 1000);
     }));
 }
 /**

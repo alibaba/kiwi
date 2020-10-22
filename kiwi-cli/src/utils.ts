@@ -6,10 +6,20 @@ import * as path from 'path';
 import * as _ from 'lodash';
 import * as fs from 'fs';
 import Axios from 'axios';
+import * as pLimit from 'p-limit';
 import { PROJECT_CONFIG, KIWI_CONFIG_FILE, KIWI_DEFAULT_TRANSLATE_TIMEOUT } from './const';
 import MD5 from './baiduTranslateMd5Util';
 
 const CONFIG = getProjectConfig();
+
+const limit = pLimit(CONFIG.translateOptions.concurrentLimit);
+
+/**
+ * 统一错误包装
+ */
+export function wrapError(error: string, detail: any) {
+  return `${error}：${JSON.stringify(detail, undefined, 2)}`
+}
 
 function lookForFiles(dir: string, fileName: string): string {
   const files = fs.readdirSync(dir);
@@ -131,11 +141,14 @@ function retry(asyncOperation, times = 1) {
  * @param ms
  */
 function withTimeout(promise: Promise<any>, ms?: number) {
+  const timeout = ms ?? KIWI_DEFAULT_TRANSLATE_TIMEOUT;
+
   const timeoutPromise = new Promise((resolve, reject) => {
     setTimeout(() => {
-      reject(`Promise timed out after ${ms} ms.`);
-    }, ms ?? KIWI_DEFAULT_TRANSLATE_TIMEOUT);
+      reject(`Promise timed out after ${timeout} ms.`);
+    }, timeout);
   });
+
   return Promise.race([promise, timeoutPromise]);
 }
 
@@ -149,8 +162,7 @@ function googleTranslate(text: string, toLang: string) {
     new Promise((resolve, reject) => {
       googleTranslate(text, 'zh', PROJECT_CONFIG.langMap[toLang], (err, translation) => {
         if (err) {
-          // reject(err);
-          reject(`Google翻译出错啦：${err}`);
+          reject(wrapError("Google 翻译出错啦", err.body));
         } else {
           resolve(translation.translatedText);
         }
@@ -175,24 +187,31 @@ function baiduTranslate(text: string, toLang: string) {
   const str1 = appid + query + salt + key;
   const sign = MD5(str1);
 
-  return withTimeout(Axios('https://fanyi-api.baidu.com/api/trans/vip/translate', {
-    method: 'GET',
-    withCredentials: true,
-    params: {
-      q: query,
-      appid: appid,
-      salt,
-      from,
-      to,
-      sign
-    }
-  }).then(response => response.data).then(resJson => {
-    if (resJson.error_code) {
-      throw Error(`百度翻译出错啦：{ error_code: ${resJson.error_code}, error_msg: ${resJson.error_msg} }`)
-    }
-    // 暂时只处理单 query 的情况，多 query 的结果除了第一个其余都会忽略
-    return resJson.trans_result[0].dst;
-  }))
+  return limit(() => new Promise((resolve, reject) => {
+    setTimeout(() => {
+      Axios('https://fanyi-api.baidu.com/api/trans/vip/translate', {
+        method: 'GET',
+        withCredentials: true,
+        params: {
+          q: query,
+          appid: appid,
+          salt,
+          from,
+          to,
+          sign
+        }
+      }).then(response => response.data).then(resJson => {
+        if (resJson.error_code) {
+          reject(wrapError("百度翻译出错啦", resJson));
+        } else {
+          const [res] = resJson.trans_result;
+          console.log(res);
+          // 暂时只处理单 query 的情况，多 query 的结果除了第一个其余都会忽略
+          resolve(res.dst);
+        }
+      })
+    }, 1000);
+  }));
 }
 
 /**

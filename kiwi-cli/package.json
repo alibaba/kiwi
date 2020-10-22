@@ -40,6 +40,7 @@
     "inquirer": "^5.2.0",
     "lodash": "^4.17.11",
     "ora": "^3.0.0",
+    "p-limit": "^3.0.2",
     "prettier": "^1.16.4",
     "randomstring": "^1.1.5",
     "slash2": "^2.0.0",

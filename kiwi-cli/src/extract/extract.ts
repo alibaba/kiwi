@@ -32,7 +32,7 @@ function findAllChineseText(dir: string) {
     const sortTexts = _.sortBy(texts, obj => -obj.range.start);
 
     if (texts.length > 0) {
-      console.log(`${file} 发现中文文案\n`);
+      console.log(`${file} 发现中文文案`);
     }
 
     return texts.length > 0 ? pre.concat({ file, texts: sortTexts }) : pre;
@@ -46,7 +46,8 @@ function findAllChineseText(dir: string) {
  * @param {dirPath} 文件夹路径
  */
 function extractAll(dirPath?: string) {
-  if (!CONFIG.googleApiKey || !(CONFIG.baiduTranslate.appId && CONFIG.baiduTranslate.appKey)) {
+
+  if (!CONFIG.googleApiKey && !(CONFIG.baiduTranslate?.appId && CONFIG.baiduTranslate?.appKey)) {
     console.log('请配置翻译服务（googleApiKey 或 baiduTranslate）');
     return;
   }
