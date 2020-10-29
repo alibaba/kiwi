@@ -29,6 +29,12 @@ Kiwi 的 CLI 工具
   // googleApiKey
   "googleApiKey": "",
 
+  // 百度翻译 api 配置
+  "baiduTranslate": {
+      "appId": "",
+      "appKey": "",
+  },
+
   // import 语句，不同项目请自己配置
   "importI18N": "",
 

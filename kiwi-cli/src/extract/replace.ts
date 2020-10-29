@@ -155,8 +155,9 @@ function createImportI18N(filePath) {
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
   const isTsFile = _.endsWith(filePath, '.ts');
   const isTsxFile = _.endsWith(filePath, '.tsx');
+  const isJsxFile = _.endsWith(filePath, '.jsx');
   const isVueFile = _.endsWith(filePath, '.vue');
-  if (isTsFile || isTsxFile) {
+  if (isTsFile || isTsxFile || isJsxFile) {
     const importStatement = `${CONFIG.importI18N}\n`;
     const pos = ast.getStart(ast, false);
     const updateCode = code.slice(0, pos) + importStatement + code.slice(pos);

@@ -3,6 +3,9 @@
  * @desc 项目配置文件配置信息
  */
 
+// 翻译超时时间
+export const KIWI_DEFAULT_TRANSLATE_TIMEOUT = 5000;
+
 export const KIWI_CONFIG_FILE = 'kiwi-config.json';
 
 export const PROJECT_CONFIG = {
@@ -18,6 +21,10 @@ export const PROJECT_CONFIG = {
       concurrentLimit: 10,
       requestOptions: {}
     },
+    baiduTranslate: {
+      appId: '',
+      appKey: '',
+    },
     importI18N: `import I18N from 'src/utils/I18N';`,
     ignoreDir: '',
     ignoreFile: ''
@@ -28,9 +35,9 @@ export const PROJECT_CONFIG = {
   },
   zhIndexFile: `import common from './common';
 
-export default Object.assign({}, {
-  common
-});`,
+  export default Object.assign({}, {
+    common
+  });`,
   zhTestFile: `export default {
     test: '测试'
   }`

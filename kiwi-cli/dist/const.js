@@ -4,7 +4,9 @@
  * @desc 项目配置文件配置信息
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PROJECT_CONFIG = exports.KIWI_CONFIG_FILE = void 0;
+exports.PROJECT_CONFIG = exports.KIWI_CONFIG_FILE = exports.KIWI_DEFAULT_TRANSLATE_TIMEOUT = void 0;
+// 翻译超时时间
+exports.KIWI_DEFAULT_TRANSLATE_TIMEOUT = 5000;
 exports.KIWI_CONFIG_FILE = 'kiwi-config.json';
 exports.PROJECT_CONFIG = {
     dir: './.kiwi',
@@ -19,6 +21,10 @@ exports.PROJECT_CONFIG = {
             concurrentLimit: 10,
             requestOptions: {}
         },
+        baiduTranslate: {
+            appId: '',
+            appKey: '',
+        },
         importI18N: `import I18N from 'src/utils/I18N';`,
         ignoreDir: '',
         ignoreFile: ''
@@ -29,9 +35,9 @@ exports.PROJECT_CONFIG = {
     },
     zhIndexFile: `import common from './common';
 
-export default Object.assign({}, {
-  common
-});`,
+  export default Object.assign({}, {
+    common
+  });`,
     zhTestFile: `export default {
     test: '测试'
   }`
