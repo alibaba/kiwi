@@ -8,7 +8,7 @@ import * as compiler from '@angular/compiler';
 import { DOUBLE_BYTE_REGEX } from './const';
 import { trimWhiteSpace } from './parserUtils';
 import { removeFileComment } from './astUtils';
-import { transerI18n,findVueText } from './babelUtil';
+import { transerI18n, findVueText } from './babelUtil';
 import * as compilerVue from 'vue-template-compiler';
 /**
  * 查找 Ts 文件中的中文
@@ -70,7 +70,7 @@ function findTextInTs(code: string, fileName: string) {
       case ts.SyntaxKind.TemplateExpression: {
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
-        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
@@ -89,7 +89,7 @@ function findTextInTs(code: string, fileName: string) {
       case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
-        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
@@ -139,7 +139,7 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
       case ts.SyntaxKind.TemplateExpression: {
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
-        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '')
+        templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
           const start = node.getStart();
           const end = node.getEnd();
@@ -247,32 +247,35 @@ function findTextInHtml(code) {
  * @question $符敏感
  */
 function findTextInVue(code, fileName) {
-  let rexspace1 = new RegExp(/&ensp;/, 'g')
-  let rexspace2 = new RegExp(/&emsp;/, 'g')
-  let rexspace3 = new RegExp(/&nbsp;/, 'g')
-  code = code.replace(rexspace1,'ccsp&;').replace(rexspace2,'ecsp&;').replace(rexspace3,'ncsp&;')
-  let coverRex1 = new RegExp(/ccsp&;/, 'g')
-  let coverRex2 = new RegExp(/ecsp&;/, 'g')
-  let coverRex3 = new RegExp(/ncsp&;/, 'g')
+  let rexspace1 = new RegExp(/&ensp;/, 'g');
+  let rexspace2 = new RegExp(/&emsp;/, 'g');
+  let rexspace3 = new RegExp(/&nbsp;/, 'g');
+  code = code
+    .replace(rexspace1, 'ccsp&;')
+    .replace(rexspace2, 'ecsp&;')
+    .replace(rexspace3, 'ncsp&;');
+  let coverRex1 = new RegExp(/ccsp&;/, 'g');
+  let coverRex2 = new RegExp(/ecsp&;/, 'g');
+  let coverRex3 = new RegExp(/ncsp&;/, 'g');
   const activeTextEditor = vscode.window.activeTextEditor;
   const matches = [];
   var result;
   const { document } = activeTextEditor;
-  const vueObejct = compilerVue.compile(code.toString(),{outputSourceRange: true});
-  let vueAst = vueObejct.ast
-  let expressTemp = findVueText(vueAst)
-  expressTemp.forEach(item=>{
+  const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true });
+  let vueAst = vueObejct.ast;
+  let expressTemp = findVueText(vueAst);
+  expressTemp.forEach(item => {
     const nodeValue = code.slice(item.start, item.end);
-    let startPos = document.positionAt(item.start+nodeValue.indexOf(item.text)+1);
-    let endPos = document.positionAt(item.start+nodeValue.indexOf(item.text)+(item.text.length-1));
+    let startPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + 1);
+    let endPos = document.positionAt(item.start + nodeValue.indexOf(item.text) + (item.text.length - 1));
     const range = new vscode.Range(startPos, endPos);
-        matches.push({
-          arrf: [item.start, item.end],
-          range,
-          text: item.text.trimRight(),
-          isString: true
-        });     
-  })
+    matches.push({
+      arrf: [item.start, item.end],
+      range,
+      text: item.text.trimRight(),
+      isString: true
+    });
+  });
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp = transerI18n(outcode, 'as.vue', null);
   /**删除所有的html中的头部空格 */
@@ -281,7 +284,15 @@ function findTextInVue(code, fileName) {
   });
   vueTemp = [...new Set(vueTemp)];
   vueTemp.forEach(item => {
-    let items = item.replace(/\{/g,'\\{').replace(/\}/g,'\\}').replace(/\$/g,'\\$').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/\+/g,'\\+').replace(/\*/g,'\\*').replace(/\^/g,'\\^')
+    let items = item
+      .replace(/\{/g, '\\{')
+      .replace(/\}/g, '\\}')
+      .replace(/\$/g, '\\$')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)')
+      .replace(/\+/g, '\\+')
+      .replace(/\*/g, '\\*')
+      .replace(/\^/g, '\\^');
     let rex = new RegExp(items, 'g');
     while ((result = rex.exec(code))) {
       let res = result;
@@ -291,7 +302,11 @@ function findTextInVue(code, fileName) {
       matches.push({
         arrf: [res.index, last],
         range,
-        text: res[0].trimRight().replace(coverRex1,'&ensp;').replace(coverRex2,'&emsp;').replace(coverRex3,'&nbsp;'),
+        text: res[0]
+          .trimRight()
+          .replace(coverRex1, '&ensp;')
+          .replace(coverRex2, '&emsp;')
+          .replace(coverRex3, '&nbsp;'),
         isString:
           (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
           (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")

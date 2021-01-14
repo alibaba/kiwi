@@ -9,7 +9,7 @@ import { findPositionInCode } from './utils';
 
 export async function findInHtmls(
   text: string,
-  fsPath = path.join(vscode.workspace.rootPath, 'src')
+  fsPath = path.join(vscode.workspace.workspaceFolders[0].uri.path, 'src')
 ): Promise<Array<vscode.Location>> {
   const info = await fs.lstat(fsPath);
 

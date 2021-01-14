@@ -67,6 +67,10 @@ export function findMatchKey(langObj, text) {
  */
 export const getAllFiles = dir =>
   fs.readdirSync(dir).reduce((files, file) => {
+    // 避免读取node_modules造成性能问题
+    if (file === 'node_modules') {
+      return [...files];
+    }
     const name = path.join(dir, file);
     const isDirectory = fs.statSync(name).isDirectory();
     return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];
@@ -106,13 +110,13 @@ export const getConfiguration = text => {
 };
 
 /**
- * 查找配置文件
+ * 查找kiwi-cli配置文件
  */
 export const getConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.rootPath}/.kiwirc.js`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwirc.js`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
-    kiwiConfigJson = `${vscode.workspace.rootPath}/.kiwirc.ts`;
+    kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwirc.ts`;
     //再找ts
     if (!fs.existsSync(kiwiConfigJson)) {
       return null;
@@ -122,10 +126,22 @@ export const getConfigFile = () => {
 };
 
 /**
+ * 查找kiwi-linter配置文件
+ */
+export const getKiwiLinterConfigFile = () => {
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  // 先找js
+  if (!fs.existsSync(kiwiConfigJson)) {
+    return null;
+  }
+  return kiwiConfigJson;
+};
+
+/**
  * 获得项目配置信息中的 googleApiKey
  */
 function getGoogleApiKey() {
-  const configFile = './.kiwi/config.json';
+  const configFile = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
   let googleApiKey = '';
 
   try {
@@ -192,4 +208,49 @@ export function translateText(text) {
   }
 
   return retry(_translateText, 3);
+}
+
+/**
+ * 获取多项目配置
+ */
+export function getTargetLangPath(currentFilePath) {
+  const configFile = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  let targetLangPath = '';
+
+  try {
+    if (fs.existsSync(configFile)) {
+      const { projects = [] } = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+      console.log(projects);
+      for (const config of projects) {
+        if (currentFilePath.indexOf(`/${config.target}/`) > -1) {
+          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.path}/${config.kiwiDir}/zh_CN/`;
+          return targetLangPath;
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
+  return targetLangPath;
+}
+
+/**
+ * 获取当前文件对应的项目路径
+ */
+export function getCurrentProjectLangPath() {
+  let currentProjectLangPath = '';
+  const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
+  if (targetLangPath) {
+    currentProjectLangPath = `${targetLangPath}**/*.ts`;
+  }
+  return currentProjectLangPath;
+}
+
+/**
+ * 获取当前文件对应的语言路径
+ */
+export function getLangPrefix() {
+  const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
+  return langPrefix;
 }

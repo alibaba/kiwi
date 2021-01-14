@@ -60,9 +60,11 @@ function matchPattern() {
   if (
     activeEditor &&
     pattern !== '' &&
-    !minimatch(activeEditor.document.uri.fsPath.replace(vscode.workspace.rootPath + '/', ''), pattern)
+    !minimatch(
+      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders[0].uri.path + '/', ''),
+      pattern
+    )
   ) {
-    console.log(activeEditor.document.uri.fsPath.replace(vscode.workspace.rootPath + '/', '') + ' 不匹配 ' + pattern);
     return false;
   } else {
     return true;
