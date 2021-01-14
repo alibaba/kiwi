@@ -164,7 +164,7 @@ function createImportI18N(filePath) {
     return updateCode;
   } else if (isVueFile) {
     const importStatement = `${CONFIG.importI18N}\n`;
-    const updateCode = code.replace(/<script>/g, `<script>\n${importStatement}`)
+    const updateCode = code.replace(/<script>/g, `<script>\n${importStatement}`);
     return updateCode;
   }
 }

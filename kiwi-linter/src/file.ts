@@ -7,17 +7,16 @@ import * as fs from 'fs-extra';
 import * as _ from 'lodash';
 import * as prettier from 'prettier';
 import { getLangData } from './getLangData';
+import { getLangPrefix } from './utils';
 import { LANG_PREFIX } from './const';
-import { getConfiguration } from './utils';
 
 export function updateLangFiles(keyValue: string, text: string, validateDuplicate: boolean) {
   if (!keyValue.startsWith('I18N.')) {
     return;
   }
-
   const [, filename, ...restPath] = keyValue.split('.');
   const fullKey = restPath.join('.');
-  const targetFilename = `${LANG_PREFIX}${filename}.ts`;
+  const targetFilename = `${getLangPrefix() || LANG_PREFIX}${filename}.ts`;
 
   if (!fs.existsSync(targetFilename)) {
     fs.outputFileSync(targetFilename, generateNewLangFile(fullKey, text));
@@ -67,19 +66,35 @@ export function generateNewLangFile(key: string, value: string) {
 
 export function addImportToMainLangFile(newFilename: string) {
   let mainContent = '';
-  if (fs.existsSync(`${LANG_PREFIX}index.ts`)) {
-    mainContent = fs.readFileSync(`${LANG_PREFIX}index.ts`, 'utf8');
+  const langPrefix = getLangPrefix() || LANG_PREFIX;
+  if (fs.existsSync(`${langPrefix}index.ts`)) {
+    mainContent = fs.readFileSync(`${langPrefix}index.ts`, 'utf8');
     mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
-    if (/\,\n(}\);)/.test(mainContent)) {
-      /** 最后一行包含,号 */
-      mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
-    } else {
-      /** 最后一行不包含,号 */
-      mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
+
+    if (/\n(}\);)/.test(mainContent)) {
+      if (/\,\n(}\);)/.test(mainContent)) {
+          /** 最后一行包含,号 */
+          mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
+      }
+      else {
+          /** 最后一行不包含,号 */
+          mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
+      }
+    }
+
+    if (/\n(};)/.test(mainContent)) {
+      if (/\,\n(};)/.test(mainContent)) {
+        /** 最后一行包含,号 */
+        mainContent = mainContent.replace(/(};)/, `  ${newFilename},\n$1`);
+      }
+      else {
+        /** 最后一行不包含,号 */
+        mainContent = mainContent.replace(/\n(};)/, `,\n  ${newFilename},\n$1`);
+      }
     }
   } else {
     mainContent = `import ${newFilename} from './${newFilename}';\n\nexport default Object.assign({}, {\n  ${newFilename},\n});`;
   }
 
-  fs.outputFileSync(`${LANG_PREFIX}index.ts`, mainContent);
+  fs.outputFileSync(`${langPrefix}index.ts`, mainContent);
 }

@@ -8,20 +8,20 @@ import * as randomstring from 'randomstring';
 import * as fs from 'fs-extra';
 import * as slash from 'slash2';
 import { getSuggestLangObj } from './getLangData';
-import { I18N_GLOB, DIR_ADAPTOR } from './const';
+import { DIR_ADAPTOR } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
-import { getConfiguration, getConfigFile, translateText } from './utils';
+import { getConfiguration, getConfigFile, translateText, getKiwiLinterConfigFile } from './utils';
 
 /**
  * 主入口文件
  * @param context
  */
 export function activate(context: vscode.ExtensionContext) {
-  if (!fs.existsSync(DIR_ADAPTOR) && !getConfigFile()) {
+  if (!getKiwiLinterConfigFile() && !getConfigFile() && !fs.existsSync(DIR_ADAPTOR)) {
     /** 存在配置文件则开启 */
     return;
   }
@@ -60,13 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
   }
   context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
 
-  // 监听 langs/ 文件夹下的变化，重新生成 finalLangObj
-  const watcher = vscode.workspace.createFileSystemWatcher(I18N_GLOB);
-  context.subscriptions.push(watcher.onDidChange(() => (finalLangObj = getSuggestLangObj())));
-  context.subscriptions.push(watcher.onDidCreate(() => (finalLangObj = getSuggestLangObj())));
-  context.subscriptions.push(watcher.onDidDelete(() => (finalLangObj = getSuggestLangObj())));
-  finalLangObj = getSuggestLangObj();
-
   // 识别到出错时点击小灯泡弹出的操作
   const hasLightBulb = getConfiguration('enableReplaceSuggestion');
   if (hasLightBulb) {
@@ -87,6 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
               const sameTextStrs = targetStrs.filter(t => t.text === targetStr.text);
               const text = targetStr.text;
               const actions = [];
+              finalLangObj = getSuggestLangObj();
               for (const key in finalLangObj) {
                 if (finalLangObj[key] === text) {
                   actions.push({
