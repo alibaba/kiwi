@@ -115,7 +115,7 @@ function hasImportI18N(filePath) {
       const importClause = node.importClause;
 
       // import I18N from 'src/utils/I18N';
-      if (importClause.kind === ts.SyntaxKind.ImportClause) {
+      if (_.get(importClause, 'kind') === ts.SyntaxKind.ImportClause) {
         if (importClause.name) {
           if (importClause.name.escapedText === 'I18N') {
             hasImportI18N = true;
@@ -164,7 +164,7 @@ function createImportI18N(filePath) {
     return updateCode;
   } else if (isVueFile) {
     const importStatement = `${CONFIG.importI18N}\n`;
-    const updateCode = code.replace(/<script>/g, `<script>\n${importStatement}`)
+    const updateCode = code.replace(/<script>/g, `<script>\n${importStatement}`);
     return updateCode;
   }
 }

@@ -5,10 +5,10 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { getLangData, getSuggestLangObj, getI18N } from './getLangData';
+import { getI18N } from './getLangData';
 import { Item } from './define';
 import { LANG_PREFIX } from './const';
-import { findPositionInCode } from './utils';
+import { findPositionInCode, getTargetLangPath } from './utils';
 import { findInHtmls } from './findInHtmls';
 import { findI18NPositions } from './findI18NPositions';
 import { transformPosition } from './lineAnnotation';
@@ -40,6 +40,7 @@ function extractObject(obj, keys = [] as string[]): Array<Item> {
 export function findAllI18N() {
   const I18NText = getI18N();
   const allItems = extractObject(I18NText);
+  const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path) || LANG_PREFIX;
 
   const getDesc = (item: Item) => item.value + ' I18N.' + item.keys.join('.');
 
@@ -51,8 +52,8 @@ export function findAllI18N() {
     }
 
     const [target, ...restKeys] = foundItem.keys;
-    const uri = vscode.Uri.file(path.join(LANG_PREFIX, target + '.ts'));
-    const content = (await fs.readFile(path.join(LANG_PREFIX, target + '.ts'))).toString('utf8');
+    const uri = vscode.Uri.file(path.join(langPrefix, target + '.ts'));
+    const content = (await fs.readFile(path.join(langPrefix, target + '.ts'))).toString('utf8');
 
     const preCodeContent = '"' + restKeys[restKeys.length - 1] + '"';
     const newCodeContent = ' ' + restKeys[restKeys.length - 1] + ':';
@@ -85,7 +86,9 @@ export function findAllI18N() {
         vscode.window.activeTextEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
       } else if (locations.length > 1) {
         vscode.window
-          .showQuickPick(locations.map(real => path.relative(vscode.workspace.rootPath, real.uri.fsPath)))
+          .showQuickPick(
+            locations.map(real => path.relative(vscode.workspace.workspaceFolders[0].uri.path, real.uri.fsPath))
+          )
           .then(async item => {
             const index = locations.findIndex(real => real.uri.fsPath.includes(item));
 

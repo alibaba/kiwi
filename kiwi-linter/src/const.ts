@@ -10,12 +10,12 @@ import { getAllFiles, getConfiguration } from './utils';
  * 适配不同的语言文件夹位置
  */
 function dirAdaptor() {
-  const kiwiLangPerfix = `${vscode.workspace.rootPath}/.kiwi/zh-CN/`;
-  const langPrefix = `${vscode.workspace.rootPath}/langs/zh-CN/`;
+  const kiwiLangPerfix = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi/zh-CN/`;
+  const langPrefix = `${vscode.workspace.workspaceFolders[0].uri.path}/langs/zh-CN/`;
 
   /** 兼容 zh_CN 情况 */
-  const _kiwiLangPerfix = `${vscode.workspace.rootPath}/.kiwi/zh_CN/`;
-  const _langPrefix = `${vscode.workspace.rootPath}/langs/zh_CN/`;
+  const _kiwiLangPerfix = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi/zh_CN/`;
+  const _langPrefix = `${vscode.workspace.workspaceFolders[0].uri.path}/langs/zh_CN/`;
 
   if (fs.existsSync(kiwiLangPerfix)) {
     return kiwiLangPerfix;
@@ -26,7 +26,7 @@ function dirAdaptor() {
   } else if (fs.existsSync(_langPrefix)) {
     return _langPrefix;
   } else {
-    const files = getAllFiles(`${vscode.workspace.rootPath}/`);
+    const files = getAllFiles(`${vscode.workspace.workspaceFolders[0].uri.path}/`);
     const matchFiles = files.filter(fileName => {
       if (
         fileName.includes('/.kiwi/zh-CN/index.ts') ||
@@ -50,7 +50,7 @@ function getDefaultDir() {
   if (!dir) {
     const preFix = getConfiguration('langPrefix');
     if (preFix) {
-      return `${vscode.workspace.rootPath}/${preFix}`;
+      return `${vscode.workspace.workspaceFolders[0].uri.path}/${preFix}`;
     }
   }
   return dir;

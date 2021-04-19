@@ -50,7 +50,7 @@ kiwi --extract [dirPath]
 
 ### kiwi `--import`
 
-导入翻译文案，将翻译人员翻译得文案，导入到项目中
+导入翻译文案，将翻译人员翻译的文案，导入到项目中
 
 ```shell script
 # 导入送翻后的文案
