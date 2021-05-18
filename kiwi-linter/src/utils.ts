@@ -113,10 +113,10 @@ export const getConfiguration = text => {
  * 查找kiwi-cli配置文件
  */
 export const getConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwirc.js`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwirc.js`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
-    kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwirc.ts`;
+    kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwirc.ts`;
     //再找ts
     if (!fs.existsSync(kiwiConfigJson)) {
       return null;
@@ -129,7 +129,7 @@ export const getConfigFile = () => {
  * 查找kiwi-linter配置文件
  */
 export const getKiwiLinterConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
     return null;
@@ -141,7 +141,7 @@ export const getKiwiLinterConfigFile = () => {
  * 获得项目配置信息中的 googleApiKey
  */
 function getGoogleApiKey() {
-  const configFile = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
   let googleApiKey = '';
 
   try {
@@ -214,7 +214,7 @@ export function translateText(text) {
  * 获取多项目配置
  */
 export function getTargetLangPath(currentFilePath) {
-  const configFile = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwi`;
   let targetLangPath = '';
 
   try {
@@ -223,7 +223,7 @@ export function getTargetLangPath(currentFilePath) {
       console.log(projects);
       for (const config of projects) {
         if (currentFilePath.indexOf(`/${config.target}/`) > -1) {
-          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.path}/${config.kiwiDir}/zh_CN/`;
+          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/zh_CN/`;
           return targetLangPath;
         }
       }

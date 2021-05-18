@@ -73,12 +73,11 @@ export function addImportToMainLangFile(newFilename: string) {
 
     if (/\n(}\);)/.test(mainContent)) {
       if (/\,\n(}\);)/.test(mainContent)) {
-          /** 最后一行包含,号 */
-          mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
-      }
-      else {
-          /** 最后一行不包含,号 */
-          mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
+        /** 最后一行包含,号 */
+        mainContent = mainContent.replace(/(}\);)/, `  ${newFilename},\n$1`);
+      } else {
+        /** 最后一行不包含,号 */
+        mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
       }
     }
 
@@ -86,8 +85,7 @@ export function addImportToMainLangFile(newFilename: string) {
       if (/\,\n(};)/.test(mainContent)) {
         /** 最后一行包含,号 */
         mainContent = mainContent.replace(/(};)/, `  ${newFilename},\n$1`);
-      }
-      else {
+      } else {
         /** 最后一行不包含,号 */
         mainContent = mainContent.replace(/\n(};)/, `,\n  ${newFilename},\n$1`);
       }

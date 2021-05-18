@@ -86,9 +86,7 @@ export function findAllI18N() {
         vscode.window.activeTextEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
       } else if (locations.length > 1) {
         vscode.window
-          .showQuickPick(
-            locations.map(real => path.relative(vscode.workspace.workspaceFolders[0].uri.path, real.uri.fsPath))
-          )
+          .showQuickPick(locations.map(real => path.relative(vscode.workspace.workspaceFolders[0].uri.fsPath, real.uri.fsPath)))
           .then(async item => {
             const index = locations.findIndex(real => real.uri.fsPath.includes(item));
 

@@ -60,10 +60,7 @@ function matchPattern() {
   if (
     activeEditor &&
     pattern !== '' &&
-    !minimatch(
-      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders[0].uri.path + '/', ''),
-      pattern
-    )
+    !minimatch(activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders[0].uri.fsPath + '/', ''), pattern)
   ) {
     return false;
   } else {
