@@ -29,6 +29,18 @@ Kiwi 的 CLI 工具
   // googleApiKey
   "googleApiKey": "",
 
+  // baiduApiKey
+  "baiduApiKey":
+    "appId": '',
+    "appKey": ''
+  },
+
+  // 百度翻译的语种代码映射 详情见官方文档 https://fanyi-api.baidu.com/doc/21
+  "baiduLangMap": {
+    "en-US": 'en',
+    "zh-TW": 'cht'
+  },
+
   // import 语句，不同项目请自己配置
   "importI18N": "",
 
@@ -73,3 +85,5 @@ kiwi --export [filePath] en-US
 ### kiwi `--mock`
 
 使用 Google 翻译，翻译未翻译的文案
+如果同时配置baiduApiKey与baiduApiKey 则命令行可手动选择翻译源
+
