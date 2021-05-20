@@ -4,6 +4,7 @@
  */
 import * as path from 'path';
 import * as _ from 'lodash';
+import * as inquirer from 'inquirer';
 import * as fs from 'fs';
 import { PROJECT_CONFIG, KIWI_CONFIG_FILE } from './const';
 
@@ -36,7 +37,10 @@ function getProjectConfig() {
   let obj = PROJECT_CONFIG.defaultConfig;
 
   if (configFile && fs.existsSync(configFile)) {
-    obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    obj = {
+      ...obj,
+      ...JSON.parse(fs.readFileSync(configFile, 'utf8'))
+    };
   }
   return obj;
 }
@@ -192,6 +196,44 @@ function flatten(obj, prefix = '') {
   return ret;
 }
 
+/**
+ * 获取翻译源类型
+ */
+async function getTranslateOriginType() {
+  const { googleApiKey, baiduApiKey } = getProjectConfig();
+  let translateType = ['Google', 'Baidu'];
+  if (!googleApiKey) {
+    translateType = translateType.filter(item => item !== 'Google');
+  }
+  if (!baiduApiKey || !baiduApiKey.appId || !baiduApiKey.appKey) {
+    translateType = translateType.filter(item => item !== 'Baidu');
+  }
+  if (translateType.length === 0) {
+    console.log('请配置 googleApiKey 或 baiduApiKey ');
+    return {
+      pass: false,
+      origin: ''
+    };
+  }
+  if (translateType.length == 1) {
+    return {
+      pass: true,
+      origin: translateType[0]
+    };
+  }
+  const { origin } = await inquirer.prompt({
+    type: 'list',
+    name: 'origin',
+    message: '请选择使用的翻译源',
+    default: 'Google',
+    choices: ['Google', 'Baidu']
+  });
+  return {
+    pass: true,
+    origin: origin
+  };
+}
+
 export {
   getKiwiDir,
   getLangDir,
@@ -204,5 +246,6 @@ export {
   findMatchKey,
   findMatchValue,
   flatten,
-  lookForFiles
+  lookForFiles,
+  getTranslateOriginType
 };
