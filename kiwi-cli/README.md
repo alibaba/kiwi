@@ -87,3 +87,11 @@ kiwi --export [filePath] en-US
 使用 Google 翻译，翻译未翻译的文案
 如果同时配置baiduApiKey与baiduApiKey 则命令行可手动选择翻译源
 
+### kiwi `--translate`
+
+全量翻译未翻译的中文文案，翻译结果自动导入 en-US zh-TW等目录
+
+```shell script
+kiwi --translate
+```
+

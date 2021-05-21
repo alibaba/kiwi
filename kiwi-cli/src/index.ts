@@ -9,6 +9,7 @@ import { importMessages } from './import';
 import { findUnUsed } from './unused';
 import { mockLangs } from './mock';
 import { extractAll } from './extract/extract';
+import { translate } from './translate';
 import { getTranslateOriginType } from './utils';
 import * as ora from 'ora';
 
@@ -31,7 +32,8 @@ commander
   .option('--import [file] [lang]', '导入翻译文案')
   .option('--export [file] [lang]', '导出未翻译的文案')
   .option('--sync', '同步各种语言的文案')
-  .option('--mock', '使用 Google 或者 Baidu 翻译')
+  .option('--mock', '使用 Google 或者 Baidu 翻译 输出mock文件')
+  .option('--translate', '使用 Google 或者 Baidu 翻译 翻译结果自动替换目标语种文案')
   .option('--unused', '导出未使用的文案')
   .option('--extract [dirPath]', '一键替换指定文件夹下的所有中文文案')
   .parse(process.argv);
@@ -100,6 +102,17 @@ if (commander.mock) {
     if (pass) {
       const spinner = ora(`使用 ${origin} 翻译中...`).start();
       await mockLangs(origin);
+      spinner.succeed(`使用 ${origin} 翻译成功`);
+    }
+  });
+}
+
+if (commander.translate) {
+  sync(async () => {
+    const { pass, origin } = await getTranslateOriginType();
+    if (pass) {
+      const spinner = ora(`使用 ${origin} 翻译中...`).start();
+      await translate(origin);
       spinner.succeed(`使用 ${origin} 翻译成功`);
     }
   });
