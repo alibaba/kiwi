@@ -14,6 +14,14 @@ export const PROJECT_CONFIG = {
     srcLang: 'zh-CN',
     distLangs: ['en-US', 'zh-TW'],
     googleApiKey: '',
+    baiduApiKey: {
+      appId: '',
+      appKey: ''
+    },
+    baiduLangMap: {
+      ['en-US']: 'en',
+      ['zh-TW']: 'cht'
+    },
     translateOptions: {
       concurrentLimit: 10,
       requestOptions: {}

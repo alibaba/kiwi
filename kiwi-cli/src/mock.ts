@@ -11,27 +11,11 @@ require('ts-node').register({
 import * as path from 'path';
 import * as fs from 'fs';
 import * as _ from 'lodash';
-import { traverse, getProjectConfig, getLangDir } from './utils';
+import { traverse, getProjectConfig, getLangDir, translateText } from './utils';
+import { baiduTranslateTexts, googleTranslateTexts } from './translate';
+
 const CONFIG = getProjectConfig();
-const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey);
 
-import { withTimeout, retry } from './utils';
-import { PROJECT_CONFIG } from './const';
-
-function translateText(text, toLang) {
-  return withTimeout(
-    new Promise((resolve, reject) => {
-      googleTranslate(text, 'zh', PROJECT_CONFIG.langMap[toLang], (err, translation) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(translation.translatedText);
-        }
-      });
-    }),
-    5000
-  );
-}
 /**
  * 获取中文文案
  */
@@ -56,33 +40,39 @@ function getDistText(dstLang) {
 
   return distTexts;
 }
+
+/**
+ * 获取所有未翻译的文案
+ * @param 目标语种
+ */
+function getAllUntranslatedTexts(toLang) {
+  const texts = getSourceText();
+  const distTexts = getDistText(toLang);
+  const untranslatedTexts = {};
+  /** 遍历文案 */
+  traverse(texts, (text, path) => {
+    const distText = _.get(distTexts, path);
+    if (text === distText || !distText) {
+      untranslatedTexts[path] = text;
+    }
+  });
+  return untranslatedTexts;
+}
+
 /**
  * Mock 对应语言
  * @param dstLang
  */
-async function mockCurrentLang(dstLang) {
-  const texts = getSourceText();
-  const distTexts = getDistText(dstLang);
-  const untranslatedTexts = {};
-  const mocks = {};
-  /** 遍历文案 */
-  traverse(texts, (text, path) => {
-    const distText = _.get(distTexts, path);
-    if (text === distText) {
-      untranslatedTexts[path] = text;
-    }
-  });
-  /** 调用 Google 翻译 */
-  const translateAllTexts = Object.keys(untranslatedTexts).map(key => {
-    return translateText(untranslatedTexts[key], dstLang).then(translatedText => [key, translatedText]);
-  });
-  /** 获取 Mocks 文案 */
-  await Promise.all(translateAllTexts).then(res => {
-    res.forEach(([key, translatedText]) => {
-      mocks[key] = translatedText;
-    });
-    return mocks;
-  });
+async function mockCurrentLang(dstLang: string, origin: string) {
+  const untranslatedTexts = getAllUntranslatedTexts(dstLang);
+  let mocks = {};
+  if (origin === 'Google') {
+    mocks = await googleTranslateTexts(untranslatedTexts, dstLang);
+  } else {
+    mocks = await baiduTranslateTexts(untranslatedTexts, dstLang);
+  }
+
+  /** 所有任务执行完毕后，写入mock文件 */
   return writeMockFile(dstLang, mocks);
 }
 /**
@@ -107,13 +97,19 @@ function writeMockFile(dstLang, mocks) {
  * Mock 语言的未翻译的文案
  * @param lang
  */
-async function mockLangs(lang?: string) {
-  const CONFIG = getProjectConfig();
-  const langs = lang ? [lang] : CONFIG.distLangs;
-  const mockPromise = langs.map(lang => {
-    return mockCurrentLang(lang);
-  });
-  return Promise.all(mockPromise);
+async function mockLangs(origin: string) {
+  const langs = CONFIG.distLangs;
+  if (origin === 'Google') {
+    const mockPromise = langs.map(lang => {
+      return mockCurrentLang(lang, origin);
+    });
+    return Promise.all(mockPromise);
+  } else {
+    for (var i = 0; i < langs.length; i++) {
+      await mockCurrentLang(langs[i], origin);
+    }
+    return Promise.resolve();
+  }
 }
 
-export { mockLangs };
+export { mockLangs, getAllUntranslatedTexts };
