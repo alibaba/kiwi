@@ -71,7 +71,7 @@ kiwi 是一种不会飞翔的鸟类🐤，但它善于奔跑，时速可达 10 �
 
 ## 钉钉用户群
 
-<img src="https://img.alicdn.com/tfs/TB1qODxbaNj0u4jSZFyXXXgMVXa-1125-1485.jpg" height="300">
+<img src="https://user-images.githubusercontent.com/11746742/130591022-b7b542fb-eb2c-4a0c-ae00-a2f36161e9fe.png" height="300">
 
 ## License
 MIT
