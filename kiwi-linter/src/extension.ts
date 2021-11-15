@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import * as randomstring from 'randomstring';
 import * as fs from 'fs-extra';
 import * as slash from 'slash2';
+import { UI } from './ui';
 import { getSuggestLangObj } from './getLangData';
 import { DIR_ADAPTOR } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
@@ -25,6 +26,8 @@ export function activate(context: vscode.ExtensionContext) {
     /** 存在配置文件则开启 */
     return;
   }
+  const ui = new UI();
+  ui.init();
   console.log('Congratulations, your extension "kiwi-linter" is now active!');
   context.subscriptions.push(vscode.commands.registerCommand('vscode-i18n-linter.findAllI18N', findAllI18N));
   let targetStrs: TargetStr[] = [];
