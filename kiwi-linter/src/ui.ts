@@ -11,7 +11,7 @@ export class UI {
 
   constructor() {
     // 创建状态栏按钮 全局搜索
-    this.searchAllBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    this.searchAllBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     // 为按钮绑定注册的command名称
     this.searchAllBar.command = 'vscode-i18n-linter.findAllI18N';
   }
