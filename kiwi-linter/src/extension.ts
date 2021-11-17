@@ -6,16 +6,21 @@ import * as vscode from 'vscode';
 import * as _ from 'lodash';
 import * as randomstring from 'randomstring';
 import * as fs from 'fs-extra';
-import * as slash from 'slash2';
 import { UI } from './ui';
 import { getSuggestLangObj } from './getLangData';
 import { DIR_ADAPTOR } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
-import { findMatchKey } from './utils';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
-import { getConfiguration, getConfigFile, translateText, getKiwiLinterConfigFile } from './utils';
+import {
+  findMatchKey,
+  getConfiguration,
+  getConfigFile,
+  translateText,
+  getKiwiLinterConfigFile,
+  getCurrActivePageI18nKey
+} from './utils';
 
 /**
  * 主入口文件
@@ -32,34 +37,14 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('vscode-i18n-linter.findAllI18N', findAllI18N));
   let targetStrs: TargetStr[] = [];
   let finalLangObj = {};
+  let suggestion = [];
 
   let activeEditor = vscode.window.activeTextEditor;
   if (activeEditor) {
     triggerUpdateDecorations(newTargetStrs => {
       targetStrs = newTargetStrs;
     });
-  }
-  const currentFilename = activeEditor.document.fileName;
-  const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
-
-  let suggestion = [];
-  if (currentFilename.includes('/pages/')) {
-    suggestion = currentFilename.match(suggestPageRegex);
-  }
-  if (suggestion) {
-    suggestion.shift();
-  }
-  /** 如果没有匹配到 Key */
-  if (!(suggestion && suggestion.length)) {
-    const names = slash(currentFilename).split('/') as string[];
-    const fileName = _.last(names);
-    const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
-    const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
-    if (dir === fileKey) {
-      suggestion = [dir];
-    } else {
-      suggestion = [dir, fileKey];
-    }
+    suggestion = getCurrActivePageI18nKey();
   }
   context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
 
@@ -303,6 +288,7 @@ export function activate(context: vscode.ExtensionContext) {
         triggerUpdateDecorations(newTargetStrs => {
           targetStrs = newTargetStrs;
         });
+        suggestion = getCurrActivePageI18nKey();
       }
     }, null)
   );
