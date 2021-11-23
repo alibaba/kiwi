@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as slash from 'slash2';
 
 /**
  * 将对象拍平
@@ -253,4 +254,34 @@ export function getCurrentProjectLangPath() {
 export function getLangPrefix() {
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
   return langPrefix;
+}
+
+/**
+ * 获取当前文件路径层级 [pageA, moudleA, componentA]
+ */
+export function getCurrActivePageI18nKey() {
+  const activeEditor = vscode.window.activeTextEditor;
+  let suggestion = [];
+  if (activeEditor) {
+    const currentFilename = activeEditor.document.fileName;
+    const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
+    if (currentFilename.includes('/pages/')) {
+      suggestion = currentFilename.match(suggestPageRegex);
+    }
+    if (suggestion && suggestion.length) {
+      // 匹配到则去除第一项currentFilename，保留元组项
+      suggestion.shift();
+    } else {
+      const names = slash(currentFilename).split('/') as string[];
+      const fileName = _.last(names);
+      const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
+      const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
+      if (dir === fileKey) {
+        suggestion = [dir];
+      } else {
+        suggestion = [dir, fileKey];
+      }
+    }
+  }
+  return suggestion;
 }
