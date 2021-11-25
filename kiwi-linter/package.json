@@ -81,6 +81,10 @@
       {
         "command": "vscode-i18n-linter.kiwigo",
         "title": "Kiwi Go!"
+      },
+      {
+        "command": "vscode-i18n-linter.switchTranslateApi",
+        "title": "Switch Translate Api"
       }
     ],
     "keybindings": [
@@ -119,14 +123,15 @@
     "@babel/core": "^7.5.5",
     "@babel/types": "^7.5.5",
     "@vue/component-compiler-utils": "^3.1.1",
+    "baidu-translate": "^1.1.0",
     "find-in-files": "^0.5.0",
     "fs-extra": "^7.0.1",
     "globby": "^7.1.1",
     "google-translate": "^2.2.0",
     "lodash": "^4.17.4",
     "minimatch": "^3.0.4",
+    "pinyin-pro": "^3.3.1",
     "prettier": "^1.16.4",
-    "randomstring": "^1.1.5",
     "slash2": "^2.0.0",
     "ts-node": "^6.0.3",
     "typescript": "^2.8.3",

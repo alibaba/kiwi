@@ -32,8 +32,7 @@ function lookForFiles(dir: string, fileName: string): string {
  * 获得项目配置信息
  */
 function getProjectConfig() {
-  const rootDir = path.resolve(process.cwd(), `./`);
-  const configFile = lookForFiles(rootDir, KIWI_CONFIG_FILE);
+  const configFile = path.resolve(process.cwd(), `./${KIWI_CONFIG_FILE}`);
   let obj = PROJECT_CONFIG.defaultConfig;
 
   if (configFile && fs.existsSync(configFile)) {
