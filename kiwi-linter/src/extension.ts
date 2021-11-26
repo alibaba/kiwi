@@ -211,7 +211,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
     })
   );
-  const virtualMemory = {};
+
   // 一键替换所有中文
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
@@ -232,6 +232,7 @@ export function activate(context: vscode.ExtensionContext) {
           if (!path) {
             return;
           };
+          const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
           // 翻译中文文案
           const translateTexts = targetStrs.reduce((prev, curr, i) => {
@@ -253,12 +254,13 @@ export function activate(context: vscode.ExtensionContext) {
                   virtualMemory[curr.text] = key;
                   return prev.concat({
                     target: curr,
-                    key: `I18N.${key}`
+                    key: `${key}`
                   });
                 }
                 const transText = translateTexts[i] && _.camelCase(translateTexts[i]);
-                let transKey = `${path + '.'}${transText}`;
-                let occurTime = 1;
+                const newPath = path.split('.').slice(1).join('.');
+                let transKey = `${newPath + '.'}${transText}`;
+                let occurTime = 1; 
                 // 防止出现前四位相同但是整体文案不同的情况
                 while (
                   finalLangObj[transKey] !== curr.text &&
@@ -287,7 +289,7 @@ export function activate(context: vscode.ExtensionContext) {
               .reverse()
               .reduce((prev: Promise<any>, obj) => {
                 return prev.then(() => {
-                  return replaceAndUpdate(obj.target, `${obj.key}`, false);
+                  return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
                 });
               }, Promise.resolve())
               .then(() => {
