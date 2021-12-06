@@ -44,6 +44,8 @@ export function activate(context: vscode.ExtensionContext) {
         ui.init(val.label);
         translateApi = val.label;
       });
+    } else {
+      vscode.window.showInformationMessage('无其他翻译源可供切换，请配置！');
     }
   });
 
@@ -215,7 +217,21 @@ export function activate(context: vscode.ExtensionContext) {
   // 一键替换所有中文
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
-      if (targetStrs.length === 0) {
+      // 将嵌套的模板字符串情况移除，只替换最外层的文案，内部中文保留
+      const newTargetStrs = targetStrs.filter((item, i) => {
+        if (i > 0) {
+          const preRange = targetStrs[i - 1].range;
+          const [preStartLine, preEndLine] = [preRange['_start']['_line'], preRange['_end']['_line']];
+          const [preStart, preEnd] = [preRange['_start']['_character'], preRange['_end']['_character']];
+          const curRange = item.range;
+          const [curStartLine, curEndLine] = [curRange['_start']['_line'], curRange['_end']['_line']];
+          const [curStart, curEnd] = [curRange['_start']['_character'], curRange['_end']['_character']];
+          // 不包含在已提取的内容范围，不同行or同行不在同一字符范围
+          return curEndLine < preStartLine || curStartLine > preEndLine || (curStartLine === preEndLine && curStart > preEnd) || (curEndLine === preStartLine && curEnd < preStart);
+        };
+        return true;
+      });
+      if (newTargetStrs.length === 0) {
         vscode.window.showInformationMessage('没有找到可替换的文案');
         return;
       }
@@ -235,7 +251,7 @@ export function activate(context: vscode.ExtensionContext) {
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
           // 翻译中文文案
-          const translateTexts = targetStrs.reduce((prev, curr, i) => {
+          const translateTexts = newTargetStrs.reduce((prev, curr, i) => {
             // 避免翻译的字符里包含数字或者特殊字符等情况
             const reg = /[^a-zA-Z\x00-\xff]+/g;
             const findText = curr.text.match(reg);
@@ -247,7 +263,7 @@ export function activate(context: vscode.ExtensionContext) {
           }, '');
 
           translateText(translateTexts, translateApi).then((translateTexts) => {
-            const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
+            const replaceableStrs = newTargetStrs.reduce((prev, curr, i) => {
               const key = findMatchKey(finalLangObj, curr.text);
               if (!virtualMemory[curr.text]) {
                 if (key) {
@@ -298,6 +314,8 @@ export function activate(context: vscode.ExtensionContext) {
               .catch(e => {
                 vscode.window.showErrorMessage(e.message);
               });
+          }).catch(err => {
+            vscode.window.showErrorMessage(err);
           });
         });
     })
