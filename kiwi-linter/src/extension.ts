@@ -220,14 +220,18 @@ export function activate(context: vscode.ExtensionContext) {
       // 将嵌套的模板字符串情况移除，只替换最外层的文案，内部中文保留
       const newTargetStrs = targetStrs.filter((item, i) => {
         if (i > 0) {
-          const preRange = targetStrs[i - 1].range;
-          const [preStartLine, preEndLine] = [preRange['_start']['_line'], preRange['_end']['_line']];
-          const [preStart, preEnd] = [preRange['_start']['_character'], preRange['_end']['_character']];
+          const beforeStrs = targetStrs.slice(0, i);
           const curRange = item.range;
           const [curStartLine, curEndLine] = [curRange['_start']['_line'], curRange['_end']['_line']];
           const [curStart, curEnd] = [curRange['_start']['_character'], curRange['_end']['_character']];
-          // 不包含在已提取的内容范围，不同行or同行不在同一字符范围
-          return curEndLine < preStartLine || curStartLine > preEndLine || (curStartLine === preEndLine && curStart > preEnd) || (curEndLine === preStartLine && curEnd < preStart);
+          const include = beforeStrs.some(str => {
+            const preRange = str.range;
+            const [preStartLine, preEndLine] = [preRange['_start']['_line'], preRange['_end']['_line']];
+            const [preStart, preEnd] = [preRange['_start']['_character'], preRange['_end']['_character']];
+            // 当前字符的范围包含在已提取的文案的范围内
+            return !(curEndLine < preStartLine || curStartLine > preEndLine || (curStartLine === preEndLine && curStart > preEnd) || (curEndLine === preStartLine && curEnd < preStart));
+          });
+          return !include;
         };
         return true;
       });
