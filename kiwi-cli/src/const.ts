@@ -7,10 +7,8 @@ export const KIWI_CONFIG_FILE = 'kiwi-config.json';
 
 export const PROJECT_CONFIG = {
   dir: './.kiwi',
-  configFile: `./.kiwi/${KIWI_CONFIG_FILE}`,
   defaultConfig: {
     kiwiDir: './.kiwi',
-    configFile: `./.kiwi/${KIWI_CONFIG_FILE}`,
     srcLang: 'zh-CN',
     distLangs: ['en-US', 'zh-TW'],
     googleApiKey: '',
