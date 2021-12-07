@@ -256,10 +256,10 @@ export function activate(context: vscode.ExtensionContext) {
           finalLangObj = getSuggestLangObj();
           // 翻译中文文案
           const translateTexts = newTargetStrs.reduce((prev, curr, i) => {
-            // 避免翻译的字符里包含数字或者特殊字符等情况
-            const reg = /[^a-zA-Z\x00-\xff]+/g;
-            const findText = curr.text.match(reg);
-            const transText = findText.join('').slice(0, 4);
+            // 避免翻译的字符里包含数字或者特殊字符等情况，只过滤出汉字和字母
+            const reg = /[a-zA-Z\u4e00-\u9fa5]+/g;
+            const findText = curr.text.match(reg) || [];
+            const transText = findText.join('').slice(0, 4) || '中文符号';
             if (i === 0) {
               return transText;
             }
