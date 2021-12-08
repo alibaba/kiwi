@@ -23,5 +23,5 @@ export enum TranslateAPiEnum {
   /** 百度 */
   Baidu = 'baidu',
   /** 拼音 */
-  PinYin = 'pinyin',
+  PinYin = 'pinyin'
 }

@@ -24,7 +24,7 @@ export class UI {
     this.switchTranslateOriginBar.command = 'vscode-i18n-linter.switchTranslateApi';
   }
 
-  init = (translateApi) => {
+  init = translateApi => {
     // 全局搜索文案
     this.searchAllBar.text = `$(search) KiwiSearch`;
     this.searchAllBar.color = '#fff';

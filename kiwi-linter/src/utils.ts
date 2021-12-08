@@ -214,15 +214,15 @@ export function translateText(text: string, type: TranslateAPiEnum) {
         // baidu
         if (type === TranslateAPiEnum.Baidu) {
           baiduTranslate(appId, appKey, 'en', 'zh')(text)
-          .then(data => {
-            if (data && data.trans_result) {
-              const result = data.trans_result[0] ? data.trans_result[0].dst.split('$') : [];
-              resolve(result);
-            }
-          })
-          .catch(err => {
-            reject(err);
-          });
+            .then(data => {
+              if (data && data.trans_result) {
+                const result = data.trans_result[0] ? data.trans_result[0].dst.split('$') : [];
+                resolve(result);
+              }
+            })
+            .catch(err => {
+              reject(err);
+            });
         }
         // pinyin
         if (type === TranslateAPiEnum.PinYin) {
@@ -324,6 +324,6 @@ export function getTranslateAPiList() {
   if (appId && appKey) {
     apiList.push({ label: TranslateAPiEnum.Baidu, description: '百度' });
   }
-  
+
   return apiList;
 }

@@ -19,7 +19,7 @@ import {
   translateText,
   getKiwiLinterConfigFile,
   getCurrActivePageI18nKey,
-  getTranslateAPiList,
+  getTranslateAPiList
 } from './utils';
 
 /**
@@ -229,29 +229,35 @@ export function activate(context: vscode.ExtensionContext) {
             const [preStartLine, preEndLine] = [preRange['_start']['_line'], preRange['_end']['_line']];
             const [preStart, preEnd] = [preRange['_start']['_character'], preRange['_end']['_character']];
             // 当前字符的范围包含在已提取的文案的范围内
-            return !(curEndLine < preStartLine || curStartLine > preEndLine || (curStartLine === preEndLine && curStart > preEnd) || (curEndLine === preStartLine && curEnd < preStart));
+            return !(
+              curEndLine < preStartLine ||
+              curStartLine > preEndLine ||
+              (curStartLine === preEndLine && curStart > preEnd) ||
+              (curEndLine === preStartLine && curEnd < preStart)
+            );
           });
           return !include;
-        };
+        }
         return true;
       });
       if (newTargetStrs.length === 0) {
         vscode.window.showInformationMessage('没有找到可替换的文案');
         return;
       }
-      vscode.window.showInputBox({
-        prompt: '请调整文案抽取后的位置，格式 `I18N.[page]`，不修改即默认',
-        value: `I18N.${suggestion.length ? suggestion.join('.') : ''}`,
-        validateInput(input) {
-          if (!input.match(/^I18N\.\w+/)) {
-            return '变量名格式 `I18N.[page]`，如 `I18N.dim`，[page] 中可包含更多 `.`';
+      vscode.window
+        .showInputBox({
+          prompt: '请调整文案抽取后的位置，格式 `I18N.[page]`，不修改即默认',
+          value: `I18N.${suggestion.length ? suggestion.join('.') : ''}`,
+          validateInput(input) {
+            if (!input.match(/^I18N\.\w+/)) {
+              return '变量名格式 `I18N.[page]`，如 `I18N.dim`，[page] 中可包含更多 `.`';
+            }
           }
-        }
-      })
+        })
         .then((path: string) => {
           if (!path) {
             return;
-          };
+          }
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
           // 翻译中文文案
@@ -266,61 +272,66 @@ export function activate(context: vscode.ExtensionContext) {
             return `${prev}$${transText}`;
           }, '');
 
-          translateText(translateTexts, translateApi).then((translateTexts) => {
-            const replaceableStrs = newTargetStrs.reduce((prev, curr, i) => {
-              const key = findMatchKey(finalLangObj, curr.text);
-              if (!virtualMemory[curr.text]) {
-                if (key) {
-                  virtualMemory[curr.text] = key;
+          translateText(translateTexts, translateApi)
+            .then(translateTexts => {
+              const replaceableStrs = newTargetStrs.reduce((prev, curr, i) => {
+                const key = findMatchKey(finalLangObj, curr.text);
+                if (!virtualMemory[curr.text]) {
+                  if (key) {
+                    virtualMemory[curr.text] = key;
+                    return prev.concat({
+                      target: curr,
+                      key: `${key}`
+                    });
+                  }
+                  const transText = translateTexts[i] && _.camelCase(translateTexts[i]);
+                  const newPath = path
+                    .split('.')
+                    .slice(1)
+                    .join('.');
+                  let transKey = `${newPath + '.'}${transText}`;
+                  let occurTime = 1;
+                  // 防止出现前四位相同但是整体文案不同的情况
+                  while (
+                    finalLangObj[transKey] !== curr.text &&
+                    _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
+                  ) {
+                    occurTime++;
+                  }
+                  if (occurTime >= 2) {
+                    transKey = `${transKey}${occurTime}`;
+                  }
+                  virtualMemory[curr.text] = transKey;
+                  finalLangObj[transKey] = curr.text;
                   return prev.concat({
                     target: curr,
-                    key: `${key}`
+                    key: transKey
+                  });
+                } else {
+                  return prev.concat({
+                    target: curr,
+                    key: virtualMemory[curr.text]
                   });
                 }
-                const transText = translateTexts[i] && _.camelCase(translateTexts[i]);
-                const newPath = path.split('.').slice(1).join('.');
-                let transKey = `${newPath + '.'}${transText}`;
-                let occurTime = 1; 
-                // 防止出现前四位相同但是整体文案不同的情况
-                while (
-                  finalLangObj[transKey] !== curr.text &&
-                  _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
-                ) {
-                  occurTime++;
-                }
-                if (occurTime >= 2) {
-                  transKey = `${transKey}${occurTime}`;
-                }
-                virtualMemory[curr.text] = transKey;
-                finalLangObj[transKey] = curr.text;
-                return prev.concat({
-                  target: curr,
-                  key: transKey
-                });
-              } else {
-                return prev.concat({
-                  target: curr,
-                  key: virtualMemory[curr.text]
-                });
-              }
-            }, []);
+              }, []);
 
-            replaceableStrs
-              .reverse()
-              .reduce((prev: Promise<any>, obj) => {
-                return prev.then(() => {
-                  return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
+              replaceableStrs
+                .reverse()
+                .reduce((prev: Promise<any>, obj) => {
+                  return prev.then(() => {
+                    return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
+                  });
+                }, Promise.resolve())
+                .then(() => {
+                  vscode.window.showInformationMessage('替换完成');
+                })
+                .catch(e => {
+                  vscode.window.showErrorMessage(e.message);
                 });
-              }, Promise.resolve())
-              .then(() => {
-                vscode.window.showInformationMessage('替换完成');
-              })
-              .catch(e => {
-                vscode.window.showErrorMessage(e.message);
-              });
-          }).catch(err => {
-            vscode.window.showErrorMessage(err);
-          });
+            })
+            .catch(err => {
+              vscode.window.showErrorMessage(err);
+            });
         });
     })
   );

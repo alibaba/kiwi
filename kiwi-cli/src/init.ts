@@ -14,7 +14,7 @@ function creteConfigFile(existDir?: string) {
     const config = JSON.stringify(
       {
         ...PROJECT_CONFIG.defaultConfig,
-        kiwiDir: existDir,
+        kiwiDir: existDir
       },
       null,
       2
