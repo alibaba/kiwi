@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
   ui.init(translateApi);
 
   vscode.commands.registerCommand('vscode-i18n-linter.switchTranslateApi', () => {
-    if (translateApiList.length > 2) {
+    if (translateApiList.length > 1) {
       vscode.window.showQuickPick(translateApiList).then(val => {
         ui.init(val.label);
         translateApi = val.label;
@@ -260,8 +260,12 @@ export function activate(context: vscode.ExtensionContext) {
           }
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
+          // 根据在文件中的位置进行排序，防止后续生成key和文案位置错位
+          const sortTargetStrs: any = _.sortBy(newTargetStrs, item => {
+            return item.range['_start']['_line'];
+          });
           // 翻译中文文案
-          const translateTexts = newTargetStrs.reduce((prev, curr, i) => {
+          const translateTexts = sortTargetStrs.reduce((prev, curr, i) => {
             // 避免翻译的字符里包含数字或者特殊字符等情况，只过滤出汉字和字母
             const reg = /[a-zA-Z\u4e00-\u9fa5]+/g;
             const findText = curr.text.match(reg) || [];
@@ -271,10 +275,12 @@ export function activate(context: vscode.ExtensionContext) {
             }
             return `${prev}$${transText}`;
           }, '');
+          console.log('key值翻译原文：', translateTexts);
 
           translateText(translateTexts, translateApi)
             .then(translateTexts => {
-              const replaceableStrs = newTargetStrs.reduce((prev, curr, i) => {
+              console.log('翻译后：', translateTexts);
+              const replaceableStrs = sortTargetStrs.reduce((prev, curr, i) => {
                 const key = findMatchKey(finalLangObj, curr.text);
                 if (!virtualMemory[curr.text]) {
                   if (key) {

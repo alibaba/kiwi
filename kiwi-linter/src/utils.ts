@@ -318,9 +318,10 @@ export function getTranslateAPiList() {
   let apiList = [{ label: TranslateAPiEnum.PinYin, description: '拼音' }];
   const googleApiKey = getConfigByKey('googleApiKey');
   const { appId, appKey } = getConfigByKey('baiduApiKey');
-  if (googleApiKey) {
-    apiList.push({ label: TranslateAPiEnum.Google, description: '谷歌' });
-  }
+  // google翻译暂时不开放
+  // if (googleApiKey) {
+  //   apiList.push({ label: TranslateAPiEnum.Google, description: '谷歌' });
+  // }
   if (appId && appKey) {
     apiList.push({ label: TranslateAPiEnum.Baidu, description: '百度' });
   }
