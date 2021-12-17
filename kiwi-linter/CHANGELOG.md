@@ -9,4 +9,4 @@ Kiwi Linter
 
 ### Features
 - 支持中文文案的全局搜索，新增显式入口（vscode右下角工具栏）
-- 支持文件粒度的批量提取，翻译源支持pinyin和百度，配合kiwi-config.json使用
+- 支持文件粒度的批量提取，翻译源支持pinyin和百度，配合[kiwi-config.json](https://github.com/alibaba/kiwi/tree/master/kiwi-cli)使用
