@@ -1,7 +1,12 @@
-# Change Log
-All notable changes to the "vscode-react-i18n" extension will be documented in this file.
+# 🐤 Change Log
+Kiwi Linter
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## 1.4.4（2021-12-08）
 
-## [Unreleased]
-- Initial release
+### Bug Fixes
+- 更新vscode插件无法使用 [#77](https://github.com/alibaba/kiwi/issues/77)
+- 抽取文案时默认key值不准确
+
+### Features
+- 支持中文文案的全局搜索，新增显式入口（vscode右下角工具栏）
+- 支持文件粒度的批量提取，翻译源支持pinyin和百度，配合kiwi-config.json使用

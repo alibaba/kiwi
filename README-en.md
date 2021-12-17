@@ -36,7 +36,10 @@ Then search "kiwi linter" in visual studio marketplace
 
 `kiwi-linter`: [📝 Link](https://github.com/alibaba/kiwi/tree/master/kiwi-linter)
 
+## Change Log
+`kiwi-cli`: [📝 Link](https://github.com/alibaba/kiwi/tree/master/kiwi-cli/CHANGELOG.md)
 
+`kiwi-linter`: [📝 Link](https://github.com/alibaba/kiwi/tree/master/kiwi-linter/CHANGELOG.md)
 
 ## Why use Kiwi?
 
