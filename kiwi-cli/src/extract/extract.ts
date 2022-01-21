@@ -89,7 +89,20 @@ function extractAll(dirPath?: string) {
 
   allTargetStrs.forEach(async item => {
     const currentFilename = item.file;
-    const targetStrs = item.texts;
+    console.log(`${currentFilename} 替换中...`);
+    // 过滤掉模板字符串内的中文，避免替换时出现异常
+    const targetStrs = item.texts.reduce((pre, strObj, i) => {
+      // 因为文案已经根据位置倒排，所以比较时只需要比较剩下的文案即可
+      const afterStrs = item.texts.slice(i + 1);
+      if (afterStrs.some(obj => strObj.range.end <= obj.range.end)) {
+        return pre;
+      };
+      return pre.concat(strObj);
+    }, []);
+    const len = item.texts.length - targetStrs.length;
+    if (len > 0) {
+      console.log(`存在 ${highlightText(len)} 处文案无法替换，请避免在模板字符串的变量中嵌套中文`);
+    };
     const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
 
     let suggestion = [];
@@ -196,7 +209,7 @@ function extractAll(dirPath?: string) {
 
           writeFile(currentFilename, code);
         }
-        successInfo(`${currentFilename} 替换完成！`);
+        successInfo(`${currentFilename} 替换完成，共替换 ${targetStrs.length} 处文案！`);
       })
       .catch(e => {
         failInfo(e.message);
