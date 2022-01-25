@@ -16,6 +16,17 @@ import { getProjectConfig } from '../utils';
 const CONFIG = getProjectConfig();
 
 /**
+ * 剔除 kiwiDir 下的文件
+ */
+function removeLangsFiles(files: string[]) {
+  const langsDir = path.resolve(process.cwd(), CONFIG.kiwiDir);
+  return files.filter(file => {
+    const completeFile = path.resolve(process.cwd(), file);
+    return !completeFile.includes(langsDir);
+  });
+};
+
+/**
  * 递归匹配项目中所有的代码的中文
  */
 function findAllChineseText(dir: string) {
@@ -25,7 +36,7 @@ function findAllChineseText(dir: string) {
     const dirPath = path.resolve(process.cwd(), dir);
     files = getSpecifiedFiles(dirPath, CONFIG.ignoreDir, CONFIG.ignoreFile);
   } else {
-    files = dir.split(',');
+    files = removeLangsFiles(dir.split(','));
   }
   const filterFiles = files.filter(file => {
     return isFile(file) && file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.vue');
