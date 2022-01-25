@@ -6,7 +6,9 @@ import * as path from 'path';
 import * as _ from 'lodash';
 import * as inquirer from 'inquirer';
 import * as fs from 'fs';
+import { pinyin } from 'pinyin-pro';
 import { PROJECT_CONFIG, KIWI_CONFIG_FILE } from './const';
+const colors = require('colors');
 
 function lookForFiles(dir: string, fileName: string): string {
   const files = fs.readdirSync(dir);
@@ -159,6 +161,43 @@ function translateText(text, toLang) {
   );
 }
 
+/**
+ * 翻译中文
+ */
+function translateKeyText(text: string, origin: string) {
+  const CONFIG = getProjectConfig();
+  const { appId, appKey } = CONFIG.baiduApiKey;
+  const baiduTranslate = require('baidu-translate');
+
+  function _translateText() {
+    return withTimeout(
+      new Promise((resolve, reject) => {
+        // Baidu
+        if (origin === 'Baidu') {
+          baiduTranslate(appId, appKey, 'en', 'zh')(text)
+            .then(data => {
+              if (data && data.trans_result) {
+                const result = data.trans_result[0] ? data.trans_result[0].dst.split('$') : [];
+                resolve(result);
+              }
+            })
+            .catch(err => {
+              reject(err);
+            });
+        }
+        // Pinyin
+        if (origin === 'Pinyin') {
+          const result = pinyin(text, { toneType: 'none' });
+          resolve(result.split('$'));
+        }
+      }),
+      3000
+    );
+  }
+
+  return retry(_translateText, 3);
+}
+
 function findMatchKey(langObj, text) {
   for (const key in langObj) {
     if (langObj[key] === text) {
@@ -233,6 +272,27 @@ async function getTranslateOriginType() {
   };
 }
 
+/**
+ * 成功的提示
+ */
+function successInfo(message: string) {
+  console.log(colors.green(message));
+};
+
+/**
+ * 失败的提示
+ */
+function failInfo(message: string) {
+  console.log(colors.red(message));
+};
+
+/**
+ * 普通提示
+ */
+ function highlightText(message: string | number) {
+  return colors.yellow(`${message}`);
+};
+
 export {
   getKiwiDir,
   getLangDir,
@@ -246,5 +306,9 @@ export {
   findMatchValue,
   flatten,
   lookForFiles,
-  getTranslateOriginType
+  getTranslateOriginType,
+  translateKeyText,
+  successInfo,
+  failInfo,
+  highlightText,
 };

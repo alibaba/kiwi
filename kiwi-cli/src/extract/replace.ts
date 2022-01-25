@@ -9,7 +9,7 @@ import * as prettier from 'prettier';
 import * as ts from 'typescript';
 import { readFile, writeFile } from './file';
 import { getLangData } from './getLangData';
-import { getProjectConfig, getLangDir } from '../utils';
+import { getProjectConfig, getLangDir, successInfo, failInfo, highlightText } from '../utils';
 
 const CONFIG = getProjectConfig();
 const srcLangDir = getLangDir(CONFIG.srcLang);
@@ -26,18 +26,18 @@ function updateLangFiles(keyValue, text, validateDuplicate) {
   if (!fs.existsSync(targetFilename)) {
     fs.writeFileSync(targetFilename, generateNewLangFile(fullKey, text));
     addImportToMainLangFile(filename);
-    console.log(`成功新建语言文件 ${targetFilename}`);
+    successInfo(`成功新建语言文件 ${targetFilename}`);
   } else {
     // 清除 require 缓存，解决手动更新语言文件后再自动抽取，导致之前更新失效的问题
     const mainContent = getLangData(targetFilename);
     const obj = mainContent;
 
     if (Object.keys(obj).length === 0) {
-      console.log(`${filename} 解析失败，该文件包含的文案无法自动补全`);
+      failInfo(`${filename} 解析失败，该文件包含的文案无法自动补全`);
     }
 
     if (validateDuplicate && _.get(obj, fullKey) !== undefined) {
-      console.log(`${targetFilename} 中已存在 key 为 \`${fullKey}\` 的翻译，请重新命名变量`);
+      failInfo(`${targetFilename} 中已存在 key 为 \`${fullKey}\` 的翻译，请重新命名变量`);
       throw new Error('duplicate');
     }
     // \n 会被自动转义成 \\n，这里转回来
@@ -59,7 +59,7 @@ function prettierFile(fileContent) {
       singleQuote: true
     });
   } catch (e) {
-    console.error(`代码格式化报错！${e.toString()}\n代码为：${fileContent}`);
+    failInfo(`代码格式化报错！${e.toString()}\n代码为：${fileContent}`);
     return fileContent;
   }
 }
@@ -175,8 +175,9 @@ function createImportI18N(filePath) {
  * @param arg  目标字符串对象
  * @param val  目标 key
  * @param validateDuplicate 是否校验文件中已经存在要写入的 key
+ * @param needWrite 是否只需要替换不需要更新 langs 文件
  */
-function replaceAndUpdate(filePath, arg, val, validateDuplicate) {
+function replaceAndUpdate(filePath, arg, val, validateDuplicate, needWrite = true) {
   const code = readFile(filePath);
   const isHtmlFile = _.endsWith(filePath, '.html');
   const isVueFile = _.endsWith(filePath, '.vue');
@@ -223,8 +224,10 @@ function replaceAndUpdate(filePath, arg, val, validateDuplicate) {
   }
 
   try {
-    // 更新语言文件
-    updateLangFiles(val, finalReplaceText, validateDuplicate);
+    if (needWrite) {
+      // 更新语言文件
+      updateLangFiles(val, finalReplaceText, validateDuplicate);
+    }
     // 若更新成功再替换代码
     return writeFile(filePath, newCode);
   } catch (e) {

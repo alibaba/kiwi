@@ -41,6 +41,9 @@ Kiwi 的 CLI 工具
     "zh-TW": 'cht'
   },
 
+  // 批量提取文案时生成key值时的默认翻译源, Google/Baidu/Pinyin
+  "defaultTranslateKeyApi": 'Pinyin',
+
   // import 语句，不同项目请自己配置
   "importI18N": "",
 
@@ -52,10 +55,31 @@ Kiwi 的 CLI 工具
 
 ### kiwi `--extract`
 
-一键批量替换指定文件夹下的所有文案
+1. 一键批量替换指定文件夹下的所有文案
 
 ```shell script
 kiwi --extract [dirPath]
+```
+
+2. commit 提交时自动增量提取，在 precommit 脚本内添加如下指令
+
+```shell script
+# 检测提交中是否存在ts或tsx文件
+TS_CHANGED=$(git diff --cached --numstat --diff-filter=ACM | grep -F '.ts' | wc -l)
+
+# 对提交的代码中存在未提取的中文文案统一处理
+if [ "$TS_CHANGED" -gt 0 ]
+then
+  TS_FILES_LIST=($(git diff --cached --name-only --diff-filter=ACM | grep -F '.ts'))
+  TS_FILES=''
+  delim=''
+  for item in ${TS_FILES_LIST[@]};do
+    TS_FILES=$TS_FILES$delim$item;
+    delim=','
+  done
+  echo "\033[33m 正在检测未提取的中文文案，请稍后 \033[0m"
+  kiwi --extract $TS_FILES || exit 1
+fi
 ```
 
 ![批量替换](https://raw.githubusercontent.com/alibaba/kiwi/master/kiwi-cli/public/extract.gif)
@@ -85,13 +109,12 @@ kiwi --export [filePath] en-US
 ### kiwi `--mock`
 
 使用 Google 翻译，翻译未翻译的文案
-如果同时配置baiduApiKey与baiduApiKey 则命令行可手动选择翻译源
+如果同时配置 baiduApiKey 与 baiduApiKey 则命令行可手动选择翻译源
 
 ### kiwi `--translate`
 
-全量翻译未翻译的中文文案，翻译结果自动导入 en-US zh-TW等目录
+全量翻译未翻译的中文文案，翻译结果自动导入 en-US zh-TW 等目录
 
 ```shell script
 kiwi --translate
 ```
-
