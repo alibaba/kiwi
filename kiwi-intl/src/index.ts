@@ -103,7 +103,7 @@ const IntlFormat = {
   init: <T>(
     lang: string,
     metas: {
-      [key: string]: Object;
+      [key: string]: T;
     },
     defaultKey?: string
   ): I18NAPI & T => {
