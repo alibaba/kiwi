@@ -9,7 +9,15 @@ import * as path from 'path';
 import { getSpecifiedFiles, readFile, writeFile, isFile, isDirectory } from './file';
 import { findChineseText } from './findChineseText';
 import { getSuggestLangObj } from './getLangData';
-import { translateText, findMatchKey, findMatchValue, translateKeyText, successInfo, failInfo, highlightText } from '../utils';
+import {
+  translateText,
+  findMatchKey,
+  findMatchValue,
+  translateKeyText,
+  successInfo,
+  failInfo,
+  highlightText
+} from '../utils';
 import { replaceAndUpdate, hasImportI18N, createImportI18N } from './replace';
 import { getProjectConfig } from '../utils';
 
@@ -24,7 +32,7 @@ function removeLangsFiles(files: string[]) {
     const completeFile = path.resolve(process.cwd(), file);
     return !completeFile.includes(langsDir);
   });
-};
+}
 
 /**
  * 递归匹配项目中所有的代码的中文
@@ -39,7 +47,7 @@ function findAllChineseText(dir: string) {
     files = removeLangsFiles(dir.split(','));
   }
   const filterFiles = files.filter(file => {
-    return isFile(file) && file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.vue');
+    return (isFile(file) && file.endsWith('.ts')) || file.endsWith('.tsx') || file.endsWith('.vue');
   });
   const allTexts = filterFiles.reduce((pre, file) => {
     const code = readFile(file);
@@ -67,7 +75,7 @@ function getTransOriginText(text: string) {
   const transOriginText = findText ? findText.join('').slice(0, 5) : '中文符号';
 
   return transOriginText;
-};
+}
 
 /**
  * 递归匹配项目中所有的代码的中文
@@ -79,9 +87,11 @@ function extractAll(dirPath?: string) {
   // 翻译源配置错误，则终止
   const origin = CONFIG.defaultTranslateKeyApi || 'Pinyin';
   if (!['Pinyin', 'Google', 'Baidu'].includes(CONFIG.defaultTranslateKeyApi)) {
-    console.log(`Kiwi 仅支持 ${highlightText('Pinyin、Google、Baidu')}，请修改 ${highlightText('defaultTranslateKeyApi')} 配置项`);
+    console.log(
+      `Kiwi 仅支持 ${highlightText('Pinyin、Google、Baidu')}，请修改 ${highlightText('defaultTranslateKeyApi')} 配置项`
+    );
     return;
-  };
+  }
 
   const allTargetStrs = findAllChineseText(dir);
   if (allTargetStrs.length === 0) {
@@ -91,7 +101,11 @@ function extractAll(dirPath?: string) {
 
   // 提示翻译源
   if (CONFIG.defaultTranslateKeyApi === 'Pinyin') {
-    console.log(`当前使用 ${highlightText('Pinyin')} 作为key值的翻译源，若想得到更好的体验，可配置 ${highlightText('googleApiKey')} 或 ${highlightText('baiduApiKey')}，并切换 ${highlightText('defaultTranslateKeyApi')}`);
+    console.log(
+      `当前使用 ${highlightText('Pinyin')} 作为key值的翻译源，若想得到更好的体验，可配置 ${highlightText(
+        'googleApiKey'
+      )} 或 ${highlightText('baiduApiKey')}，并切换 ${highlightText('defaultTranslateKeyApi')}`
+    );
   } else {
     console.log(`当前使用 ${highlightText(CONFIG.defaultTranslateKeyApi)} 作为key值的翻译源`);
   }
@@ -107,13 +121,13 @@ function extractAll(dirPath?: string) {
       const afterStrs = item.texts.slice(i + 1);
       if (afterStrs.some(obj => strObj.range.end <= obj.range.end)) {
         return pre;
-      };
+      }
       return pre.concat(strObj);
     }, []);
     const len = item.texts.length - targetStrs.length;
     if (len > 0) {
       console.log(`存在 ${highlightText(len)} 处文案无法替换，请避免在模板字符串的变量中嵌套中文`);
-    };
+    }
     const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
 
     let suggestion = [];
@@ -165,7 +179,7 @@ function extractAll(dirPath?: string) {
     if (translateTexts.length === 0) {
       failInfo(`未得到翻译结果，${currentFilename}替换失败！`);
       return;
-    };
+    }
 
     const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
       const key = findMatchKey(finalLangObj, curr.text);
@@ -175,7 +189,7 @@ function extractAll(dirPath?: string) {
           return prev.concat({
             target: curr,
             key,
-            needWrite: false,
+            needWrite: false
           });
         }
         const transText = translateTexts[i] && _.camelCase(translateTexts[i] as string);
@@ -196,13 +210,13 @@ function extractAll(dirPath?: string) {
         return prev.concat({
           target: curr,
           key: transKey,
-          needWrite: true,
+          needWrite: true
         });
       } else {
         return prev.concat({
           target: curr,
           key: virtualMemory[curr.text],
-          needWrite: true,
+          needWrite: true
         });
       }
     }, []);

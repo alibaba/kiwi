@@ -71,7 +71,7 @@ function isFile(path) {
  * 判断是文件夹
  * @param path
  */
- function isDirectory(path) {
+function isDirectory(path) {
   return fs.statSync(path).isDirectory();
 }
 

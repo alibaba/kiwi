@@ -277,21 +277,21 @@ async function getTranslateOriginType() {
  */
 function successInfo(message: string) {
   console.log(colors.green(message));
-};
+}
 
 /**
  * 失败的提示
  */
 function failInfo(message: string) {
   console.log(colors.red(message));
-};
+}
 
 /**
  * 普通提示
  */
- function highlightText(message: string | number) {
+function highlightText(message: string | number) {
   return colors.yellow(`${message}`);
-};
+}
 
 export {
   getKiwiDir,
@@ -310,5 +310,5 @@ export {
   translateKeyText,
   successInfo,
   failInfo,
-  highlightText,
+  highlightText
 };
