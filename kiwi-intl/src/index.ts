@@ -12,8 +12,9 @@ export interface I18NAPI {
    * 初始化对应语言
    * @param lang: 对应语言
    * @param metas: 所有语言的语言文件
+   * @param defaultKey: 默认支持的文件枚举值
    */
-  init?(lang: string, metas: object): I18NAPI;
+  init?(lang: string, metas: object, defaultKey?: 'zh-CN'): I18NAPI;
   /**
    * 设置对应语言
    * @param lang: 切换的对应语言
@@ -37,10 +38,12 @@ class I18N {
   __lang__: string;
   __metas__: any;
   __data__: any;
-  constructor(lang: string, metas: object) {
+  __defaultKey__: string;
+  constructor(lang: string, metas: object, defaultKey?: string) {
     this.__lang__ = lang;
     this.__metas__ = metas;
     this.__data__ = metas[lang];
+    this.__defaultKey__ = defaultKey;
   }
   setLang(lang: string) {
     this.__lang__ = lang;
@@ -79,7 +82,7 @@ class I18N {
   get(str, args?) {
     let msg = lodashGet(this.__data__, str);
     if (!msg) {
-      msg = lodashGet(this.__metas__['zh-CN'], str, str);
+      msg = lodashGet(this.__metas__[this.__defaultKey__ || 'zh-CN'], str, str);
     }
     if (args) {
       try {
@@ -100,12 +103,12 @@ const IntlFormat = {
   init: <T>(
     lang: string,
     metas: {
-      'zh-CN': T;
-      [key: string]: Object;
-    }
+      [key: string]: T;
+    },
+    defaultKey?: string
   ): I18NAPI & T => {
-    const i18n = new I18N(lang, metas);
-    return Observer(i18n);
+    const i18n = new I18N(lang, metas, defaultKey);
+    return Observer(i18n, defaultKey);
   }
 };
 

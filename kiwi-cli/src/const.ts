@@ -7,17 +7,24 @@ export const KIWI_CONFIG_FILE = 'kiwi-config.json';
 
 export const PROJECT_CONFIG = {
   dir: './.kiwi',
-  configFile: `./.kiwi/${KIWI_CONFIG_FILE}`,
   defaultConfig: {
     kiwiDir: './.kiwi',
-    configFile: `./.kiwi/${KIWI_CONFIG_FILE}`,
     srcLang: 'zh-CN',
     distLangs: ['en-US', 'zh-TW'],
     googleApiKey: '',
+    baiduApiKey: {
+      appId: '',
+      appKey: ''
+    },
+    baiduLangMap: {
+      ['en-US']: 'en',
+      ['zh-TW']: 'cht'
+    },
     translateOptions: {
       concurrentLimit: 10,
       requestOptions: {}
     },
+    defaultTranslateKeyApi: 'Pinyin', // 批量提取文案时生成key值时的默认翻译源
     importI18N: `import I18N from 'src/utils/I18N';`,
     ignoreDir: '',
     ignoreFile: ''

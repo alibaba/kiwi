@@ -59,4 +59,20 @@ function writeFile(filePath, file) {
   }
 }
 
-export { getSpecifiedFiles, readFile, writeFile };
+/**
+ * 判断是文件
+ * @param path
+ */
+function isFile(path) {
+  return fs.statSync(path).isFile();
+}
+
+/**
+ * 判断是文件夹
+ * @param path
+ */
+function isDirectory(path) {
+  return fs.statSync(path).isDirectory();
+}
+
+export { getSpecifiedFiles, readFile, writeFile, isFile, isDirectory };

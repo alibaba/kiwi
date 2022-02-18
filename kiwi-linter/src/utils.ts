@@ -6,6 +6,9 @@ import * as _ from 'lodash';
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as slash from 'slash2';
+import { pinyin } from 'pinyin-pro';
+import { TranslateAPiEnum } from './define';
 
 /**
  * 将对象拍平
@@ -113,10 +116,10 @@ export const getConfiguration = text => {
  * 查找kiwi-cli配置文件
  */
 export const getConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwirc.js`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwirc.js`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
-    kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwirc.ts`;
+    kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/.kiwirc.ts`;
     //再找ts
     if (!fs.existsSync(kiwiConfigJson)) {
       return null;
@@ -129,7 +132,7 @@ export const getConfigFile = () => {
  * 查找kiwi-linter配置文件
  */
 export const getKiwiLinterConfigFile = () => {
-  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  let kiwiConfigJson = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/kiwi-config.json`;
   // 先找js
   if (!fs.existsSync(kiwiConfigJson)) {
     return null;
@@ -140,18 +143,18 @@ export const getKiwiLinterConfigFile = () => {
 /**
  * 获得项目配置信息中的 googleApiKey
  */
-function getGoogleApiKey() {
-  const configFile = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
-  let googleApiKey = '';
+function getConfigByKey(key: string): any {
+  const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/kiwi-config.json`;
+  let content = '';
 
   try {
     if (fs.existsSync(configFile)) {
-      googleApiKey = JSON.parse(fs.readFileSync(configFile, 'utf8')).googleApiKey;
+      content = JSON.parse(fs.readFileSync(configFile, 'utf8'))[key];
     }
   } catch (error) {
     console.log(error);
   }
-  return googleApiKey;
+  return content;
 }
 
 /**
@@ -188,20 +191,44 @@ function withTimeout(promise, ms) {
 /**
  * 翻译中文
  */
-export function translateText(text) {
-  const googleApiKey = getGoogleApiKey();
+export function translateText(text: string, type: TranslateAPiEnum) {
+  const googleApiKey = getConfigByKey('googleApiKey');
   const { translate: googleTranslate } = require('google-translate')(googleApiKey);
+  const { appId, appKey } = getConfigByKey('baiduApiKey');
+  const baiduTranslate = require('baidu-translate');
 
   function _translateText() {
     return withTimeout(
       new Promise((resolve, reject) => {
-        googleTranslate(text, 'zh', 'en', (err, translation) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(translation.translatedText);
-          }
-        });
+        // google
+        if (type === TranslateAPiEnum.Google) {
+          googleTranslate(text, 'zh', 'en', (err, translation) => {
+            if (err) {
+              reject(err);
+            } else {
+              const result = translation.translatedText ? translation.translatedText.split('$') : [];
+              resolve(result);
+            }
+          });
+        }
+        // baidu
+        if (type === TranslateAPiEnum.Baidu) {
+          baiduTranslate(appId, appKey, 'en', 'zh')(text)
+            .then(data => {
+              if (data && data.trans_result) {
+                const result = data.trans_result[0] ? data.trans_result[0].dst.split('$') : [];
+                resolve(result);
+              }
+            })
+            .catch(err => {
+              reject(err);
+            });
+        }
+        // pinyin
+        if (type === TranslateAPiEnum.PinYin) {
+          const result = pinyin(text, { toneType: 'none' });
+          resolve(result.split('$'));
+        }
       }),
       3000
     );
@@ -214,16 +241,15 @@ export function translateText(text) {
  * 获取多项目配置
  */
 export function getTargetLangPath(currentFilePath) {
-  const configFile = `${vscode.workspace.workspaceFolders[0].uri.path}/.kiwi`;
+  const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/kiwi-config.json`;
   let targetLangPath = '';
 
   try {
     if (fs.existsSync(configFile)) {
       const { projects = [] } = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-      console.log(projects);
       for (const config of projects) {
         if (currentFilePath.indexOf(`/${config.target}/`) > -1) {
-          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.path}/${config.kiwiDir}/zh_CN/`;
+          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/zh_CN/`;
           return targetLangPath;
         }
       }
@@ -253,4 +279,52 @@ export function getCurrentProjectLangPath() {
 export function getLangPrefix() {
   const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
   return langPrefix;
+}
+
+/**
+ * 获取当前文件路径层级 [pageA, moudleA, componentA]
+ */
+export function getCurrActivePageI18nKey() {
+  const activeEditor = vscode.window.activeTextEditor;
+  let suggestion = [];
+  if (activeEditor) {
+    const currentFilename = activeEditor.document.fileName;
+    const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
+    if (currentFilename.includes('/pages/')) {
+      suggestion = currentFilename.match(suggestPageRegex);
+    }
+    if (suggestion && suggestion.length) {
+      // 匹配到则去除第一项currentFilename，保留元组项
+      suggestion.shift();
+    } else {
+      const names = slash(currentFilename).split('/') as string[];
+      const fileName = _.last(names);
+      const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
+      const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
+      if (dir === fileKey) {
+        suggestion = [dir];
+      } else {
+        suggestion = [dir, fileKey];
+      }
+    }
+  }
+  return suggestion;
+}
+
+/**
+ * 检测翻译源
+ */
+export function getTranslateAPiList() {
+  let apiList = [{ label: TranslateAPiEnum.PinYin, description: '拼音' }];
+  const googleApiKey = getConfigByKey('googleApiKey');
+  const { appId, appKey } = getConfigByKey('baiduApiKey');
+  // google翻译暂时不开放
+  // if (googleApiKey) {
+  //   apiList.push({ label: TranslateAPiEnum.Google, description: '谷歌' });
+  // }
+  if (appId && appKey) {
+    apiList.push({ label: TranslateAPiEnum.Baidu, description: '百度' });
+  }
+
+  return apiList;
 }

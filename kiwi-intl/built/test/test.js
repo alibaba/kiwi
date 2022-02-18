@@ -1,11 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = require("assert");
-var index_1 = require("../src/index");
+import * as assert from 'assert';
+import IntlFormat from '../src/index';
 describe('IntlFormat', function () {
-    var intlFormat;
+    let intlFormat;
     before(function () {
-        intlFormat = index_1.default.init('zh-CN', {
+        intlFormat = IntlFormat.init('zh-CN', {
             'zh-CN': {
                 value: '值',
                 test: '测试',
@@ -45,12 +43,12 @@ describe('IntlFormat', function () {
             }), '你有3条未读通知');
         });
         it('Different instance values', function () {
-            var intlFormat1 = index_1.default.init('zh-CN', {
+            const intlFormat1 = IntlFormat.init('zh-CN', {
                 'zh-CN': {
                     test: 'firstvalue'
                 }
             });
-            var intlFormat2 = index_1.default.init('zh-CN', {
+            const intlFormat2 = IntlFormat.init('zh-CN', {
                 'zh-CN': {
                     test: 'secondvalue'
                 }

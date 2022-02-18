@@ -4,8 +4,11 @@
  */
 import * as path from 'path';
 import * as _ from 'lodash';
+import * as inquirer from 'inquirer';
 import * as fs from 'fs';
+import { pinyin } from 'pinyin-pro';
 import { PROJECT_CONFIG, KIWI_CONFIG_FILE } from './const';
+const colors = require('colors');
 
 function lookForFiles(dir: string, fileName: string): string {
   const files = fs.readdirSync(dir);
@@ -31,12 +34,14 @@ function lookForFiles(dir: string, fileName: string): string {
  * 获得项目配置信息
  */
 function getProjectConfig() {
-  const rootDir = path.resolve(process.cwd(), `./`);
-  const configFile = lookForFiles(rootDir, KIWI_CONFIG_FILE);
+  const configFile = path.resolve(process.cwd(), `./${KIWI_CONFIG_FILE}`);
   let obj = PROJECT_CONFIG.defaultConfig;
 
   if (configFile && fs.existsSync(configFile)) {
-    obj = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    obj = {
+      ...obj,
+      ...JSON.parse(fs.readFileSync(configFile, 'utf8'))
+    };
   }
   return obj;
 }
@@ -156,6 +161,43 @@ function translateText(text, toLang) {
   );
 }
 
+/**
+ * 翻译中文
+ */
+function translateKeyText(text: string, origin: string) {
+  const CONFIG = getProjectConfig();
+  const { appId, appKey } = CONFIG.baiduApiKey;
+  const baiduTranslate = require('baidu-translate');
+
+  function _translateText() {
+    return withTimeout(
+      new Promise((resolve, reject) => {
+        // Baidu
+        if (origin === 'Baidu') {
+          baiduTranslate(appId, appKey, 'en', 'zh')(text)
+            .then(data => {
+              if (data && data.trans_result) {
+                const result = data.trans_result[0] ? data.trans_result[0].dst.split('$') : [];
+                resolve(result);
+              }
+            })
+            .catch(err => {
+              reject(err);
+            });
+        }
+        // Pinyin
+        if (origin === 'Pinyin') {
+          const result = pinyin(text, { toneType: 'none' });
+          resolve(result.split('$'));
+        }
+      }),
+      3000
+    );
+  }
+
+  return retry(_translateText, 3);
+}
+
 function findMatchKey(langObj, text) {
   for (const key in langObj) {
     if (langObj[key] === text) {
@@ -192,6 +234,65 @@ function flatten(obj, prefix = '') {
   return ret;
 }
 
+/**
+ * 获取翻译源类型
+ */
+async function getTranslateOriginType() {
+  const { googleApiKey, baiduApiKey } = getProjectConfig();
+  let translateType = ['Google', 'Baidu'];
+  if (!googleApiKey) {
+    translateType = translateType.filter(item => item !== 'Google');
+  }
+  if (!baiduApiKey || !baiduApiKey.appId || !baiduApiKey.appKey) {
+    translateType = translateType.filter(item => item !== 'Baidu');
+  }
+  if (translateType.length === 0) {
+    console.log('请配置 googleApiKey 或 baiduApiKey ');
+    return {
+      pass: false,
+      origin: ''
+    };
+  }
+  if (translateType.length == 1) {
+    return {
+      pass: true,
+      origin: translateType[0]
+    };
+  }
+  const { origin } = await inquirer.prompt({
+    type: 'list',
+    name: 'origin',
+    message: '请选择使用的翻译源',
+    default: 'Google',
+    choices: ['Google', 'Baidu']
+  });
+  return {
+    pass: true,
+    origin: origin
+  };
+}
+
+/**
+ * 成功的提示
+ */
+function successInfo(message: string) {
+  console.log(colors.green(message));
+}
+
+/**
+ * 失败的提示
+ */
+function failInfo(message: string) {
+  console.log(colors.red(message));
+}
+
+/**
+ * 普通提示
+ */
+function highlightText(message: string | number) {
+  return colors.yellow(`${message}`);
+}
+
 export {
   getKiwiDir,
   getLangDir,
@@ -204,5 +305,10 @@ export {
   findMatchKey,
   findMatchValue,
   flatten,
-  lookForFiles
+  lookForFiles,
+  getTranslateOriginType,
+  translateKeyText,
+  successInfo,
+  failInfo,
+  highlightText
 };

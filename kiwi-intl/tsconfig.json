@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
     "noImplicitAny": false,
-    "target": "es5",
+    "module": "esnext",
+    "target": "es6",
     "removeComments": true,
     "preserveConstEnums": true,
     "jsx": "react",
@@ -14,7 +14,7 @@
     "emitDecoratorMetadata": true,
     "baseUrl": "./src/",
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es6", "es5"],
+    "lib": ["dom", "es2015", "es2016", "es2017"],
     "types": ["node", "mocha"]
   },
   "exclude": ["node_modules", "packages", "built"]

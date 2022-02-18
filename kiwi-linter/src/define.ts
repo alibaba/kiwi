@@ -15,3 +15,13 @@ export interface TargetStr {
   range: vscode.Range;
   isString: boolean;
 }
+
+/** 翻译源，目前只支持google和百度 */
+export enum TranslateAPiEnum {
+  /** 谷歌 */
+  Google = 'google',
+  /** 百度 */
+  Baidu = 'baidu',
+  /** 拼音 */
+  PinYin = 'pinyin'
+}

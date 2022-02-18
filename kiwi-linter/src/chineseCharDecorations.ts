@@ -61,7 +61,7 @@ function matchPattern() {
     activeEditor &&
     pattern !== '' &&
     !minimatch(
-      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders[0].uri.path + '/', ''),
+      activeEditor.document.uri.fsPath.replace(vscode.workspace.workspaceFolders[0].uri.fsPath + '/', ''),
       pattern
     )
   ) {

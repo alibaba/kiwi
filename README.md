@@ -31,6 +31,11 @@
 
 `kiwi-linter`: [📝 文档链接](https://github.com/alibaba/kiwi/tree/master/kiwi-linter)
 
+## Change Log
+`kiwi-cli`: [📝 点击此处查看](https://github.com/alibaba/kiwi/tree/master/kiwi-cli/CHANGELOG.md)
+
+`kiwi-linter`: [📝 点击此处查看](https://github.com/alibaba/kiwi/tree/master/kiwi-linter/CHANGELOG.md)
+
 ## 为什么使用 kiwi？
 
 目前有很多成熟的库可以帮助前端去做对应的国际化方案，比较知名的有 `react-intl` 以及 `I18N-loader`。这些库都可以很好的解决代码中多种语言切换的问题，但是也存在如下没有解决的问题：
@@ -71,7 +76,7 @@ kiwi 是一种不会飞翔的鸟类🐤，但它善于奔跑，时速可达 10 �
 
 ## 钉钉用户群
 
-<img src="https://img.alicdn.com/tfs/TB1qODxbaNj0u4jSZFyXXXgMVXa-1125-1485.jpg" height="300">
+<img src="https://user-images.githubusercontent.com/11746742/130591022-b7b542fb-eb2c-4a0c-ae00-a2f36161e9fe.png" height="300">
 
 ## License
 MIT

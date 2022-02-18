@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = require("../src/index");
-var intlFormat = index_1.default.init('zh-CN', {
+import IntlFormat from '../src/index';
+const intlFormat = IntlFormat.init('zh-CN', {
     'zh-CN': {
         value: '值',
         test: '测试',

@@ -3,9 +3,9 @@
  * @author linhuiw
  */
 
-const Observer = obj => {
+const Observer = (obj, defaultKey = 'zh-CN') => {
   Object.keys(obj.__data__ || obj).forEach(key => {
-    defineReactive(obj, key);
+    defineReactive(obj, key, defaultKey);
   });
   return obj;
 };
@@ -17,14 +17,14 @@ const observe = value => {
   Observer(value);
 };
 
-var defineReactive = (obj, key) => {
+var defineReactive = (obj, key, defaultKey) => {
   var childObj = observe(obj[key]);
   Object.defineProperty(obj, key, {
     get() {
       if (obj.__data__[key]) {
         return obj.__data__[key];
-      } else if (obj.__metas__['zh-CN'][key]) {
-        return obj.__metas__['zh-CN'][key];
+      } else if (obj.__metas__[defaultKey][key]) {
+        return obj.__metas__[defaultKey][key];
       }
     },
     set(newVal) {
