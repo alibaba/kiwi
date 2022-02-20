@@ -26,7 +26,7 @@ function javascriptI18n(code, filename) {
     }
   };
   let arrayPlugin = { visitor };
-  babel.transform(code.toString(), {
+  babel.transformSync(code.toString(), {
     filename,
     plugins: [arrayPlugin]
   });
@@ -243,7 +243,6 @@ function findTextInVue(code: string) {
   const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true });
   let vueAst = vueObejct.ast;
   let expressTemp = findVueText(vueAst);
-
   expressTemp.forEach(item => {
     item.arrf = [item.start, item.end];
 
@@ -251,18 +250,20 @@ function findTextInVue(code: string) {
   matches = expressTemp;
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp = transerI18n(outcode, 'as.vue', null);
+  
   /**删除所有的html中的头部空格 */
   vueTemp = vueTemp.map(item => {
     return item.trim();
   });
-  vueTemp = [...new Set(vueTemp)];
+ 
+  vueTemp = Array.from(new Set(vueTemp))
   let codeStaticArr = []
   vueObejct.staticRenderFns.forEach(item => {
     let childcode = item.toString().replace('with(this)', 'function a()')
     let vueTempChild = transerI18n(childcode, 'as.vue', null)
-    codeStaticArr = codeStaticArr.concat([...new Set(vueTempChild)])
+    codeStaticArr = codeStaticArr.concat(Array.from(new Set(vueTempChild)))
   })
-  vueTemp = [...new Set(codeStaticArr.concat(vueTemp))];
+  vueTemp = Array.from(new Set(codeStaticArr.concat(vueTemp)));
   vueTemp.forEach(item => {
     let items = item
       .replace(/\{/g, '\\{')
