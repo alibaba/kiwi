@@ -8,17 +8,24 @@ exports.PROJECT_CONFIG = exports.KIWI_CONFIG_FILE = void 0;
 exports.KIWI_CONFIG_FILE = 'kiwi-config.json';
 exports.PROJECT_CONFIG = {
     dir: './.kiwi',
-    configFile: `./.kiwi/${exports.KIWI_CONFIG_FILE}`,
     defaultConfig: {
         kiwiDir: './.kiwi',
-        configFile: `./.kiwi/${exports.KIWI_CONFIG_FILE}`,
         srcLang: 'zh-CN',
         distLangs: ['en-US', 'zh-TW'],
         googleApiKey: '',
+        baiduApiKey: {
+            appId: '',
+            appKey: ''
+        },
+        baiduLangMap: {
+            ['en-US']: 'en',
+            ['zh-TW']: 'cht'
+        },
         translateOptions: {
             concurrentLimit: 10,
             requestOptions: {}
         },
+        defaultTranslateKeyApi: 'Pinyin',
         importI18N: `import I18N from 'src/utils/I18N';`,
         ignoreDir: '',
         ignoreFile: ''
