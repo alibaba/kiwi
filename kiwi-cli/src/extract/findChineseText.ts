@@ -8,7 +8,6 @@ import * as compilerVue from 'vue-template-compiler';
 import * as babel from '@babel/core';
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
 
-
 function transerI18n(code, filename, lang) {
   if (lang === 'ts') {
     return typescriptI18n(code, filename);
@@ -245,24 +244,23 @@ function findTextInVue(code: string) {
   let expressTemp = findVueText(vueAst);
   expressTemp.forEach(item => {
     item.arrf = [item.start, item.end];
-
   });
   matches = expressTemp;
   let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
   let vueTemp = transerI18n(outcode, 'as.vue', null);
-  
+
   /**删除所有的html中的头部空格 */
   vueTemp = vueTemp.map(item => {
     return item.trim();
   });
- 
-  vueTemp = Array.from(new Set(vueTemp))
-  let codeStaticArr = []
+
+  vueTemp = Array.from(new Set(vueTemp));
+  let codeStaticArr = [];
   vueObejct.staticRenderFns.forEach(item => {
-    let childcode = item.toString().replace('with(this)', 'function a()')
-    let vueTempChild = transerI18n(childcode, 'as.vue', null)
-    codeStaticArr = codeStaticArr.concat(Array.from(new Set(vueTempChild)))
-  })
+    let childcode = item.toString().replace('with(this)', 'function a()');
+    let vueTempChild = transerI18n(childcode, 'as.vue', null);
+    codeStaticArr = codeStaticArr.concat(Array.from(new Set(vueTempChild)));
+  });
   vueTemp = Array.from(new Set(codeStaticArr.concat(vueTemp)));
   vueTemp.forEach(item => {
     let items = item
@@ -275,12 +273,12 @@ function findTextInVue(code: string) {
       .replace(/\*/g, '\\*')
       .replace(/\^/g, '\\^');
     let rex = new RegExp(items, 'g');
-    let codeTemplate = code.substring((vueObejct.ast as any).start, (vueObejct.ast as any).end)
+    let codeTemplate = code.substring((vueObejct.ast as any).start, (vueObejct.ast as any).end);
     while ((result = rex.exec(codeTemplate))) {
       let res = result;
       let last = rex.lastIndex;
       last = last - (res[0].length - res[0].trimRight().length);
-      const range = {start:res.index,end: last}
+      const range = { start: res.index, end: last };
       matches.push({
         arrf: [res.index, last],
         range,
@@ -327,7 +325,7 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除引号 */
-          const range = {start: start + startNum, end: end + startNum}
+          const range = { start: start + startNum, end: end + startNum };
           matches.push({
             range,
             text,
@@ -344,7 +342,7 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
-          const range = {start: start + startNum, end: end + startNum}
+          const range = { start: start + startNum, end: end + startNum };
           matches.push({
             range,
             text: code.slice(start + 1, end - 1),

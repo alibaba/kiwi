@@ -34,7 +34,7 @@ function exportMessages(file?: string, lang?: string) {
       console.log('All the messages have been translated.');
       return;
     }
-   
+
     const content = tsvFormatRows(messagesToTranslate);
     const sourceFile = file || `./export-${lang}`;
     fs.writeFileSync(sourceFile, content);
