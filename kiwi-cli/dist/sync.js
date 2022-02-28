@@ -28,7 +28,7 @@ function getTranslations(file, toLang) {
     const { default: texts } = require(srcFile);
     let distTexts;
     if (fs.existsSync(distFile)) {
-        const distTexts = require(distFile).default;
+        distTexts = require(distFile).default;
     }
     utils_1.traverse(texts, (text, path) => {
         const key = fileNameWithoutExt + '.' + path;

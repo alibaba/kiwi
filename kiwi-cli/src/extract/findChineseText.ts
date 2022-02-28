@@ -7,6 +7,50 @@ import * as compiler from '@angular/compiler';
 import * as compilerVue from 'vue-template-compiler';
 import * as babel from '@babel/core';
 const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
+
+
+function transerI18n(code, filename, lang) {
+  if (lang === 'ts') {
+    return typescriptI18n(code, filename);
+  } else {
+    return javascriptI18n(code, filename);
+  }
+}
+function javascriptI18n(code, filename) {
+  let arr = [];
+  let visitor = {
+    StringLiteral(path) {
+      if (path.node.value.match(DOUBLE_BYTE_REGEX)) {
+        arr.push(path.node.value);
+      }
+    }
+  };
+  let arrayPlugin = { visitor };
+  babel.transformSync(code.toString(), {
+    filename,
+    plugins: [arrayPlugin]
+  });
+  return arr;
+}
+function typescriptI18n(code, fileName) {
+  let arr = [];
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
+  function visit(node: ts.Node) {
+    switch (node.kind) {
+      case ts.SyntaxKind.StringLiteral: {
+        /** 判断 Ts 中的字符串含有中文 */
+        const { text } = node as ts.StringLiteral;
+        if (text.match(DOUBLE_BYTE_REGEX)) {
+          arr.push(text);
+        }
+        break;
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  ts.forEachChild(ast, visit);
+  return arr;
+}
 /**
  * 去掉文件中的注释
  * @param code
@@ -184,11 +228,91 @@ function findTextInHtml(code) {
  * @param code
  */
 function findTextInVue(code: string) {
+  let rexspace1 = new RegExp(/&ensp;/, 'g');
+  let rexspace2 = new RegExp(/&emsp;/, 'g');
+  let rexspace3 = new RegExp(/&nbsp;/, 'g');
+  code = code
+    .replace(rexspace1, 'ccsp&;')
+    .replace(rexspace2, 'ecsp&;')
+    .replace(rexspace3, 'ncsp&;');
+  let coverRex1 = new RegExp(/ccsp&;/, 'g');
+  let coverRex2 = new RegExp(/ecsp&;/, 'g');
+  let coverRex3 = new RegExp(/ncsp&;/, 'g');
+  let matches = [];
+  var result;
   const vueObejct = compilerVue.compile(code.toString(), { outputSourceRange: true });
-  let TextaArr = findVueText(vueObejct.ast);
+  let vueAst = vueObejct.ast;
+  let expressTemp = findVueText(vueAst);
+  expressTemp.forEach(item => {
+    item.arrf = [item.start, item.end];
+
+  });
+  matches = expressTemp;
+  let outcode = vueObejct.render.toString().replace('with(this)', 'function a()');
+  let vueTemp = transerI18n(outcode, 'as.vue', null);
+  
+  /**删除所有的html中的头部空格 */
+  vueTemp = vueTemp.map(item => {
+    return item.trim();
+  });
+ 
+  vueTemp = Array.from(new Set(vueTemp))
+  let codeStaticArr = []
+  vueObejct.staticRenderFns.forEach(item => {
+    let childcode = item.toString().replace('with(this)', 'function a()')
+    let vueTempChild = transerI18n(childcode, 'as.vue', null)
+    codeStaticArr = codeStaticArr.concat(Array.from(new Set(vueTempChild)))
+  })
+  vueTemp = Array.from(new Set(codeStaticArr.concat(vueTemp)));
+  vueTemp.forEach(item => {
+    let items = item
+      .replace(/\{/g, '\\{')
+      .replace(/\}/g, '\\}')
+      .replace(/\$/g, '\\$')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)')
+      .replace(/\+/g, '\\+')
+      .replace(/\*/g, '\\*')
+      .replace(/\^/g, '\\^');
+    let rex = new RegExp(items, 'g');
+    let codeTemplate = code.substring(vueObejct.ast.start, vueObejct.ast.end)
+    while ((result = rex.exec(codeTemplate))) {
+      let res = result;
+      let last = rex.lastIndex;
+      last = last - (res[0].length - res[0].trimRight().length);
+      const range = {start:res.index,end: last}
+      matches.push({
+        arrf: [res.index, last],
+        range,
+        text: res[0]
+          .trimRight()
+          .replace(coverRex1, '&ensp;')
+          .replace(coverRex2, '&emsp;')
+          .replace(coverRex3, '&nbsp;'),
+        isString:
+          (codeTemplate.substr(res.index - 1, 1) === '"' && codeTemplate.substr(last, 1) === '"') ||
+          (codeTemplate.substr(res.index - 1, 1) === "'" && codeTemplate.substr(last, 1) === "'")
+            ? true
+            : false
+      });
+    }
+  });
+  let matchesTemp = matches;
+  let matchesTempResult = matchesTemp.filter((item, index) => {
+    let canBe = true;
+    matchesTemp.forEach(items => {
+      if (
+        (item.arrf[0] > items.arrf[0] && item.arrf[1] <= items.arrf[1]) ||
+        (item.arrf[0] >= items.arrf[0] && item.arrf[1] < items.arrf[1]) ||
+        (item.arrf[0] > items.arrf[0] && item.arrf[1] < items.arrf[1])
+      ) {
+        canBe = false;
+      }
+    });
+    if (canBe) return item;
+  });
   const sfc = compilerVue.parseComponent(code.toString());
-  let vueTemp = findTextInVueTs(sfc.script.content, 'fileName', sfc.script.start);
-  return vueTemp.concat(TextaArr);
+  return matchesTempResult.concat(findTextInVueTs(sfc.script.content, 'AS', sfc.script.start));
 }
 function findTextInVueTs(code: string, fileName: string, startNum: number) {
   const matches = [];
@@ -203,8 +327,7 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除引号 */
-
-          const range = { start: start + startNum, end: end + startNum };
+          const range = {start: start + startNum, end: end + startNum}
           matches.push({
             range,
             text,
@@ -221,10 +344,7 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
-          const range =
-            code.indexOf('${') !== -1
-              ? { start: start + startNum, end: end + startNum }
-              : { start: start + startNum + 1, end: end + startNum - 1 };
+          const range = {start: start + startNum, end: end + startNum}
           matches.push({
             range,
             text: code.slice(start + 1, end - 1),
@@ -299,4 +419,4 @@ function findChineseText(code: string, fileName: string) {
   }
 }
 
-export { findChineseText };
+export { findChineseText, findTextInVue };

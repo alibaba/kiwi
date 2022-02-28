@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mockLangs = void 0;
+exports.getAllUntranslatedTexts = exports.mockLangs = void 0;
 /**
  * @author linhuiw
  * @desc 翻译方法
@@ -24,22 +24,8 @@ const path = require("path");
 const fs = require("fs");
 const _ = require("lodash");
 const utils_1 = require("./utils");
+const translate_1 = require("./translate");
 const CONFIG = utils_1.getProjectConfig();
-const { translate: googleTranslate } = require('google-translate')(CONFIG.googleApiKey);
-const utils_2 = require("./utils");
-const const_1 = require("./const");
-function translateText(text, toLang) {
-    return utils_2.withTimeout(new Promise((resolve, reject) => {
-        googleTranslate(text, 'zh', const_1.PROJECT_CONFIG.langMap[toLang], (err, translation) => {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(translation.translatedText);
-            }
-        });
-    }), 5000);
-}
 /**
  * 获取中文文案
  */
@@ -63,33 +49,38 @@ function getDistText(dstLang) {
     return distTexts;
 }
 /**
+ * 获取所有未翻译的文案
+ * @param 目标语种
+ */
+function getAllUntranslatedTexts(toLang) {
+    const texts = getSourceText();
+    const distTexts = getDistText(toLang);
+    const untranslatedTexts = {};
+    /** 遍历文案 */
+    utils_1.traverse(texts, (text, path) => {
+        const distText = _.get(distTexts, path);
+        if (text === distText || !distText) {
+            untranslatedTexts[path] = text;
+        }
+    });
+    return untranslatedTexts;
+}
+exports.getAllUntranslatedTexts = getAllUntranslatedTexts;
+/**
  * Mock 对应语言
  * @param dstLang
  */
-function mockCurrentLang(dstLang) {
+function mockCurrentLang(dstLang, origin) {
     return __awaiter(this, void 0, void 0, function* () {
-        const texts = getSourceText();
-        const distTexts = getDistText(dstLang);
-        const untranslatedTexts = {};
-        const mocks = {};
-        /** 遍历文案 */
-        utils_1.traverse(texts, (text, path) => {
-            const distText = _.get(distTexts, path);
-            if (text === distText) {
-                untranslatedTexts[path] = text;
-            }
-        });
-        /** 调用 Google 翻译 */
-        const translateAllTexts = Object.keys(untranslatedTexts).map(key => {
-            return translateText(untranslatedTexts[key], dstLang).then(translatedText => [key, translatedText]);
-        });
-        /** 获取 Mocks 文案 */
-        yield Promise.all(translateAllTexts).then(res => {
-            res.forEach(([key, translatedText]) => {
-                mocks[key] = translatedText;
-            });
-            return mocks;
-        });
+        const untranslatedTexts = getAllUntranslatedTexts(dstLang);
+        let mocks = {};
+        if (origin === 'Google') {
+            mocks = yield translate_1.googleTranslateTexts(untranslatedTexts, dstLang);
+        }
+        else {
+            mocks = yield translate_1.baiduTranslateTexts(untranslatedTexts, dstLang);
+        }
+        /** 所有任务执行完毕后，写入mock文件 */
         return writeMockFile(dstLang, mocks);
     });
 }
@@ -116,14 +107,21 @@ function writeMockFile(dstLang, mocks) {
  * Mock 语言的未翻译的文案
  * @param lang
  */
-function mockLangs(lang) {
+function mockLangs(origin) {
     return __awaiter(this, void 0, void 0, function* () {
-        const CONFIG = utils_1.getProjectConfig();
-        const langs = lang ? [lang] : CONFIG.distLangs;
-        const mockPromise = langs.map(lang => {
-            return mockCurrentLang(lang);
-        });
-        return Promise.all(mockPromise);
+        const langs = CONFIG.distLangs;
+        if (origin === 'Google') {
+            const mockPromise = langs.map(lang => {
+                return mockCurrentLang(lang, origin);
+            });
+            return Promise.all(mockPromise);
+        }
+        else {
+            for (var i = 0; i < langs.length; i++) {
+                yield mockCurrentLang(langs[i], origin);
+            }
+            return Promise.resolve();
+        }
     });
 }
 exports.mockLangs = mockLangs;

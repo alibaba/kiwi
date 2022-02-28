@@ -283,6 +283,13 @@ function findTextInVue(code, fileName) {
     return item.trim();
   });
   vueTemp = [...new Set(vueTemp)];
+  let codeStaticArr = []
+  vueObejct.staticRenderFns.forEach(item => {
+    let childcode = item.toString().replace('with(this)', 'function a()')
+    let vueTempChild = transerI18n(childcode, 'as.vue', null)
+    codeStaticArr = codeStaticArr.concat([...new Set(vueTempChild)])
+  })
+  vueTemp = [...new Set(codeStaticArr.concat(vueTemp))];
   vueTemp.forEach(item => {
     let items = item
       .replace(/\{/g, '\\{')
@@ -294,7 +301,8 @@ function findTextInVue(code, fileName) {
       .replace(/\*/g, '\\*')
       .replace(/\^/g, '\\^');
     let rex = new RegExp(items, 'g');
-    while ((result = rex.exec(code))) {
+    let codeTemplate = code.substring(vueObejct.ast.start, vueObejct.ast.end)
+    while ((result = rex.exec(codeTemplate))) {
       let res = result;
       let last = rex.lastIndex;
       last = last - (res[0].length - res[0].trimRight().length);
@@ -308,8 +316,8 @@ function findTextInVue(code, fileName) {
           .replace(coverRex2, '&emsp;')
           .replace(coverRex3, '&nbsp;'),
         isString:
-          (code.substr(res.index - 1, 1) === '"' && code.substr(last, 1) === '"') ||
-          (code.substr(res.index - 1, 1) === "'" && code.substr(last, 1) === "'")
+          (codeTemplate.substr(res.index - 1, 1) === '"' && codeTemplate.substr(last, 1) === '"') ||
+          (codeTemplate.substr(res.index - 1, 1) === "'" && codeTemplate.substr(last, 1) === "'")
             ? true
             : false
       });
@@ -330,6 +338,7 @@ function findTextInVue(code, fileName) {
     if (canBe) return item;
   });
   const sfc = compilerVue.parseComponent(code.toString());
+  
   return matchesTempResult.concat(findTextInVueTs(sfc.script.content, fileName, sfc.script.start));
 }
 /**

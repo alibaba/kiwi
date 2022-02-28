@@ -5,32 +5,26 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initProject = void 0;
-const _ = require("lodash");
 const path = require("path");
 const fs = require("fs");
-const utils_1 = require("./utils");
 const const_1 = require("./const");
 function creteConfigFile(existDir) {
-    if (!utils_1.lookForFiles(path.resolve(process.cwd(), `./`), const_1.KIWI_CONFIG_FILE)) {
-        const existConfigFile = _.endsWith(existDir, '/')
-            ? `${existDir}${const_1.KIWI_CONFIG_FILE}`
-            : `${existDir}/${const_1.KIWI_CONFIG_FILE}`;
-        if (existDir && fs.existsSync(existDir) && !fs.existsSync(existConfigFile)) {
-            const config = JSON.stringify(Object.assign(Object.assign({}, const_1.PROJECT_CONFIG.defaultConfig), { kiwiDir: existDir, configFile: existConfigFile }), null, 2);
-            fs.writeFile(existConfigFile, config, err => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        }
-        else if (!fs.existsSync(const_1.PROJECT_CONFIG.configFile)) {
-            const config = JSON.stringify(const_1.PROJECT_CONFIG.defaultConfig, null, 2);
-            fs.writeFile(const_1.PROJECT_CONFIG.configFile, config, err => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        }
+    const configDir = path.resolve(process.cwd(), `./${const_1.KIWI_CONFIG_FILE}`);
+    if (existDir && fs.existsSync(existDir) && !fs.existsSync(configDir)) {
+        const config = JSON.stringify(Object.assign(Object.assign({}, const_1.PROJECT_CONFIG.defaultConfig), { kiwiDir: existDir }), null, 2);
+        fs.writeFile(configDir, config, err => {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
+    else if (!fs.existsSync(configDir)) {
+        const config = JSON.stringify(const_1.PROJECT_CONFIG.defaultConfig, null, 2);
+        fs.writeFile(configDir, config, err => {
+            if (err) {
+                console.log(err);
+            }
+        });
     }
 }
 function createCnFile() {

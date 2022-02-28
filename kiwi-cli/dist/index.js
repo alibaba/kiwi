@@ -19,6 +19,8 @@ const import_1 = require("./import");
 const unused_1 = require("./unused");
 const mock_1 = require("./mock");
 const extract_1 = require("./extract/extract");
+const translate_1 = require("./translate");
+const utils_1 = require("./utils");
 const ora = require("ora");
 /**
  * 进度条加载
@@ -38,7 +40,8 @@ commander
     .option('--import [file] [lang]', '导入翻译文案')
     .option('--export [file] [lang]', '导出未翻译的文案')
     .option('--sync', '同步各种语言的文案')
-    .option('--mock', '使用 Google 翻译')
+    .option('--mock', '使用 Google 或者 Baidu 翻译 输出mock文件')
+    .option('--translate', '使用 Google 或者 Baidu 翻译 翻译结果自动替换目标语种文案')
     .option('--unused', '导出未使用的文案')
     .option('--extract [dirPath]', '一键替换指定文件夹下的所有中文文案')
     .parse(process.argv);
@@ -98,10 +101,23 @@ if (commander.unused) {
     });
 }
 if (commander.mock) {
-    const spinner = ora('使用 Google 翻译中...').start();
     sync_1.sync(() => __awaiter(void 0, void 0, void 0, function* () {
-        yield mock_1.mockLangs();
-        spinner.succeed('使用 Google 翻译成功');
+        const { pass, origin } = yield utils_1.getTranslateOriginType();
+        if (pass) {
+            const spinner = ora(`使用 ${origin} 翻译中...`).start();
+            yield mock_1.mockLangs(origin);
+            spinner.succeed(`使用 ${origin} 翻译成功`);
+        }
+    }));
+}
+if (commander.translate) {
+    sync_1.sync(() => __awaiter(void 0, void 0, void 0, function* () {
+        const { pass, origin } = yield utils_1.getTranslateOriginType();
+        if (pass) {
+            const spinner = ora(`使用 ${origin} 翻译中...`).start();
+            yield translate_1.translate(origin);
+            spinner.succeed(`使用 ${origin} 翻译成功`);
+        }
     }));
 }
 if (commander.extract) {
