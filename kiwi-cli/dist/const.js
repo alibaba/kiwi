@@ -4,7 +4,6 @@
  * @desc 项目配置文件配置信息
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PROJECT_CONFIG = exports.KIWI_CONFIG_FILE = void 0;
 exports.KIWI_CONFIG_FILE = 'kiwi-config.json';
 exports.PROJECT_CONFIG = {
     dir: './.kiwi',

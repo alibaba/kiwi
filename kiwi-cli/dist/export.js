@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportMessages = void 0;
 /**
  * @author linhuiw
  * @desc 导出未翻译文件

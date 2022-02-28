@@ -1,15 +1,13 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.highlightText = exports.failInfo = exports.successInfo = exports.translateKeyText = exports.getTranslateOriginType = exports.lookForFiles = exports.flatten = exports.findMatchValue = exports.findMatchKey = exports.translateText = exports.getProjectConfig = exports.getAllMessages = exports.withTimeout = exports.retry = exports.traverse = exports.getLangDir = exports.getKiwiDir = void 0;
 /**
  * @author linhuiw
  * @desc 工具方法
@@ -48,7 +46,7 @@ function getProjectConfig() {
     const configFile = path.resolve(process.cwd(), `./${const_1.KIWI_CONFIG_FILE}`);
     let obj = const_1.PROJECT_CONFIG.defaultConfig;
     if (configFile && fs.existsSync(configFile)) {
-        obj = Object.assign(Object.assign({}, obj), JSON.parse(fs.readFileSync(configFile, 'utf8')));
+        obj = Object.assign({}, obj, JSON.parse(fs.readFileSync(configFile, 'utf8')));
     }
     return obj;
 }

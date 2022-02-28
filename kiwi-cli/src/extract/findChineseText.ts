@@ -275,7 +275,7 @@ function findTextInVue(code: string) {
       .replace(/\*/g, '\\*')
       .replace(/\^/g, '\\^');
     let rex = new RegExp(items, 'g');
-    let codeTemplate = code.substring(vueObejct.ast.start, vueObejct.ast.end)
+    let codeTemplate = code.substring((vueObejct.ast as any).start, (vueObejct.ast as any).end)
     while ((result = rex.exec(codeTemplate))) {
       let res = result;
       let last = rex.lastIndex;
