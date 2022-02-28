@@ -2,6 +2,8 @@
 
 Kiwi Cli
 
+## 1.0.20（2022-02-28）
+- kiwi 优化在vue环境下中文检测与linter保持同步
 ## 1.0.19（2022-01-26）
 
 ### Breaking changes
