@@ -58,7 +58,9 @@ Kiwi 的 CLI 工具
 1. 一键批量替换指定文件夹下的所有文案
 
 ```shell script
-kiwi --extract [dirPath]
+# --extract [dirPath] 指定文件夹路径 
+# --prefix [prefix] 指定文案前缀
+kiwi --extract [dirPath] --prefix [prefix]
 ```
 
 2. commit 提交时自动增量提取，在 precommit 脚本内添加如下指令
