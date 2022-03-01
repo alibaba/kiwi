@@ -80,9 +80,10 @@ function getTransOriginText(text: string) {
  * 递归匹配项目中所有的代码的中文
  * @param {dirPath} 文件夹路径
  */
-function extractAll(dirPath?: string) {
+function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) {
   const dir = dirPath || './';
-
+  // 去除I18N
+  const langsPrefix = prefix ? prefix.replace(/^I18N\./, '') : null;
   // 翻译源配置错误，则终止
   const origin = CONFIG.defaultTranslateKeyApi || 'Pinyin';
   if (!['Pinyin', 'Google', 'Baidu'].includes(CONFIG.defaultTranslateKeyApi)) {
@@ -193,6 +194,9 @@ function extractAll(dirPath?: string) {
         }
         const transText = translateTexts[i] && _.camelCase(translateTexts[i] as string);
         let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
+        if (langsPrefix) {
+          transKey = `${langsPrefix}.${transText}`;
+        }
         let occurTime = 1;
         // 防止出现前四位相同但是整体文案不同的情况
         while (
