@@ -59,7 +59,7 @@ Kiwi 的 CLI 工具
 
 ```shell script
 # --extract [dirPath] 指定文件夹路径 
-# --prefix [prefix] 指定文案前缀
+# --prefix [prefix] 指定文案前缀 I18N.xxxx
 kiwi --extract [dirPath] --prefix [prefix]
 ```
 
