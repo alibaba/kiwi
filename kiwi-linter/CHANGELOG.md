@@ -1,7 +1,7 @@
 # 🐤 Change Log
 Kiwi Linter
 
-## 1.4.5（2022-02-28）
+## 1.4.7（2022-02-28）
 
 ### Bug Fixes
 - 优化中文提取不完整错位的问题 [#88](https://github.com/alibaba/kiwi/issues/88)
