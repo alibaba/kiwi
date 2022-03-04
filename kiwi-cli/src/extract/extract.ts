@@ -77,6 +77,94 @@ function getTransOriginText(text: string) {
 }
 
 /**
+ * @param currentFilename 文件路径
+ * @returns string[]
+ */
+function getSuggestion(currentFilename: string) {
+  let suggestion = [];
+  const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
+
+  if (currentFilename.includes('/pages/')) {
+    suggestion = currentFilename.match(suggestPageRegex);
+  }
+  if (suggestion) {
+    suggestion.shift();
+  }
+  /** 如果没有匹配到 Key */
+  if (!(suggestion && suggestion.length)) {
+    const names = slash(currentFilename).split('/');
+    const fileName = _.last(names) as any;
+    const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
+    const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
+    if (dir === fileKey) {
+      suggestion = [dir];
+    } else {
+      suggestion = [dir, fileKey];
+    }
+  }
+
+  return suggestion;
+}
+
+/**
+ * 统一处理key值，已提取过的文案直接替换，翻译后的key若相同，加上出现次数
+ * @param currentFilename 文件路径
+ * @param langsPrefix 替换后的前缀
+ * @param translateTexts 翻译后的key值
+ * @param targetStrs 当前文件提取后的文案
+ * @returns any[] 最终可用于替换的key值和文案
+ */
+function getReplaceableStrs(currentFilename: string, langsPrefix: string, translateTexts: string[], targetStrs: any[]) {
+  const finalLangObj = getSuggestLangObj();
+  const virtualMemory = {};
+  const suggestion = getSuggestion(currentFilename);
+  const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
+    const key = findMatchKey(finalLangObj, curr.text);
+    if (!virtualMemory[curr.text]) {
+      if (key) {
+        virtualMemory[curr.text] = key;
+        return prev.concat({
+          target: curr,
+          key,
+          needWrite: false
+        });
+      }
+      const transText = translateTexts[i] && _.camelCase(translateTexts[i] as string);
+      let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
+      if (langsPrefix) {
+        transKey = `${langsPrefix}.${transText}`;
+      }
+      let occurTime = 1;
+      // 防止出现前四位相同但是整体文案不同的情况
+      while (
+        findMatchValue(finalLangObj, transKey) !== curr.text &&
+        _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
+      ) {
+        occurTime++;
+      }
+      if (occurTime >= 2) {
+        transKey = `${transKey}${occurTime}`;
+      }
+      virtualMemory[curr.text] = transKey;
+      finalLangObj[transKey] = curr.text;
+      return prev.concat({
+        target: curr,
+        key: transKey,
+        needWrite: true
+      });
+    } else {
+      return prev.concat({
+        target: curr,
+        key: virtualMemory[curr.text],
+        needWrite: true
+      });
+    }
+  }, []);
+
+  return replaceableStrs;
+}
+
+/**
  * 递归匹配项目中所有的代码的中文
  * @param {dirPath} 文件夹路径
  */
@@ -112,7 +200,8 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
 
   console.log('即将截取每个中文文案的前5位翻译生成key值，并替换中...');
 
-  allTargetStrs.forEach(async item => {
+  // 对当前文件进行文案key生成和替换
+  const generateKeyAndReplace = async item => {
     const currentFilename = item.file;
     console.log(`${currentFilename} 替换中...`);
     // 过滤掉模板字符串内的中文，避免替换时出现异常
@@ -128,41 +217,18 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
     if (len > 0) {
       console.log(`存在 ${highlightText(len)} 处文案无法替换，请避免在模板字符串的变量中嵌套中文`);
     }
-    const suggestPageRegex = /\/pages\/\w+\/([^\/]+)\/([^\/\.]+)/;
-
-    let suggestion = [];
-    const finalLangObj = getSuggestLangObj();
-    const virtualMemory = {};
-
-    if (currentFilename.includes('/pages/')) {
-      suggestion = currentFilename.match(suggestPageRegex);
-    }
-    if (suggestion) {
-      suggestion.shift();
-    }
-    /** 如果没有匹配到 Key */
-    if (!(suggestion && suggestion.length)) {
-      const names = slash(currentFilename).split('/');
-      const fileName = _.last(names) as any;
-      const fileKey = fileName.split('.')[0].replace(new RegExp('-', 'g'), '_');
-      const dir = names[names.length - 2].replace(new RegExp('-', 'g'), '_');
-      if (dir === fileKey) {
-        suggestion = [dir];
-      } else {
-        suggestion = [dir, fileKey];
-      }
-    }
 
     let translateTexts;
 
     if (origin !== 'Google') {
       // 翻译中文文案，百度和pinyin将文案进行拼接统一翻译
+      const delimiter = origin === 'Baidu' ? '\n' : '$';
       const translateOriginTexts = targetStrs.reduce((prev, curr, i) => {
         const transOriginText = getTransOriginText(curr.text);
         if (i === 0) {
           return transOriginText;
         }
-        return `${prev}$${transOriginText}`;
+        return `${prev}${delimiter}${transOriginText}`;
       }, []);
 
       translateTexts = await translateKeyText(translateOriginTexts, origin);
@@ -181,50 +247,9 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
       return;
     }
 
-    const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
-      const key = findMatchKey(finalLangObj, curr.text);
-      if (!virtualMemory[curr.text]) {
-        if (key) {
-          virtualMemory[curr.text] = key;
-          return prev.concat({
-            target: curr,
-            key,
-            needWrite: false
-          });
-        }
-        const transText = translateTexts[i] && _.camelCase(translateTexts[i] as string);
-        let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
-        if (langsPrefix) {
-          transKey = `${langsPrefix}.${transText}`;
-        }
-        let occurTime = 1;
-        // 防止出现前四位相同但是整体文案不同的情况
-        while (
-          findMatchValue(finalLangObj, transKey) !== curr.text &&
-          _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
-        ) {
-          occurTime++;
-        }
-        if (occurTime >= 2) {
-          transKey = `${transKey}${occurTime}`;
-        }
-        virtualMemory[curr.text] = transKey;
-        finalLangObj[transKey] = curr.text;
-        return prev.concat({
-          target: curr,
-          key: transKey,
-          needWrite: true
-        });
-      } else {
-        return prev.concat({
-          target: curr,
-          key: virtualMemory[curr.text],
-          needWrite: true
-        });
-      }
-    }, []);
+    const replaceableStrs = getReplaceableStrs(currentFilename, langsPrefix, translateTexts, targetStrs);
 
-    replaceableStrs
+    await replaceableStrs
       .reduce((prev, obj) => {
         return prev.then(() => {
           return replaceAndUpdate(currentFilename, obj.target, `I18N.${obj.key}`, false, obj.needWrite);
@@ -242,7 +267,17 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
       .catch(e => {
         failInfo(e.message);
       });
-  });
+  };
+
+  allTargetStrs
+    .reduce((prev, current) => {
+      return prev.then(() => {
+        return generateKeyAndReplace(current);
+      });
+    }, Promise.resolve())
+    .then(() => {
+      successInfo('全部替换完成！');
+    });
 }
 
 export { extractAll };
