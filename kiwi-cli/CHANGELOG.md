@@ -2,6 +2,9 @@
 
 Kiwi Cli
 
+## 1.0.22 (2022-03-04)
+-  kiwi --extract 修复多文件提取时的并发问题
+-  kiwi --extract 修复文案key出现undefined的情况
 ## 1.0.21 (2022-03-01)
 -  kiwi --extract 添加 --prefix 参数，自定义配置 118N 提取文案路径
 ## 1.0.20（2022-02-28）
