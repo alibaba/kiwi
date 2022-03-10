@@ -10,7 +10,7 @@ import { getSuggestLangObj } from './getLangData';
 import { DIR_ADAPTOR } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
-import { TargetStr } from './define';
+import { TargetStr, TranslateAPiEnum } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
 import {
   findMatchKey,
@@ -265,15 +265,16 @@ export function activate(context: vscode.ExtensionContext) {
             return item.range['_start']['_line'];
           });
           // 翻译中文文案
+          const delimiter = translateApi === TranslateAPiEnum.Baidu ? '\n' : '$';
           const translateTexts = sortTargetStrs.reduce((prev, curr, i) => {
             // 避免翻译的字符里包含数字或者特殊字符等情况，只过滤出汉字和字母
             const reg = /[a-zA-Z\u4e00-\u9fa5]+/g;
             const findText = curr.text.match(reg) || [];
-            const transText = findText.join('').slice(0, 4) || '中文符号';
+            const transText = findText.join('').slice(0, 5) || '中文符号';
             if (i === 0) {
               return transText;
             }
-            return `${prev}$${transText}`;
+            return `${prev}${delimiter}${transText}`;
           }, '');
           console.log('key值翻译原文：', translateTexts);
 
