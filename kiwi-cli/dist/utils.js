@@ -174,7 +174,7 @@ function translateKeyText(text, origin) {
                 baiduTranslate(appId, appKey, 'en', 'zh')(text)
                     .then(data => {
                     if (data && data.trans_result) {
-                        const result = data.trans_result[0] ? data.trans_result[0].dst.split('$') : [];
+                        const result = data.trans_result.map(item => item.dst) || [];
                         resolve(result);
                     }
                 })
