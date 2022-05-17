@@ -4,7 +4,7 @@
  */
 
 import IntlMessageFormat from 'intl-messageformat';
-import * as lodashGet from 'lodash.get';
+import lodashGet from 'lodash.get';
 import Observer from './Observer';
 
 export interface I18NAPI {
