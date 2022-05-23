@@ -59,6 +59,7 @@ function getDefaultDir() {
 const LANG_PREFIX = getDefaultDir();
 const DIR_ADAPTOR = dirAdaptor();
 const I18N_GLOB = `${LANG_PREFIX}**/*.ts`;
-const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
+/** unicode cjk 中日韩文 范围 */
+const DOUBLE_BYTE_REGEX = /[\u4E00-\u9FFF]/g;
 
 export { LANG_PREFIX, I18N_GLOB, DOUBLE_BYTE_REGEX, DIR_ADAPTOR };

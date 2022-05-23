@@ -6,7 +6,8 @@ import * as ts from 'typescript';
 import * as compiler from '@angular/compiler';
 import * as compilerVue from 'vue-template-compiler';
 import * as babel from '@babel/core';
-const DOUBLE_BYTE_REGEX = /[^\x00-\xff]/g;
+/** unicode cjk 中日韩文 范围 */
+const DOUBLE_BYTE_REGEX = /[\u4E00-\u9FFF]/g;
 
 function transerI18n(code, filename, lang) {
   if (lang === 'ts') {
