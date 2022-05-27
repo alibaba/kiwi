@@ -212,7 +212,8 @@ exports.findMatchValue = findMatchValue;
  */
 function flatten(obj, prefix = '') {
     var propName = prefix ? prefix + '.' : '', ret = {};
-    for (var attr in obj) {
+    for (var attribute in obj) {
+        var attr = attribute.replace(/-/g, '_');
         if (_.isArray(obj[attr])) {
             var len = obj[attr].length;
             ret[attr] = obj[attr].join(',');
@@ -271,14 +272,14 @@ exports.getTranslateOriginType = getTranslateOriginType;
  * 成功的提示
  */
 function successInfo(message) {
-    console.log(colors.green(message));
+    console.log('successInfo: ', colors.green(message));
 }
 exports.successInfo = successInfo;
 /**
  * 失败的提示
  */
 function failInfo(message) {
-    console.log(colors.red(message));
+    console.log('failInfo: ', colors.red(message));
 }
 exports.failInfo = failInfo;
 /**
