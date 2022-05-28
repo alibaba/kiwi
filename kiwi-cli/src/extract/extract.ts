@@ -6,6 +6,8 @@
 import * as _ from 'lodash';
 import * as slash from 'slash2';
 import * as path from 'path';
+import * as colors from 'colors';
+
 import { getSpecifiedFiles, readFile, writeFile, isFile, isDirectory } from './file';
 import { findChineseText } from './findChineseText';
 import { getSuggestLangObj } from './getLangData';
@@ -119,10 +121,14 @@ function getReplaceableStrs(currentFilename: string, langsPrefix: string, transl
   const virtualMemory = {};
   const suggestion = getSuggestion(currentFilename);
   const replaceableStrs = targetStrs.reduce((prev, curr, i) => {
-    const key = findMatchKey(finalLangObj, curr.text);
-    if (!virtualMemory[curr.text]) {
+    const _text = curr.text;
+    let key = findMatchKey(finalLangObj, _text);
+    if (key) {
+      key = key.replace(/-/g, '_');
+    }
+    if (!virtualMemory[_text]) {
       if (key) {
-        virtualMemory[curr.text] = key;
+        virtualMemory[_text] = key;
         return prev.concat({
           target: curr,
           key,
@@ -131,13 +137,14 @@ function getReplaceableStrs(currentFilename: string, langsPrefix: string, transl
       }
       const transText = translateTexts[i] && _.camelCase(translateTexts[i] as string);
       let transKey = `${suggestion.length ? suggestion.join('.') + '.' : ''}${transText}`;
+      transKey = transKey.replace(/-/g, '_');
       if (langsPrefix) {
         transKey = `${langsPrefix}.${transText}`;
       }
       let occurTime = 1;
       // 防止出现前四位相同但是整体文案不同的情况
       while (
-        findMatchValue(finalLangObj, transKey) !== curr.text &&
+        findMatchValue(finalLangObj, transKey) !== _text &&
         _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
       ) {
         occurTime++;
@@ -145,8 +152,8 @@ function getReplaceableStrs(currentFilename: string, langsPrefix: string, transl
       if (occurTime >= 2) {
         transKey = `${transKey}${occurTime}`;
       }
-      virtualMemory[curr.text] = transKey;
-      finalLangObj[transKey] = curr.text;
+      virtualMemory[_text] = transKey;
+      finalLangObj[transKey] = _text;
       return prev.concat({
         target: curr,
         key: transKey,
@@ -155,7 +162,7 @@ function getReplaceableStrs(currentFilename: string, langsPrefix: string, transl
     } else {
       return prev.concat({
         target: curr,
-        key: virtualMemory[curr.text],
+        key: virtualMemory[_text],
         needWrite: true
       });
     }
@@ -215,7 +222,7 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
     }, []);
     const len = item.texts.length - targetStrs.length;
     if (len > 0) {
-      console.log(`存在 ${highlightText(len)} 处文案无法替换，请避免在模板字符串的变量中嵌套中文`);
+      console.log(colors.red(`存在 ${highlightText(len)} 处文案无法替换，请避免在模板字符串的变量中嵌套中文`));
     }
 
     let translateTexts;
@@ -277,6 +284,9 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
     }, Promise.resolve())
     .then(() => {
       successInfo('全部替换完成！');
+    })
+    .catch((e: any) => {
+      failInfo(e.message);
     });
 }
 
