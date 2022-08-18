@@ -221,7 +221,8 @@ function flatten(obj, prefix = '') {
   var propName = prefix ? prefix + '.' : '',
     ret = {};
 
-  for (var attr in obj) {
+  for (var attribute in obj) {
+    var attr = attribute.replace(/-/g, '_');
     if (_.isArray(obj[attr])) {
       var len = obj[attr].length;
       ret[attr] = obj[attr].join(',');
@@ -276,14 +277,14 @@ async function getTranslateOriginType() {
  * 成功的提示
  */
 function successInfo(message: string) {
-  console.log(colors.green(message));
+  console.log('successInfo: ', colors.green(message));
 }
 
 /**
  * 失败的提示
  */
 function failInfo(message: string) {
-  console.log(colors.red(message));
+  console.log('failInfo: ', colors.red(message));
 }
 
 /**

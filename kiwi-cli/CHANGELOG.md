@@ -2,6 +2,9 @@
 
 Kiwi Cli
 
+## 1.0.23 (2022-06-10)
+-  kiwi --extract 兼容文件夹中带 - 的情况
+
 ## 1.0.22 (2022-03-04)
 -  kiwi --extract 修复多文件提取时的并发问题
 -  kiwi --extract 修复文案key出现undefined的情况
