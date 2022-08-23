@@ -13,9 +13,10 @@ import * as fs from 'fs';
  * @param  {string} dir 路径
  * @param {ignoreDirectory} 忽略文件夹 {ignoreFile} 忽略的文件
  */
-function getSpecifiedFiles(dir, ignoreDirectory = '', ignoreFile = '') {
+function getSpecifiedFiles(dir, ignoreDirectory = [], ignoreFile = []) {
   return fs.readdirSync(dir).reduce((files, file) => {
     const name = path.join(dir, file);
+
     const isDirectory = fs.statSync(name).isDirectory();
     const isFile = fs.statSync(name).isFile();
 
@@ -23,16 +24,26 @@ function getSpecifiedFiles(dir, ignoreDirectory = '', ignoreFile = '') {
       return files.concat(getSpecifiedFiles(name, ignoreDirectory, ignoreFile));
     }
 
-    const isIgnoreDirectory =
-      !ignoreDirectory ||
-      (ignoreDirectory &&
-        !path
+    const isIncludeDirectory =
+      !(ignoreDirectory || []).length ||
+      !(ignoreDirectory || []).some(ignoreDir => {
+        return path
           .dirname(name)
-          .split('/')
-          .includes(ignoreDirectory));
-    const isIgnoreFile = !ignoreFile || (ignoreFile && path.basename(name) !== ignoreFile);
+          .split(path.sep)
+          .join('/')
+          .includes(ignoreDir);
+      });
 
-    if (isFile && isIgnoreDirectory && isIgnoreFile) {
+    const isIncludeFile =
+      !(ignoreFile || []).length ||
+      !(ignoreFile || []).some(filename =>
+        name
+          .split(path.sep)
+          .join('/')
+          .includes(filename)
+      );
+
+    if (isFile && isIncludeDirectory && isIncludeFile) {
       return files.concat(name);
     }
     return files;
