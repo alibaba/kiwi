@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as slash from 'slash2';
 import { pinyin } from 'pinyin-pro';
 import { TranslateAPiEnum } from './define';
+import { getObjectLiteralExpression } from './astUtils';
 
 /**
  * 将对象拍平
@@ -84,13 +85,12 @@ export const getAllFiles = dir =>
  */
 export function getLangJson(fileName) {
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
-  let obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)[1];
-  obj = obj.replace(/\s*;\s*$/, '');
+  let objStr = getObjectLiteralExpression(fileContent);
   let jsObj = {};
   try {
-    jsObj = eval('(' + obj + ')');
+    jsObj = eval('(' + objStr + ')');
   } catch (err) {
-    console.log(obj);
+    console.log(objStr);
     console.error(err);
   }
   return jsObj;
