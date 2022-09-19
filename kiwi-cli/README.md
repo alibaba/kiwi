@@ -47,9 +47,12 @@ Kiwi 的 CLI 工具
   // import 语句，不同项目请自己配置
   "importI18N": "",
 
-  // 可跳过的文件夹名或者文加名，比如docs、mock等
-  "ignoreDir": "",
-  "ignoreFile": ""
+  // 可跳过的文件夹名或者文加名，比如docs、mock等，只需要匹配部分路径即可
+  // 如实际文件目录是 /src/components/layouts
+  // 可以配置 ignoreDir: '/src/components/layouts' 或者 ['/src/components/layouts']
+  // 路径以 / 连接，ignoreFile 也是相同匹配规则
+  "ignoreDir": [],
+  "ignoreFile": []
 }
 ```
 
