@@ -29,7 +29,12 @@ function translateTextByBaidu(text, toLang) {
   } = CONFIG;
   return withTimeout(
     new Promise((resolve, reject) => {
-      baiduTranslate(appId, appKey, baiduLangMap[toLang], 'zh')(text)
+      baiduTranslate(
+        appId,
+        appKey,
+        baiduLangMap[toLang],
+        'zh'
+      )(text)
         .then(data => {
           if (data && data.trans_result) {
             resolve(data.trans_result);
@@ -89,10 +94,10 @@ async function baiduTranslateTexts(untranslatedTexts, toLang) {
     let lastIndex = 0;
     // 由于百度api单词翻译字符长度限制，需要将待翻译的文案拆分成单个子任务
     untranslatedKeys.reduce((pre, next, index) => {
-    const value = untranslatedTexts[next].replace(/\n/g, '$n');
+      const value = untranslatedTexts[next].replace(/\n/g, '$n');
       const byteLen = Buffer.byteLength(pre, 'utf8');
-      if (byteLen > 950) {
-        // 获取翻译字节数，大于950放到单独任务里面处理
+      if (byteLen > 5500) {
+        // 获取翻译字节数，大于5500放到单独任务里面处理
         taskLists[lastIndex] = () => {
           return new Promise(resolve => {
             setTimeout(() => {
