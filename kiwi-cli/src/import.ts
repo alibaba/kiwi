@@ -21,7 +21,8 @@ function getMessagesToImport(file: string) {
     try {
       // value 的形式和 JSON 中的字符串值一致，其中的特殊字符是以转义形式存在的，
       // 如换行符 \n，在 value 中占两个字符，需要转成真正的换行符。
-      value = JSON.parse(`"${value}"`);
+      // 把文案中自带的"转换成\", 防止JSON解析报错
+      value = JSON.parse(`"${value.replace(/"/g, '\\"')}"`);
     } catch (e) {
       throw new Error(`Illegal message: ${value}`);
     }
