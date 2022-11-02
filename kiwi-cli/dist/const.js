@@ -26,8 +26,8 @@ exports.PROJECT_CONFIG = {
         },
         defaultTranslateKeyApi: 'Pinyin',
         importI18N: `import I18N from 'src/utils/I18N';`,
-        ignoreDir: '',
-        ignoreFile: ''
+        ignoreDir: [],
+        ignoreFile: []
     },
     langMap: {
         ['en-US']: 'en',

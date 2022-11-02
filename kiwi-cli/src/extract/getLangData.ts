@@ -28,8 +28,11 @@ function getLangData(fileName) {
  */
 function getLangJson(fileName) {
   const fileContent = fs.readFileSync(fileName, { encoding: 'utf8' });
-  let obj = fileContent.match(/export\s*default\s*({[\s\S]+);?$/)?.[1];
-  obj = obj?.replace(/\s*;\s*$/, '');
+  const matches = fileContent.match(/export\s*default\s*({[\s\S]+);?$/);
+  let obj = matches && matches[1];
+  if (obj) {
+    obj = obj.replace(/\s*;\s*$/, '');
+  }
   let jsObj = {};
   try {
     jsObj = eval('(' + obj + ')');
