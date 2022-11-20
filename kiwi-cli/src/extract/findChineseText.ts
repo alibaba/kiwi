@@ -181,7 +181,7 @@ function findTextInJs(code: string) {
       }
     },
     TemplateLiteral({ node }) {
-      const { start, end } = node as babelTypes.TemplateElement;
+      const { start, end } = node as babelTypes.TemplateLiteral;
       const templateContent = code.slice(start, end);
       if (templateContent.match(DOUBLE_BYTE_REGEX)) {
         const range = { start, end };
