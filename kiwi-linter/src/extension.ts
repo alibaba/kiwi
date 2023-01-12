@@ -222,12 +222,12 @@ export function activate(context: vscode.ExtensionContext) {
         if (i > 0) {
           const beforeStrs = targetStrs.slice(0, i);
           const curRange = item.range;
-          const [curStartLine, curEndLine] = [curRange['_start']['_line'], curRange['_end']['_line']];
-          const [curStart, curEnd] = [curRange['_start']['_character'], curRange['_end']['_character']];
+          const [curStartLine, curEndLine] = [curRange.start.line, curRange.end.line];
+          const [curStart, curEnd] = [curRange.start.character, curRange.end.character];
           const include = beforeStrs.some(str => {
             const preRange = str.range;
-            const [preStartLine, preEndLine] = [preRange['_start']['_line'], preRange['_end']['_line']];
-            const [preStart, preEnd] = [preRange['_start']['_character'], preRange['_end']['_character']];
+            const [preStartLine, preEndLine] = [preRange.start.line, preRange.end.line];
+            const [preStart, preEnd] = [preRange.start.character, preRange.end.character];
             // 当前字符的范围包含在已提取的文案的范围内
             return !(
               curEndLine < preStartLine ||
@@ -262,7 +262,7 @@ export function activate(context: vscode.ExtensionContext) {
           finalLangObj = getSuggestLangObj();
           // 根据在文件中的位置进行排序，防止后续生成key和文案位置错位
           const sortTargetStrs: any = _.sortBy(newTargetStrs, item => {
-            return item.range['_start']['_line'];
+            return item.range.start.line;
           });
           // 翻译中文文案
           const delimiter = translateApi === TranslateAPiEnum.Baidu ? '\n' : '$';
