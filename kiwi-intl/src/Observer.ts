@@ -3,13 +3,15 @@
  * @author linhuiw
  */
 
+import { getProxyObj, getDefaultProxyString } from './utils';
+
 const Observer = (obj, defaultKey = 'zh-CN') => {
-  Object.keys(obj.__data__ || obj).forEach(key => {
+  Object.keys(obj.__data__ || obj).forEach((key) => {
     defineReactive(obj, key, defaultKey);
   });
   return obj;
 };
-const observe = value => {
+const observe = (value) => {
   // 判断是否为object类型，是就继续执行Observer
   if (!value || typeof value !== 'object') {
     return;
@@ -22,9 +24,11 @@ var defineReactive = (obj, key, defaultKey) => {
   Object.defineProperty(obj, key, {
     get() {
       if (obj.__data__[key]) {
-        return obj.__data__[key];
+        return getProxyObj(obj.__data__[key]);
       } else if (obj.__metas__[defaultKey][key]) {
-        return obj.__metas__[defaultKey][key];
+        return getProxyObj(obj.__metas__[defaultKey][key]);
+      } else {
+        return getDefaultProxyString();
       }
     },
     set(newVal) {

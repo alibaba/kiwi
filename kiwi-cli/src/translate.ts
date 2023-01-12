@@ -29,7 +29,12 @@ function translateTextByBaidu(text, toLang) {
   } = CONFIG;
   return withTimeout(
     new Promise((resolve, reject) => {
-      baiduTranslate(appId, appKey, baiduLangMap[toLang], 'zh')(text)
+      baiduTranslate(
+        appId,
+        appKey,
+        baiduLangMap[toLang],
+        'zh'
+      )(text)
         .then(data => {
           if (data && data.trans_result) {
             resolve(data.trans_result);
@@ -45,11 +50,14 @@ function translateTextByBaidu(text, toLang) {
   );
 }
 
-/** 文案首字母大小 变量小写 */
 function textToUpperCaseByFirstWord(text) {
-  // 翻译文案首字母大写，变量小写
+  // 翻译文案首字母大写
   return text
-    ? `${text.charAt(0).toUpperCase()}${text.slice(1)}`.replace(/(\{.*?\})/g, text => text.toLowerCase())
+    ? `${text.charAt(0).toUpperCase()}${text.slice(1)}`
+        // {val} 变量小写
+        .replace(/(\{.*?\})/g, text => `${text.charAt(0).toLowerCase()}${text.slice(1)}`)
+        // 文案中的\n换行翻译前转换成了$n, 翻译后转换回来
+        .replace(/\$[nN]/g, '\n')
     : '';
 }
 
@@ -86,6 +94,7 @@ async function baiduTranslateTexts(untranslatedTexts, toLang) {
     let lastIndex = 0;
     // 由于百度api单词翻译字符长度限制，需要将待翻译的文案拆分成单个子任务
     untranslatedKeys.reduce((pre, next, index) => {
+      const value = untranslatedTexts[next].replace(/\n/g, '$n');
       const byteLen = Buffer.byteLength(pre, 'utf8');
       if (byteLen > 5500) {
         // 获取翻译字节数，大于5500放到单独任务里面处理
@@ -97,17 +106,17 @@ async function baiduTranslateTexts(untranslatedTexts, toLang) {
           });
         };
         lastIndex = index;
-        return untranslatedTexts[next];
+        return value;
       } else if (index === untranslatedKeys.length - 1) {
         taskLists[lastIndex] = () => {
           return new Promise(resolve => {
             setTimeout(() => {
-              resolve(translateTextByBaidu(`${pre}\n${untranslatedTexts[next]}`, toLang));
+              resolve(translateTextByBaidu(`${pre}\n${value}`, toLang));
             }, 1500);
           });
         };
       }
-      return `${pre}\n${untranslatedTexts[next]}`;
+      return `${pre}\n${value}`;
     }, '');
 
     // 由于百度api调用QPS只有1, 考虑网络延迟 每1.5s请求一个子任务
