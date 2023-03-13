@@ -21,7 +21,7 @@ function updateLangFiles(keyValue, text, validateDuplicate) {
 
   const [, filename, ...restPath] = keyValue.split('.');
   const fullKey = restPath.join('.');
-  const targetFilename = `${srcLangDir}/${filename}.ts`;
+  const targetFilename = `${srcLangDir}/${filename}.${CONFIG.fileType}`;
 
   if (!fs.existsSync(targetFilename)) {
     fs.writeFileSync(targetFilename, generateNewLangFile(fullKey, text));
@@ -72,8 +72,8 @@ function generateNewLangFile(key, value) {
 
 function addImportToMainLangFile(newFilename) {
   let mainContent = '';
-  if (fs.existsSync(`${srcLangDir}/index.ts`)) {
-    mainContent = fs.readFileSync(`${srcLangDir}/index.ts`, 'utf8');
+  if (fs.existsSync(`${srcLangDir}/index.${CONFIG.fileType}`)) {
+    mainContent = fs.readFileSync(`${srcLangDir}/index.${CONFIG.fileType}`, 'utf8');
     mainContent = mainContent.replace(/^(\s*import.*?;)$/m, `$1\nimport ${newFilename} from './${newFilename}';`);
     if (/(}\);)/.test(mainContent)) {
       if (/\,\n(}\);)/.test(mainContent)) {
@@ -98,7 +98,7 @@ function addImportToMainLangFile(newFilename) {
     mainContent = `import ${newFilename} from './${newFilename}';\n\nexport default Object.assign({}, {\n  ${newFilename},\n});`;
   }
 
-  fs.writeFileSync(`${srcLangDir}/index.ts`, mainContent);
+  fs.writeFileSync(`${srcLangDir}/index.${CONFIG.fileType}`, mainContent);
 }
 
 /**
@@ -155,8 +155,10 @@ function createImportI18N(filePath) {
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
   const isTsFile = _.endsWith(filePath, '.ts');
   const isTsxFile = _.endsWith(filePath, '.tsx');
+  const isJsFile = _.endsWith(filePath, '.js');
+  const isJsxFile = _.endsWith(filePath, '.jsx');
   const isVueFile = _.endsWith(filePath, '.vue');
-  if (isTsFile || isTsxFile) {
+  if (isTsFile || isTsxFile || isJsFile || isJsxFile) {
     const importStatement = `${CONFIG.importI18N}\n`;
     const pos = ast.getStart(ast, false);
     const updateCode = code.slice(0, pos) + importStatement + code.slice(pos);

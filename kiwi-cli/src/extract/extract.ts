@@ -49,7 +49,7 @@ function findAllChineseText(dir: string) {
     files = removeLangsFiles(dir.split(','));
   }
   const filterFiles = files.filter(file => {
-    return (isFile(file) && file.endsWith('.ts')) || file.endsWith('.tsx') || file.endsWith('.vue');
+    return (isFile(file) && file.endsWith('.ts')) || file.endsWith('.tsx') || file.endsWith('.js') || file.endsWith('.jsx') || file.endsWith('.vue');
   });
   const allTexts = filterFiles.reduce((pre, file) => {
     const code = readFile(file);

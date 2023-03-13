@@ -8,24 +8,24 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { PROJECT_CONFIG, KIWI_CONFIG_FILE } from './const';
 
-function creteConfigFile(existDir?: string) {
+function creteConfigFile(existDir?: string, type?: string) {
   const configDir = path.resolve(process.cwd(), `./${KIWI_CONFIG_FILE}`);
+  const config = JSON.stringify(
+    {
+      ...PROJECT_CONFIG.defaultConfig,
+      kiwiDir: existDir,
+      fileType: type,
+    },
+    null,
+    2
+  );
   if (existDir && fs.existsSync(existDir) && !fs.existsSync(configDir)) {
-    const config = JSON.stringify(
-      {
-        ...PROJECT_CONFIG.defaultConfig,
-        kiwiDir: existDir
-      },
-      null,
-      2
-    );
     fs.writeFile(configDir, config, err => {
       if (err) {
         console.log(err);
       }
     });
   } else if (!fs.existsSync(configDir)) {
-    const config = JSON.stringify(PROJECT_CONFIG.defaultConfig, null, 2);
     fs.writeFile(configDir, config, err => {
       if (err) {
         console.log(err);
@@ -34,16 +34,16 @@ function creteConfigFile(existDir?: string) {
   }
 }
 
-function createCnFile() {
+function createCnFile(type?: string) {
   const cnDir = `${PROJECT_CONFIG.dir}/zh-CN`;
   if (!fs.existsSync(cnDir)) {
     fs.mkdirSync(cnDir);
-    fs.writeFile(`${cnDir}/index.ts`, PROJECT_CONFIG.zhIndexFile, err => {
+    fs.writeFile(`${cnDir}/index.${type}`, PROJECT_CONFIG.zhIndexFile, err => {
       if (err) {
         console.log(err);
       }
     });
-    fs.writeFile(`${cnDir}/common.ts`, PROJECT_CONFIG.zhTestFile, err => {
+    fs.writeFile(`${cnDir}/common.${type}`, PROJECT_CONFIG.zhTestFile, err => {
       if (err) {
         console.log(err);
       }
@@ -51,7 +51,7 @@ function createCnFile() {
   }
 }
 
-function initProject(existDir?: string) {
+function initProject(existDir?: string, type?: string) {
   /** 初始化配置文件夹 */
   if (existDir) {
     if (!fs.existsSync(existDir)) {
@@ -61,9 +61,10 @@ function initProject(existDir?: string) {
   } else if (!fs.existsSync(PROJECT_CONFIG.dir)) {
     fs.mkdirSync(PROJECT_CONFIG.dir);
   }
-  creteConfigFile(existDir);
+  const defaultFileType = type || PROJECT_CONFIG.defaultConfig.fileType;
+  creteConfigFile(existDir, defaultFileType);
   if (!(existDir && fs.existsSync(existDir))) {
-    createCnFile();
+    createCnFile(defaultFileType);
   }
 }
 

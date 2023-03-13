@@ -9,6 +9,7 @@ export const PROJECT_CONFIG = {
   dir: './.kiwi',
   defaultConfig: {
     kiwiDir: './.kiwi',
+    fileType: 'ts',
     srcLang: 'zh-CN',
     distLangs: ['en-US', 'zh-TW'],
     googleApiKey: '',
