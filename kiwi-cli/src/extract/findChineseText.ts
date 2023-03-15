@@ -460,57 +460,6 @@ function findVueText(ast) {
   return arr;
 }
 /**
- * 查找 JS 文件中的中文
- * @Param code
- */
-function findTextInJs(code: string) {
-  const matches = [];
-  const ast = babelParser.parse(code, { sourceType: "module", plugins: ['jsx'] })
-
-  babelTraverse.default(ast, {
-    StringLiteral({ node }) {
-      const { start, end, value } = node as babelTypes.StringLiteral;
-      if (value && value.match(DOUBLE_BYTE_REGEX)) {
-        const range = { start, end };
-        matches.push({
-          range,
-          text: value,
-          isString: true
-        })
-      }
-    },
-    TemplateLiteral({ node }) {
-      const { start, end } = node as babelTypes.TemplateLiteral;
-      const templateContent = code.slice(start, end);
-      if (templateContent.match(DOUBLE_BYTE_REGEX)) {
-        const range = { start, end };
-        matches.push({
-          range,
-          text: code.slice(start + 1, end - 1),
-          isString: true
-        });
-      }
-    },
-    JSXElement({ node }) {
-      const { children } = node as babelTypes.JSXElement;
-      children.forEach(child => {
-        if (babelTypes.isJSXText(child)) {
-          const { value, start, end } = child;
-          const range = { start, end };
-          if (value.match(DOUBLE_BYTE_REGEX)) {
-            matches.push({
-              range,
-              text: value.trim(),
-              isString: false
-            })
-          }
-        }
-      })
-    }
-  })
-  return matches;
-}
-/**
  * 递归匹配代码的中文
  * @param code
  */
