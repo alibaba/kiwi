@@ -28,6 +28,9 @@
   "dependencies": {
     "@angular/compiler": "^7.2.0",
     "@babel/core": "^7.5.5",
+    "@babel/parser": "^7.20.3",
+    "@babel/traverse": "^7.20.1",
+    "@babel/types": "^7.20.2",
     "@types/commander": "^2.12.2",
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.14",
