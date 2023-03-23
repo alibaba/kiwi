@@ -10,15 +10,20 @@ Kiwi 的 CLI 工具
 
 ## CLI 参数
 
-### kiwi `--init`
+### kiwi `--init` 
+初始化项目，生成 kiwi 的配置文件 `kiwi-config.json`，并生成kiwi文件夹和相关导出文件
 
-初始化项目，生成 kiwi 的配置文件 `kiwi-config.json`
-
+```shell script 
+# --init [type] 指定kiwi文件夹下导出文件的文件类型，js或ts，默认ts 
+kiwi --init [type]
+```
+生成`kiwi-config.json`默认配置如下：
 ```js
 {
   // kiwi文件根目录，用于放置提取的langs文件
   "kiwiDir": "./.kiwi",
-
+  // kiwi目录生成文件类型，ts或者js，默认ts
+  "fileType": "ts",
   // 配置文件目录，若调整配置文件，此处可手动修改
   "configFile": "./.kiwi/kiwi-config.json",
 
