@@ -6,12 +6,12 @@
 import { getProxyObj, getDefaultProxyString } from './utils';
 
 const Observer = (obj, defaultKey = 'zh-CN') => {
-  Object.keys(obj.__data__ || obj).forEach((key) => {
+  Object.keys(obj.__data__ || obj).forEach(key => {
     defineReactive(obj, key, defaultKey);
   });
   return obj;
 };
-const observe = (value) => {
+const observe = value => {
   // 判断是否为object类型，是就继续执行Observer
   if (!value || typeof value !== 'object') {
     return;

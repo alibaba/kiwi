@@ -14,7 +14,7 @@ function creteConfigFile(existDir?: string, type?: string) {
     {
       ...PROJECT_CONFIG.defaultConfig,
       kiwiDir: existDir,
-      fileType: type,
+      fileType: type
     },
     null,
     2

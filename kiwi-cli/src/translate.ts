@@ -29,12 +29,7 @@ function translateTextByBaidu(text, toLang) {
   } = CONFIG;
   return withTimeout(
     new Promise((resolve, reject) => {
-      baiduTranslate(
-        appId,
-        appKey,
-        baiduLangMap[toLang],
-        'zh'
-      )(text)
+      baiduTranslate(appId, appKey, baiduLangMap[toLang], 'zh')(text)
         .then(data => {
           if (data && data.trans_result) {
             resolve(data.trans_result);

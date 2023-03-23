@@ -166,7 +166,7 @@ function findTextInTs(code: string, fileName: string) {
  */
 function findTextInJs(code: string) {
   const matches = [];
-  const ast = babelParser.parse(code, { sourceType: "module", plugins: ['jsx'] })
+  const ast = babelParser.parse(code, { sourceType: 'module', plugins: ['jsx'] });
 
   babelTraverse.default(ast, {
     StringLiteral({ node }) {
@@ -177,7 +177,7 @@ function findTextInJs(code: string) {
           range,
           text: value,
           isString: true
-        })
+        });
       }
     },
     TemplateLiteral({ node }) {
@@ -203,12 +203,12 @@ function findTextInJs(code: string) {
               range,
               text: value.trim(),
               isString: false
-            })
+            });
           }
         }
-      })
+      });
     }
-  })
+  });
   return matches;
 }
 

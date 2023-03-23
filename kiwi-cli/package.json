@@ -1,6 +1,6 @@
 {
   "name": "kiwi-clis",
-  "version": "1.0.24",
+  "version": "1.1.0",
   "description": "a cli for kiwi",
   "main": "dist/index.js",
   "scripts": {
@@ -24,6 +24,7 @@
   "bugs": {
     "url": "https://github.com/alibaba/kiwi/issues"
   },
+  "registry": "https://registry.npmjs.org/",
   "homepage": "https://github.com/alibaba/kiwi#readme",
   "dependencies": {
     "@angular/compiler": "^7.2.0",
