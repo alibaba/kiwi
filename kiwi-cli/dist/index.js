@@ -40,7 +40,7 @@ function spining(text, callback) {
 }
 commander
     .version('0.2.0')
-    .option('--init', '初始化项目', { isDefault: true })
+    .option('--init [type]', '初始化项目')
     .option('--import [file] [lang]', '导入翻译文案')
     .option('--export [file] [lang]', '导出未翻译的文案')
     .option('--sync', '同步各种语言的文案')
@@ -60,7 +60,16 @@ if (commander.init) {
         });
         if (!result.confirm) {
             spining('初始化项目', () => __awaiter(this, void 0, void 0, function* () {
-                init_1.initProject();
+                if (['js', 'ts'].includes(commander.init)) {
+                    init_1.initProject(void 0, commander.init);
+                }
+                else if (commander.init === true) {
+                    init_1.initProject();
+                }
+                else {
+                    console.log('指定初始化类型 [type] 只支持js、ts');
+                    return false;
+                }
             }));
         }
         else {
@@ -70,7 +79,16 @@ if (commander.init) {
                 message: '请输入相关目录：'
             });
             spining('初始化项目', () => __awaiter(this, void 0, void 0, function* () {
-                init_1.initProject(value.dir);
+                if (['js', 'ts'].includes(commander.init)) {
+                    init_1.initProject(value.dir, commander.init);
+                }
+                else if (commander.init === true) {
+                    init_1.initProject(value.dir);
+                }
+                else {
+                    console.log('指定初始化类型 [type] 只支持js、ts');
+                    return false;
+                }
             }));
         }
     }))();

@@ -70,14 +70,14 @@ if (commander.init) {
         message: '请输入相关目录：'
       });
       spining('初始化项目', async () => {
-          if (['js', 'ts'].includes(commander.init)) {
-            initProject(value.dir, commander.init);
-          } else if (commander.init === true) {
-            initProject(value.dir);
-          } else {
-            console.log('指定初始化类型 [type] 只支持js、ts');
-            return false;
-          }
+        if (['js', 'ts'].includes(commander.init)) {
+          initProject(value.dir, commander.init);
+        } else if (commander.init === true) {
+          initProject(value.dir);
+        } else {
+          console.log('指定初始化类型 [type] 只支持js、ts');
+          return false;
+        }
       });
     }
   })();

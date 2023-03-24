@@ -183,7 +183,7 @@ function findTextInJs(code: string) {
           range,
           text: value,
           isString: true
-        })
+        });
       }
     },
     TemplateLiteral({ node }) {
@@ -209,12 +209,12 @@ function findTextInJs(code: string) {
               range,
               text: value.trim(),
               isString: false
-            })
+            });
           }
         }
-      })
+      });
     }
-  })
+  });
   return matches;
 }
 
