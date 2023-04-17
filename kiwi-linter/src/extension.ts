@@ -12,6 +12,7 @@ import { findAllI18N, findI18N } from './findAllI18N';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr, TranslateAPiEnum } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
+import { AutoImportI18NFixer } from './autoImportI18n';
 import {
   findMatchKey,
   getConfiguration,
@@ -54,6 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
   let targetStrs: TargetStr[] = [];
   let finalLangObj = {};
   let suggestion = [];
+  let autoFixer: AutoImportI18NFixer;
 
   let activeEditor = vscode.window.activeTextEditor;
   if (activeEditor) {
@@ -61,6 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
       targetStrs = newTargetStrs;
     });
     suggestion = getCurrActivePageI18nKey();
+    autoFixer = new AutoImportI18NFixer();
   }
   context.subscriptions.push(vscode.commands.registerTextEditorCommand('vscode-i18n-linter.findI18N', findI18N));
 
@@ -153,6 +156,9 @@ export function activate(context: vscode.ExtensionContext) {
           .then(
             () => {
               vscode.window.showInformationMessage(`成功替换 ${finalArgs.length} 处文案`);
+              if (autoFixer) {
+                autoFixer.fix(vscode.window.activeTextEditor.document);
+              }
             },
             err => {
               console.log(err, 'err');
@@ -205,6 +211,9 @@ export function activate(context: vscode.ExtensionContext) {
               }, Promise.resolve())
               .then(() => {
                 vscode.window.showInformationMessage('替换完成');
+                if (autoFixer) {
+                  autoFixer.fix(vscode.window.activeTextEditor.document);
+                }
               })
               .catch(e => {
                 vscode.window.showErrorMessage(e.message);
@@ -331,6 +340,9 @@ export function activate(context: vscode.ExtensionContext) {
                 }, Promise.resolve())
                 .then(() => {
                   vscode.window.showInformationMessage('替换完成');
+                  if (autoFixer) {
+                    autoFixer.fix(vscode.window.activeTextEditor.document);
+                  }
                 })
                 .catch(e => {
                   vscode.window.showErrorMessage(e.message);

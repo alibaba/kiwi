@@ -2,7 +2,7 @@
   "name": "vscode-i18n-linter",
   "displayName": "kiwi-linter",
   "description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
-  "version": "1.4.8",
+  "version": "1.5.1",
   "publisher": "zwenjian",
   "engines": {
     "vscode": "^1.18.0"
@@ -62,6 +62,16 @@
           "type": "string",
           "default": "**/src/**/*.+(vue|js*|html|ts*)",
           "description": "A glob expression (eg. abc/**/*.ts) to match I18N translation files"
+        },
+        "vscode-i18n-linter.importI18nPath": {
+          "type": "string",
+          "default": "import I18N from 'src/utils/I18N';",
+          "description": "how to import I18N module"
+        },
+        "vscode-i18n-linter.autoImportI18n": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically import I18N module when extracting Chinese"
         }
       }
     },
