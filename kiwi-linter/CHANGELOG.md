@@ -1,6 +1,16 @@
 # 🐤 Change Log
 Kiwi Linter
 
+## 1.5.1（2023-04-17）
+
+### Bug Fixes
+- 优化 泡提取文案/kiwigo等提取文案时自动导入I18N
+
+## 1.5.0（2023-01-12）
+
+### Bug Fixes
+- vscode高版本兼容，修复新版vscode range不再兼容_line字段问题
+
 ## 1.4.8（2022-03-10）
 
 ### Bug Fixes
