@@ -1,0 +1,13 @@
+diff --git a/node_modules/baidu-translate/index.js b/node_modules/baidu-translate/index.js
+index 4d0e427..521c502 100644
+--- a/node_modules/baidu-translate/index.js
++++ b/node_modules/baidu-translate/index.js
+@@ -24,7 +24,7 @@ function baiduTranslate(appid, secret, to = "en", from = "auto", dict = 1, tts =
+                 tts
+             };
+             request.post({
+-                url: "http://api.fanyi.baidu.com/api/trans/vip/translate",
++                url: "https://fanyi-api.baidu.com/api/trans/vip/translate",
+                 form: querystring.stringify(postData)
+             }, function (err, httpResponse, body) {
+                 if (err) {
