@@ -166,13 +166,10 @@ function findTextInTs(code: string, fileName: string) {
  */
 function findTextInJs(code: string) {
   const matches = [];
-  const ast = babelParser.parse(code, { 
-    sourceType: "module", 
-    plugins: [
-      'jsx',
-      'decorators-legacy'
-    ] 
-  })
+  const ast = babelParser.parse(code, {
+    sourceType: 'module',
+    plugins: ['jsx', 'decorators-legacy']
+  });
 
   babelTraverse.default(ast, {
     StringLiteral({ node }) {

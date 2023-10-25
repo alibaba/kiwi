@@ -143,7 +143,7 @@ export const getKiwiLinterConfigFile = () => {
 /**
  * 获得项目配置信息中的 googleApiKey
  */
-function getConfigByKey(key: string): any {
+export function getConfigByKey(key: string): any {
   const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/kiwi-config.json`;
   let content = '';
 
@@ -240,7 +240,7 @@ export function translateText(text: string, type: TranslateAPiEnum) {
 /**
  * 获取多项目配置
  */
-export function getTargetLangPath(currentFilePath) {
+export function getTargetLangPath(currentFilePath, lang = 'zh_CN') {
   const configFile = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/kiwi-config.json`;
   let targetLangPath = '';
 
@@ -249,7 +249,7 @@ export function getTargetLangPath(currentFilePath) {
       const { projects = [] } = JSON.parse(fs.readFileSync(configFile, 'utf8'));
       for (const config of projects) {
         if (currentFilePath.indexOf(`/${config.target}/`) > -1) {
-          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/zh_CN/`;
+          targetLangPath = `${vscode.workspace.workspaceFolders[0].uri.fsPath}/${config.kiwiDir}/${lang}/`;
           return targetLangPath;
         }
       }
@@ -264,9 +264,9 @@ export function getTargetLangPath(currentFilePath) {
 /**
  * 获取当前文件对应的项目路径
  */
-export function getCurrentProjectLangPath() {
+export function getCurrentProjectLangPath(activeEditor?: vscode.TextEditor) {
   let currentProjectLangPath = '';
-  const targetLangPath = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
+  const targetLangPath = getTargetLangPath((activeEditor || vscode.window.activeTextEditor).document.uri.path);
   if (targetLangPath) {
     currentProjectLangPath = `${targetLangPath}**/*.ts`;
   }
@@ -276,8 +276,8 @@ export function getCurrentProjectLangPath() {
 /**
  * 获取当前文件对应的语言路径
  */
-export function getLangPrefix() {
-  const langPrefix = getTargetLangPath(vscode.window.activeTextEditor.document.uri.path);
+export function getLangPrefix(activeEditor?: vscode.TextEditor, lang?: string) {
+  const langPrefix = getTargetLangPath((activeEditor || vscode.window.activeTextEditor).document.uri.path, lang);
   return langPrefix;
 }
 

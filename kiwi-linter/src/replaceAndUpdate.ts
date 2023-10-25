@@ -11,15 +11,24 @@ import { updateLangFiles } from './file';
  * @param arg  目标字符串对象
  * @param val  目标 key
  * @param validateDuplicate 是否校验文件中已经存在要写入的 key
+ * @param replaceEditorInstance 需要进行替换的 editor 窗口
+ * @param translateResult 已有翻译结果
  */
-export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate: boolean): Thenable<any> {
-  let activeEditor = vscode.window.activeTextEditor;
+export function replaceAndUpdate(
+  arg: TargetStr,
+  val: string,
+  validateDuplicate: boolean,
+  replaceEditorInstance?: vscode.TextEditor,
+  translateResult?: Record<string, string>
+): Thenable<any> {
+  let activeEditor = replaceEditorInstance || vscode.window.activeTextEditor;
   const currentFilename = activeEditor.document.fileName;
   const isHtmlFile = currentFilename.endsWith('.html');
   const isVueFile = currentFilename.endsWith('.vue');
   const edit = new vscode.WorkspaceEdit();
-  const { document } = vscode.window.activeTextEditor;
+  const { document } = replaceEditorInstance || vscode.window.activeTextEditor;
   let finalReplaceText = arg.text;
+
   // 若是字符串，删掉两侧的引号
   if (arg.isString) {
     // 如果引号左侧是 等号，则可能是 jsx 的 props，此时要替换成 {
@@ -76,7 +85,7 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
 
   try {
     // 更新语言文件
-    updateLangFiles(val, finalReplaceText, validateDuplicate);
+    updateLangFiles(val, finalReplaceText, validateDuplicate, activeEditor, translateResult);
     // 若更新成功再替换代码
     return vscode.workspace.applyEdit(edit);
   } catch (e) {

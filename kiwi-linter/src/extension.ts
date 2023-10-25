@@ -22,6 +22,7 @@ import {
   getCurrActivePageI18nKey,
   getTranslateAPiList
 } from './utils';
+import { showExtractForm } from './utils/extract-panel';
 
 /**
  * 主入口文件
@@ -122,42 +123,72 @@ export function activate(context: vscode.ExtensionContext) {
   // 点击小灯泡后进行替换操作
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-i18n-linter.extractI18N', args => {
-      return new Promise(resolve => {
+      // 保存当前编辑的editor现场，当打开新的 webview 时 vscode.window.activeTextEditor 会丢失
+      const currentWindowEditor = vscode.window.activeTextEditor;
+
+      // 需要抽取的中文文案
+      const word = args.targets[0].text;
+
+      return new Promise(async resolve => {
         // 若变量名已确定则直接开始替换
         if (args.varName) {
           return resolve(args.varName);
         }
+
+        if (!word) return;
+
         // 否则要求用户输入变量名
-        return resolve(
-          vscode.window.showInputBox({
-            prompt: '请输入变量名，格式 `I18N.[page].[key]`，按 <回车> 启动替换',
-            value: `I18N.${suggestion.length ? suggestion.join('.') + '.' : ''}`,
-            validateInput(input) {
-              if (!input.match(/^I18N\.\w+\.\w+/)) {
-                return '变量名格式 `I18N.[page].[key]`，如 `I18N.dim.new`，[key] 中可包含更多 `.`';
-              }
-            }
-          })
-        );
-      }).then((val: string) => {
+        const res = await showExtractForm({
+          word,
+          key: `I18N.${suggestion.length ? suggestion.join('.') + '.' : ''}`
+        });
+
+        return resolve(res);
+
+        // return resolve(
+        //   vscode.window.showInputBox({
+        //     prompt: '请输入变量名，格式 `I18N.[page].[key]`，按 <回车> 启动替换',
+        //     value: `I18N.${suggestion.length ? suggestion.join('.') + '.' : ''}`,
+        //     validateInput(input) {
+        //       if (!input.match(/^I18N\.\w+\.\w+/)) {
+        //         return '变量名格式 `I18N.[page].[key]`，如 `I18N.dim.new`，[key] 中可包含更多 `.`';
+        //       }
+        //     }
+        //   })
+        // );
+      }).then((val: any) => {
+        console.log('表单回填数据：', val);
+
+        const { key, en, tw } = val;
+
         // 没有输入变量名
-        if (!val) {
+        if (!key || !en || !tw) {
           return;
         }
+
         const finalArgs = Array.isArray(args.targets) ? args.targets : [args.targets];
         return finalArgs
           .reverse()
           .reduce((prev: Promise<any>, curr: TargetStr, index: number) => {
             return prev.then(() => {
-              const isEditCommon = val.startsWith('I18N.common.');
-              return replaceAndUpdate(curr, val, !isEditCommon && index === 0 ? !args.varName : false);
+              const isEditCommon = key.startsWith('I18N.common.');
+              return replaceAndUpdate(
+                curr,
+                key,
+                !isEditCommon && index === 0 ? !args.varName : false,
+                currentWindowEditor,
+                {
+                  en_US: en,
+                  zh_TW: tw
+                }
+              );
             });
           }, Promise.resolve())
           .then(
             () => {
               vscode.window.showInformationMessage(`成功替换 ${finalArgs.length} 处文案`);
               if (autoFixer) {
-                autoFixer.fix(vscode.window.activeTextEditor.document);
+                autoFixer.fix(currentWindowEditor.document);
               }
             },
             err => {
