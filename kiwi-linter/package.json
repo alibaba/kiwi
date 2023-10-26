@@ -1,9 +1,9 @@
 {
-  "name": "vscode-i18n-linter",
-  "displayName": "kiwi-linter",
-  "description": "A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
-  "version": "1.5.1",
-  "publisher": "zwenjian",
+  "name": "vscode-i18n-linter-qbi",
+  "displayName": "qbi-kiwi-linter",
+  "description": "(qbi) A VSCode extension to identify and extract string literals for js(x)/ts(x) files",
+  "version": "1.0.0",
+  "publisher": "zijiewang",
   "engines": {
     "vscode": "^1.18.0"
   },
