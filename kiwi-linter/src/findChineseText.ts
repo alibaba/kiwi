@@ -40,6 +40,9 @@ function findTextInTs(code: string, fileName: string) {
         }
         break;
       }
+      // JsxFragment 适配空标签<>文案</>
+      case ts.SyntaxKind.JsxFragment:
+      // JsxElement 适配非空标签<div>文案</div>
       case ts.SyntaxKind.JsxElement: {
         const { children } = node as ts.JsxElement;
 
