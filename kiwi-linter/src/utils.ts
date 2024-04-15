@@ -7,9 +7,11 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as slash from 'slash2';
+import * as globby from 'globby';
 import { pinyin } from 'pinyin-pro';
 import { TranslateAPiEnum } from './define';
 import { getObjectLiteralExpression } from './astUtils';
+import { I18N_GLOB } from './const';
 
 /**
  * 将对象拍平
@@ -213,7 +215,12 @@ export function translateText(text: string, type: TranslateAPiEnum) {
         }
         // baidu
         if (type === TranslateAPiEnum.Baidu) {
-          baiduTranslate(appId, appKey, 'en', 'zh')(text)
+          baiduTranslate(
+            appId,
+            appKey,
+            'en',
+            'zh'
+          )(text)
             .then(data => {
               if (data && data.trans_result) {
                 const result = data.trans_result.map(item => item.dst) || [];
@@ -327,4 +334,32 @@ export function getTranslateAPiList() {
   }
 
   return apiList;
+}
+
+/** 获取语言文件名称 */
+export function getI18NFileNames() {
+  const _I18N_GLOB = getCurrentProjectLangPath() || I18N_GLOB;
+  const paths = globby.sync(_I18N_GLOB);
+  return (paths || [])
+    .map(i => {
+      return i
+        .split('/')
+        .pop()
+        .replace(/\.tsx?$/, '');
+    })
+    .filter(i => i !== 'index');
+}
+
+/** 纠正path中文件名称的方法 */
+export function getSafePath(path: string) {
+  if (!path) {
+    return path;
+  }
+  const fileNames = getI18NFileNames();
+  const [filename, ...restPath] = path.split('.');
+  const sameFileNameIndex = fileNames.map(i => i.toLowerCase()).findIndex(i => i === filename.toLowerCase());
+  if (sameFileNameIndex > -1) {
+    return [fileNames[sameFileNameIndex], ...restPath].join('.');
+  }
+  return path;
 }

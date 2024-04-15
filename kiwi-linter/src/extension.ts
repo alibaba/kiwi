@@ -20,7 +20,8 @@ import {
   translateText,
   getKiwiLinterConfigFile,
   getCurrActivePageI18nKey,
-  getTranslateAPiList
+  getTranslateAPiList,
+  getSafePath
 } from './utils';
 
 /**
@@ -267,6 +268,12 @@ export function activate(context: vscode.ExtensionContext) {
           if (!path) {
             return;
           }
+          const newPath = getSafePath(
+            path
+              .split('.')
+              .slice(1)
+              .join('.')
+          );
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
           // 根据在文件中的位置进行排序，防止后续生成key和文案位置错位
@@ -301,10 +308,6 @@ export function activate(context: vscode.ExtensionContext) {
                     });
                   }
                   const transText = translateTexts[i] && _.camelCase(translateTexts[i]);
-                  const newPath = path
-                    .split('.')
-                    .slice(1)
-                    .join('.');
                   let transKey = `${newPath + '.'}${transText}`;
                   let occurTime = 1;
                   // 防止出现前四位相同但是整体文案不同的情况
