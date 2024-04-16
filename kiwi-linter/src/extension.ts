@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import * as fs from 'fs-extra';
 import { UI } from './ui';
 import { getSuggestLangObj } from './getLangData';
-import { DIR_ADAPTOR } from './const';
+import { DIR_ADAPTOR, KiwiSearchTypes } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr, TranslateAPiEnum } from './define';
@@ -49,6 +49,16 @@ export function activate(context: vscode.ExtensionContext) {
     } else {
       vscode.window.showInformationMessage('无其他翻译源可供切换，请配置！');
     }
+  });
+
+  vscode.commands.registerCommand('vscode-i18n-linter.searchI18N', () => {
+    vscode.window.showQuickPick(KiwiSearchTypes).then(val => {
+      if (val.label === '在当前文件中搜索') {
+        findI18N();
+      } else {
+        findAllI18N();
+      }
+    });
   });
 
   console.log('Congratulations, your extension "kiwi-linter" is now active!');

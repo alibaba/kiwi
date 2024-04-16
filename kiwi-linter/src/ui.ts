@@ -6,8 +6,8 @@
 import * as vscode from 'vscode';
 
 export class UI {
-  /** 全局搜索文案 */
-  searchAllBar: vscode.StatusBarItem;
+  /** 文案搜索入口 */
+  searchBar: vscode.StatusBarItem;
   /** 批量提取当前文件中的所有文案 */
   kiwiGoBar: vscode.StatusBarItem;
   /** 切换翻译源 */
@@ -17,19 +17,19 @@ export class UI {
     // 创建状态栏按钮
     this.switchTranslateOriginBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     this.kiwiGoBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
-    this.searchAllBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
+    this.searchBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
     // 为按钮绑定注册的command名称
-    this.searchAllBar.command = 'vscode-i18n-linter.findAllI18N';
+    this.searchBar.command = 'vscode-i18n-linter.searchI18N';
     this.kiwiGoBar.command = 'vscode-i18n-linter.kiwigo';
     this.switchTranslateOriginBar.command = 'vscode-i18n-linter.switchTranslateApi';
   }
 
   init = translateApi => {
     // 全局搜索文案
-    this.searchAllBar.text = `$(search) KiwiSearch`;
-    this.searchAllBar.color = '#fff';
-    this.searchAllBar.tooltip = 'Kiwi - 全局搜索中文文案';
-    this.searchAllBar.show();
+    this.searchBar.text = `$(search) KiwiSearch`;
+    this.searchBar.color = '#fff';
+    this.searchBar.tooltip = 'Kiwi - 搜索中文文案';
+    this.searchBar.show();
 
     // 批量提取当前文件中的所有文案
     this.kiwiGoBar.text = 'KiwiGo';
