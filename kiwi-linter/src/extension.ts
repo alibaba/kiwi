@@ -104,15 +104,25 @@ export function activate(context: vscode.ExtensionContext) {
                 }
               }
 
-              return actions.concat({
-                title: `抽取为自定义 I18N 变量（共${sameTextStrs.length}处）`,
-                command: 'vscode-i18n-linter.extractI18N',
-                arguments: [
-                  {
-                    targets: sameTextStrs
-                  }
-                ]
-              });
+              return actions.concat([
+                {
+                  title: `抽取为自定义 I18N 变量（共${sameTextStrs.length}处）`,
+                  command: 'vscode-i18n-linter.extractI18N',
+                  arguments: [
+                    {
+                      targets: sameTextStrs
+                    }
+                  ]
+                },
+                {
+                  title: `在当前行中禁用I18N提取`,
+                  command: 'vscode-i18n-linter.IngoreI18N'
+                },
+                {
+                  title: `在当前文件中禁用I18N提取`,
+                  command: 'vscode-i18n-linter.IngoreFileI18N'
+                }
+              ]);
             }
           }
         }
@@ -165,6 +175,49 @@ export function activate(context: vscode.ExtensionContext) {
               console.log(err, 'err');
             }
           );
+      });
+    })
+  );
+
+  // 点击小灯泡后忽略当前行提取
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-linter.IngoreI18N', args => {
+      return new Promise(resolve => {
+        const activeTextEditor = vscode.window.activeTextEditor;
+        // 鼠标所属行
+        const activeLine = activeTextEditor.selection.active.line;
+        // 当前行的代码
+        const currentLineText = activeTextEditor.document.lineAt(activeLine).text;
+        // 匹配当前行的缩进
+        const indentMatch = currentLineText.match(/^\s*/);
+        const indentWhitespace = indentMatch ? indentMatch[0] : '';
+        activeTextEditor.edit(editBuilder => {
+          // 在当前行之前插入注释
+          editBuilder.insert(new vscode.Position(activeLine, 0), indentWhitespace + '/* kiwi-disable-next-line */ \n');
+        });
+        resolve(undefined);
+      }).then(() => {
+        return Promise.resolve().then(() => {
+          vscode.window.showInformationMessage('文案提取已禁用');
+        });
+      });
+    })
+  );
+
+  // 点击小灯泡后忽略当前文件中的I18N文案提取
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-linter.IngoreFileI18N', args => {
+      return new Promise(resolve => {
+        const activeTextEditor = vscode.window.activeTextEditor;
+        activeTextEditor.edit(editBuilder => {
+          // 在当前文件的第一行插入注释
+          editBuilder.insert(new vscode.Position(0, 0), '/* kiwi-disable-file */ \n');
+        });
+        resolve(undefined);
+      }).then(() => {
+        return Promise.resolve().then(() => {
+          vscode.window.showInformationMessage('文案提取已禁用');
+        });
       });
     })
   );

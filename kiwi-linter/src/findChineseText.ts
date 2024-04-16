@@ -19,13 +19,27 @@ function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
+  const lines = ast.text.split(/\r?\n/);
+  const hasDisableKiwi = /\/\*+\s+kiwi\-disable\-file/.test(ast.text);
+
+  /** 判断当前节点的上一行代码不包含禁用规则 */
+  function hasNoDisableRule(node: ts.Node) {
+    const { line } = ast.getLineAndCharacterOfPosition(node.getStart());
+    const lastLine = lines[line - 1] || '';
+    return (
+      !hasDisableKiwi &&
+      (!lastLine ||
+        !(/\/\/\s+kiwi\-disable\-next\-line/.test(lastLine) || /\/\*+\s+kiwi\-disable\-next\-line/.test(lastLine)))
+    );
+  }
 
   function visit(node: ts.Node) {
     switch (node.kind) {
       case ts.SyntaxKind.StringLiteral: {
         /** 判断 Ts 中的字符串含有中文 */
         const { text } = node as ts.StringLiteral;
-        if (text.match(DOUBLE_BYTE_REGEX)) {
+        /** 所属行 */
+        if (text.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除引号 */
@@ -52,7 +66,7 @@ function findTextInTs(code: string, fileName: string) {
             /** 修复注释含有中文的情况，Angular 文件错误的 Ast 情况 */
             const noCommentText = removeFileComment(text, fileName);
 
-            if (noCommentText.match(DOUBLE_BYTE_REGEX)) {
+            if (noCommentText.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(child)) {
               const start = child.getStart();
               const end = child.getEnd();
               const startPos = activeEditor.document.positionAt(start);
@@ -74,7 +88,7 @@ function findTextInTs(code: string, fileName: string) {
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
         templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
-        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+        if (templateContent.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
@@ -93,7 +107,7 @@ function findTextInTs(code: string, fileName: string) {
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
         templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
-        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+        if (templateContent.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
