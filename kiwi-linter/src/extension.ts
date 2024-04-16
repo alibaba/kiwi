@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import * as fs from 'fs-extra';
 import { UI } from './ui';
 import { getSuggestLangObj } from './getLangData';
-import { DIR_ADAPTOR } from './const';
+import { DIR_ADAPTOR, KiwiSearchTypes } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { TargetStr, TranslateAPiEnum } from './define';
@@ -20,7 +20,8 @@ import {
   translateText,
   getKiwiLinterConfigFile,
   getCurrActivePageI18nKey,
-  getTranslateAPiList
+  getTranslateAPiList,
+  getSafePath
 } from './utils';
 
 /**
@@ -48,6 +49,16 @@ export function activate(context: vscode.ExtensionContext) {
     } else {
       vscode.window.showInformationMessage('无其他翻译源可供切换，请配置！');
     }
+  });
+
+  vscode.commands.registerCommand('vscode-i18n-linter.searchI18N', () => {
+    vscode.window.showQuickPick(KiwiSearchTypes).then(val => {
+      if (val.label === '在当前文件中搜索') {
+        findI18N();
+      } else {
+        findAllI18N();
+      }
+    });
   });
 
   console.log('Congratulations, your extension "kiwi-linter" is now active!');
@@ -103,15 +114,25 @@ export function activate(context: vscode.ExtensionContext) {
                 }
               }
 
-              return actions.concat({
-                title: `抽取为自定义 I18N 变量（共${sameTextStrs.length}处）`,
-                command: 'vscode-i18n-linter.extractI18N',
-                arguments: [
-                  {
-                    targets: sameTextStrs
-                  }
-                ]
-              });
+              return actions.concat([
+                {
+                  title: `抽取为自定义 I18N 变量（共${sameTextStrs.length}处）`,
+                  command: 'vscode-i18n-linter.extractI18N',
+                  arguments: [
+                    {
+                      targets: sameTextStrs
+                    }
+                  ]
+                },
+                {
+                  title: `在当前行中禁用I18N提取`,
+                  command: 'vscode-i18n-linter.IngoreI18N'
+                },
+                {
+                  title: `在当前文件中禁用I18N提取`,
+                  command: 'vscode-i18n-linter.IngoreFileI18N'
+                }
+              ]);
             }
           }
         }
@@ -164,6 +185,60 @@ export function activate(context: vscode.ExtensionContext) {
               console.log(err, 'err');
             }
           );
+      });
+    })
+  );
+
+  // 点击小灯泡后忽略当前行提取
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-linter.IngoreI18N', () => {
+      return new Promise(resolve => {
+        const activeTextEditor = vscode.window.activeTextEditor;
+        // 鼠标所属行
+        const activeLine = activeTextEditor.selection.active.line;
+        // 当前行的代码
+        const currentLineText = activeTextEditor.document.lineAt(activeLine).text;
+        // 匹配当前行的缩进
+        const indentMatch = currentLineText.match(/^\s*/);
+        const indentWhitespace = indentMatch ? indentMatch[0] : '';
+        activeTextEditor.edit(editBuilder => {
+          // 在当前行之前插入注释
+          editBuilder.insert(
+            new vscode.Position(activeLine, 0),
+            indentWhitespace +
+              (activeTextEditor.document.fileName.endsWith('.html')
+                ? '<!-- kiwi-disable-next-line --> \n'
+                : '/* kiwi-disable-next-line */ \n')
+          );
+        });
+        resolve(undefined);
+      }).then(() => {
+        return Promise.resolve().then(() => {
+          vscode.window.showInformationMessage('文案提取已禁用');
+        });
+      });
+    })
+  );
+
+  // 点击小灯泡后忽略当前文件中的I18N文案提取
+  context.subscriptions.push(
+    vscode.commands.registerCommand('vscode-i18n-linter.IngoreFileI18N', () => {
+      return new Promise(resolve => {
+        const activeTextEditor = vscode.window.activeTextEditor;
+        activeTextEditor.edit(editBuilder => {
+          // 在当前文件的第一行插入注释
+          editBuilder.insert(
+            new vscode.Position(0, 0),
+            activeTextEditor.document.fileName.endsWith('.html')
+              ? '<!-- kiwi-disable-file --> \n'
+              : '/* kiwi-disable-file */ \n'
+          );
+        });
+        resolve(undefined);
+      }).then(() => {
+        return Promise.resolve().then(() => {
+          vscode.window.showInformationMessage('文案提取已禁用');
+        });
       });
     })
   );
@@ -267,6 +342,12 @@ export function activate(context: vscode.ExtensionContext) {
           if (!path) {
             return;
           }
+          const newPath = getSafePath(
+            path
+              .split('.')
+              .slice(1)
+              .join('.')
+          );
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
           // 根据在文件中的位置进行排序，防止后续生成key和文案位置错位
@@ -301,10 +382,6 @@ export function activate(context: vscode.ExtensionContext) {
                     });
                   }
                   const transText = translateTexts[i] && _.camelCase(translateTexts[i]);
-                  const newPath = path
-                    .split('.')
-                    .slice(1)
-                    .join('.');
                   let transKey = `${newPath + '.'}${transText}`;
                   let occurTime = 1;
                   // 防止出现前四位相同但是整体文案不同的情况

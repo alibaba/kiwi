@@ -89,6 +89,10 @@
         "title": "Search inside All Files for I18N Strings"
       },
       {
+        "command": "vscode-i18n-linter.searchI18N",
+        "title": "Search I18N Strings inside Current File or All Files "
+      },
+      {
         "command": "vscode-i18n-linter.kiwigo",
         "title": "Kiwi Go!"
       },
