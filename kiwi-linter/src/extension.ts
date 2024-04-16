@@ -181,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 点击小灯泡后忽略当前行提取
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-i18n-linter.IngoreI18N', args => {
+    vscode.commands.registerCommand('vscode-i18n-linter.IngoreI18N', () => {
       return new Promise(resolve => {
         const activeTextEditor = vscode.window.activeTextEditor;
         // 鼠标所属行
@@ -193,7 +193,13 @@ export function activate(context: vscode.ExtensionContext) {
         const indentWhitespace = indentMatch ? indentMatch[0] : '';
         activeTextEditor.edit(editBuilder => {
           // 在当前行之前插入注释
-          editBuilder.insert(new vscode.Position(activeLine, 0), indentWhitespace + '/* kiwi-disable-next-line */ \n');
+          editBuilder.insert(
+            new vscode.Position(activeLine, 0),
+            indentWhitespace +
+              (activeTextEditor.document.fileName.endsWith('.html')
+                ? '<!-- kiwi-disable-next-line --> \n'
+                : '/* kiwi-disable-next-line */ \n')
+          );
         });
         resolve(undefined);
       }).then(() => {
@@ -206,12 +212,17 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 点击小灯泡后忽略当前文件中的I18N文案提取
   context.subscriptions.push(
-    vscode.commands.registerCommand('vscode-i18n-linter.IngoreFileI18N', args => {
+    vscode.commands.registerCommand('vscode-i18n-linter.IngoreFileI18N', () => {
       return new Promise(resolve => {
         const activeTextEditor = vscode.window.activeTextEditor;
         activeTextEditor.edit(editBuilder => {
           // 在当前文件的第一行插入注释
-          editBuilder.insert(new vscode.Position(0, 0), '/* kiwi-disable-file */ \n');
+          editBuilder.insert(
+            new vscode.Position(0, 0),
+            activeTextEditor.document.fileName.endsWith('.html')
+              ? '<!-- kiwi-disable-file --> \n'
+              : '/* kiwi-disable-file */ \n'
+          );
         });
         resolve(undefined);
       }).then(() => {

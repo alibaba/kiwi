@@ -20,12 +20,14 @@ function findTextInTs(code: string, fileName: string) {
   const activeEditor = vscode.window.activeTextEditor;
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
   const lines = ast.text.split(/\r?\n/);
+  // 文件注释中不包含 /* kiwi-disable-file */
   const hasDisableKiwi = /\/\*+\s+kiwi\-disable\-file/.test(ast.text);
 
   /** 判断当前节点的上一行代码不包含禁用规则 */
   function hasNoDisableRule(node: ts.Node) {
     const { line } = ast.getLineAndCharacterOfPosition(node.getStart());
     const lastLine = lines[line - 1] || '';
+    // 文件注释中不包含 /* kiwi-disable-file */ 且当前行的前一行注释中不包含 /* kiwi-disable-next-line */
     return (
       !hasDisableKiwi &&
       (!lastLine ||
@@ -132,13 +134,28 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
+  const lines = ast.text.split(/\r?\n/);
+  // 文件注释中不包含 /* kiwi-disable-file */
+  const hasDisableKiwi = /\/\*+\s+kiwi\-disable\-file/.test(ast.text);
+
+  /** 判断当前节点的上一行代码不包含禁用规则 */
+  function hasNoDisableRule(node: ts.Node) {
+    const { line } = ast.getLineAndCharacterOfPosition(node.getStart());
+    const lastLine = lines[line - 1] || '';
+    // 文件注释中不包含 /* kiwi-disable-file */ 且当前行的前一行注释中不包含 /* kiwi-disable-next-line */
+    return (
+      !hasDisableKiwi &&
+      (!lastLine ||
+        !(/\/\/\s+kiwi\-disable\-next\-line/.test(lastLine) || /\/\*+\s+kiwi\-disable\-next\-line/.test(lastLine)))
+    );
+  }
 
   function visit(node: ts.Node) {
     switch (node.kind) {
       case ts.SyntaxKind.StringLiteral: {
         /** 判断 Ts 中的字符串含有中文 */
         const { text } = node as ts.StringLiteral;
-        if (text.match(DOUBLE_BYTE_REGEX)) {
+        if (text.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除引号 */
@@ -157,7 +174,7 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
         const { pos, end } = node;
         let templateContent = code.slice(pos, end);
         templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
-        if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+        if (templateContent.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
@@ -190,8 +207,23 @@ function findTextInHtml(code) {
   const ast = compiler.parseTemplate(code, 'ast.html', {
     preserveWhitespaces: false
   });
+  const lines = code.split(/\r?\n/);
+  // 文件注释中不包含 <!-- kiwi-disable-file -->
+  const hasDisableKiwi = /\<\!\-\-\s+kiwi\-disable\-file/.test(code);
+
+  /** 判断当前节点的上一行代码不包含禁用规则 */
+  function hasNoDisableRule(node) {
+    const valueSpan = node.valueSpan || node.sourceSpan;
+    const line = valueSpan.start.line;
+    const lastLine = lines[line - 1] || '';
+    // 整个文件中不包含<!-- kiwi-disable-file --> 且当前行的前一行注释中不包含 <!-- kiwi-disable-next-line -->
+    return !hasDisableKiwi && (!lastLine || !/\<\!\-\-\s+kiwi\-disable\-next\-line/.test(lastLine));
+  }
   function visit(node) {
     const value = node.value;
+    if (!hasNoDisableRule(node)) {
+      return;
+    }
     if (value && typeof value === 'string' && value.match(DOUBLE_BYTE_REGEX)) {
       const valueSpan = node.valueSpan || node.sourceSpan;
       let {
