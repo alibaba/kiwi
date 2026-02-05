@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsc --watch",
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,7 @@
     "inquirer": "^5.2.0",
     "lodash": "^4.17.11",
     "ora": "^3.0.0",
+    "patch-package": "^6.5.1",
     "pinyin-pro": "^3.3.1",
     "prettier": "^1.16.4",
     "randomstring": "^1.1.5",
