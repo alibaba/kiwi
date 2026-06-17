@@ -8,6 +8,31 @@ import * as _ from 'lodash';
 import * as prettier from 'prettier';
 import * as ts from 'typescript';
 import { readFile, writeFile } from './file';
+
+/**
+ * 使用平衡括号计数提取模板字符串中的 ${...} 变量
+ * 支持任意深度的嵌套，解决正则无法处理嵌套 {} 的问题
+ */
+function findTemplateVariables(text: string): string[] {
+  const vars: string[] = [];
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '$' && text[i + 1] === '{') {
+      let depth = 1;
+      const start = i;
+      i += 2;
+      while (i < text.length && depth > 0) {
+        if (text[i] === '{') depth++;
+        else if (text[i] === '}') depth--;
+        i++;
+      }
+      vars.push(text.slice(start, i));
+    } else {
+      i++;
+    }
+  }
+  return vars;
+}
 import { getLangData } from './getLangData';
 import { getProjectConfig, getLangDir, successInfo, failInfo, highlightText } from '../utils';
 
@@ -83,9 +108,8 @@ function addImportToMainLangFile(newFilename) {
         /** 最后一行不包含,号 */
         mainContent = mainContent.replace(/\n(}\);)/, `,\n  ${newFilename},\n$1`);
       }
-    }
-    // 兼容 export default { common };的写法
-    if (/(};)/.test(mainContent)) {
+    } else if (/(};)/.test(mainContent)) {
+      // 兼容 export default { common };的写法
       if (/\,\n(};)/.test(mainContent)) {
         /** 最后一行包含,号 */
         mainContent = mainContent.replace(/(};)/, `  ${newFilename},\n$1`);
@@ -93,6 +117,12 @@ function addImportToMainLangFile(newFilename) {
         /** 最后一行不包含,号 */
         mainContent = mainContent.replace(/\n(};)/, `,\n  ${newFilename},\n$1`);
       }
+    } else if (/,\s*\n(\s*},\s*\n\s*\);)/.test(mainContent)) {
+      // 兼容 Object.assign({}, {\n  ...\n},\n); 多行写法
+      mainContent = mainContent.replace(new RegExp(',\\s*\\n(\\s*},\\s*\\n\\s*\\);)'), `,\n    ${newFilename},\n$1`);
+    } else if (/\n(\s*},\s*\n\s*\);)/.test(mainContent)) {
+      // 多行写法且最后一行无逗号
+      mainContent = mainContent.replace(new RegExp('\\n(\\s*},\\s*\\n\\s*\\);)'), `,\n    ${newFilename},\n$1`);
     }
   } else {
     mainContent = `import ${newFilename} from './${newFilename}';\n\nexport default Object.assign({}, {\n  ${newFilename},\n});`;
@@ -102,11 +132,15 @@ function addImportToMainLangFile(newFilename) {
 }
 
 /**
- * 检查是否添加 import I18N 命令
+ * 检查是否已添加 import I18N 命令
  * @param filePath 文件路径
  */
 function hasImportI18N(filePath) {
   const code = readFile(filePath);
+  // Vue 文件直接用字符串检测，避免 TS AST 无法解析完整 .vue 文件
+  if (_.endsWith(filePath, '.vue')) {
+    return code.includes('import I18N') || code.includes('import { I18N }');
+  }
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
   let hasImportI18N = false;
 
@@ -166,7 +200,8 @@ function createImportI18N(filePath) {
     return updateCode;
   } else if (isVueFile) {
     const importStatement = `${CONFIG.importI18N}\n`;
-    const updateCode = code.replace(/<script>/g, `<script>\n${importStatement}`);
+    // 只替换第一个 <script> 标签，兼容 <script lang="ts"> 和 <script setup>
+    const updateCode = code.replace(/<script([^>]*)>/, `<script$1>\n${importStatement}`);
     return updateCode;
   }
 }
@@ -203,10 +238,10 @@ function replaceAndUpdate(filePath, arg, val, validateDuplicate, needWrite = tru
     }
     // 若是模板字符串，看看其中是否包含变量
     if (last1Char === '`') {
-      const varInStr = arg.text.match(/(\$\{[^\}]+?\})/g);
-      if (varInStr) {
+      const varInStr = findTemplateVariables(arg.text);
+      if (varInStr.length > 0) {
         const kvPair = varInStr.map((str, index) => {
-          return `val${index + 1}: ${str.replace(/^\${([^\}]+)\}$/, '$1')}`;
+          return `val${index + 1}: ${str.slice(2, -1)}`;
         });
         finalReplaceVal = `I18N.template(${val}, { ${kvPair.join(',\n')} })`;
 

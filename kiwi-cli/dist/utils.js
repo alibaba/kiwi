@@ -1,21 +1,75 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getKiwiDir = getKiwiDir;
+exports.getLangDir = getLangDir;
+exports.traverse = traverse;
+exports.retry = retry;
+exports.withTimeout = withTimeout;
+exports.getAllMessages = getAllMessages;
+exports.getProjectConfig = getProjectConfig;
+exports.translateText = translateText;
+exports.findMatchKey = findMatchKey;
+exports.findMatchValue = findMatchValue;
+exports.flatten = flatten;
+exports.lookForFiles = lookForFiles;
+exports.getTranslateOriginType = getTranslateOriginType;
+exports.translateKeyText = translateKeyText;
+exports.successInfo = successInfo;
+exports.failInfo = failInfo;
+exports.highlightText = highlightText;
 /**
  * @author linhuiw
  * @desc 工具方法
  */
-const path = require("path");
-const _ = require("lodash");
-const inquirer = require("inquirer");
-const fs = require("fs");
+const path = __importStar(require("path"));
+const _ = __importStar(require("lodash"));
+const inquirer_1 = __importDefault(require("inquirer"));
+const fs = __importStar(require("fs"));
 const pinyin_pro_1 = require("pinyin-pro");
 const const_1 = require("./const");
 const colors = require('colors');
@@ -38,7 +92,6 @@ function lookForFiles(dir, fileName) {
         }
     }
 }
-exports.lookForFiles = lookForFiles;
 /**
  * 获得项目配置信息
  */
@@ -46,11 +99,10 @@ function getProjectConfig() {
     const configFile = path.resolve(process.cwd(), `./${const_1.KIWI_CONFIG_FILE}`);
     let obj = const_1.PROJECT_CONFIG.defaultConfig;
     if (configFile && fs.existsSync(configFile)) {
-        obj = Object.assign({}, obj, JSON.parse(fs.readFileSync(configFile, 'utf8')));
+        obj = Object.assign(Object.assign({}, obj), JSON.parse(fs.readFileSync(configFile, 'utf8')));
     }
     return obj;
 }
-exports.getProjectConfig = getProjectConfig;
 /**
  * 获取语言资源的根目录
  */
@@ -60,7 +112,6 @@ function getKiwiDir() {
         return config.kiwiDir;
     }
 }
-exports.getKiwiDir = getKiwiDir;
 /**
  * 获取对应语言的目录位置
  * @param lang
@@ -69,7 +120,6 @@ function getLangDir(lang) {
     const langsDir = getKiwiDir();
     return path.resolve(langsDir, lang);
 }
-exports.getLangDir = getLangDir;
 /**
  * 深度优先遍历对象中的所有 string 属性，即文案
  */
@@ -86,7 +136,6 @@ function traverse(obj, cb) {
     }
     traverseInner(obj, cb, []);
 }
-exports.traverse = traverse;
 /**
  * 获取所有文案
  */
@@ -95,6 +144,8 @@ function getAllMessages(lang, filter = (message, key) => true) {
     let files = fs.readdirSync(srcLangDir);
     files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts').map(file => path.resolve(srcLangDir, file));
     const allMessages = files.map(file => {
+        // 清除 require 缓存，确保读取最新文件内容
+        delete require.cache[require.resolve(file)];
         const { default: messages } = require(file);
         const fileNameWithoutExt = path.basename(file).split('.')[0];
         const flattenedMessages = {};
@@ -108,7 +159,6 @@ function getAllMessages(lang, filter = (message, key) => true) {
     });
     return Object.assign({}, ...allMessages);
 }
-exports.getAllMessages = getAllMessages;
 /**
  * 重试方法
  * @param asyncOperation
@@ -126,7 +176,6 @@ function retry(asyncOperation, times = 1) {
     };
     return asyncOperation().catch(handleReject);
 }
-exports.retry = retry;
 /**
  * 设置超时
  * @param promise
@@ -140,7 +189,6 @@ function withTimeout(promise, ms) {
     });
     return Promise.race([promise, timeoutPromise]);
 }
-exports.withTimeout = withTimeout;
 /**
  * 使用google翻译
  */
@@ -159,7 +207,6 @@ function translateText(text, toLang) {
         });
     }), 5000);
 }
-exports.translateText = translateText;
 /**
  * 翻译中文
  */
@@ -184,14 +231,13 @@ function translateKeyText(text, origin) {
             }
             // Pinyin
             if (origin === 'Pinyin') {
-                const result = pinyin_pro_1.pinyin(text, { toneType: 'none' });
+                const result = (0, pinyin_pro_1.pinyin)(text, { toneType: 'none' });
                 resolve(result.split('$'));
             }
         }), 3000);
     }
     return retry(_translateText, 3);
 }
-exports.translateKeyText = translateKeyText;
 function findMatchKey(langObj, text) {
     for (const key in langObj) {
         if (langObj[key] === text) {
@@ -200,11 +246,9 @@ function findMatchKey(langObj, text) {
     }
     return null;
 }
-exports.findMatchKey = findMatchKey;
 function findMatchValue(langObj, key) {
     return langObj[key];
 }
-exports.findMatchValue = findMatchValue;
 /**
  * 将对象拍平
  * @param obj 原始对象
@@ -227,7 +271,6 @@ function flatten(obj, prefix = '') {
     }
     return ret;
 }
-exports.flatten = flatten;
 /**
  * 获取翻译源类型
  */
@@ -254,7 +297,7 @@ function getTranslateOriginType() {
                 origin: translateType[0]
             };
         }
-        const { origin } = yield inquirer.prompt({
+        const { origin } = yield inquirer_1.default.prompt({
             type: 'list',
             name: 'origin',
             message: '请选择使用的翻译源',
@@ -267,26 +310,22 @@ function getTranslateOriginType() {
         };
     });
 }
-exports.getTranslateOriginType = getTranslateOriginType;
 /**
  * 成功的提示
  */
 function successInfo(message) {
     console.log('successInfo: ', colors.green(message));
 }
-exports.successInfo = successInfo;
 /**
  * 失败的提示
  */
 function failInfo(message) {
     console.log('failInfo: ', colors.red(message));
 }
-exports.failInfo = failInfo;
 /**
  * 普通提示
  */
 function highlightText(message) {
     return colors.yellow(`${message}`);
 }
-exports.highlightText = highlightText;
 //# sourceMappingURL=utils.js.map

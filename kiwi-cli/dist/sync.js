@@ -1,35 +1,73 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.sync = sync;
 /**
  * @author linhuiw
  * @desc 翻译文件
  */
 require('ts-node').register({
+    transpileOnly: true,
     compilerOptions: {
         module: 'commonjs'
     }
 });
-const fs = require("fs");
-const path = require("path");
-const _ = require("lodash");
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const _ = __importStar(require("lodash"));
 const utils_1 = require("./utils");
-const CONFIG = utils_1.getProjectConfig();
+const CONFIG = (0, utils_1.getProjectConfig)();
 /**
  * 获取中文文案文件的翻译，优先使用已有翻译，若找不到则使用 google 翻译
  * */
 function getTranslations(file, toLang) {
     const translations = {};
     const fileNameWithoutExt = path.basename(file).split('.')[0];
-    const srcLangDir = utils_1.getLangDir(CONFIG.srcLang);
-    const distLangDir = utils_1.getLangDir(toLang);
+    const srcLangDir = (0, utils_1.getLangDir)(CONFIG.srcLang);
+    const distLangDir = (0, utils_1.getLangDir)(toLang);
     const srcFile = path.resolve(srcLangDir, file);
     const distFile = path.resolve(distLangDir, file);
+    // 清除 require 缓存，确保读取最新文件内容
+    delete require.cache[require.resolve(srcFile)];
     const { default: texts } = require(srcFile);
     let distTexts;
     if (fs.existsSync(distFile)) {
+        delete require.cache[require.resolve(distFile)];
         distTexts = require(distFile).default;
     }
-    utils_1.traverse(texts, (text, path) => {
+    (0, utils_1.traverse)(texts, (text, path) => {
         const key = fileNameWithoutExt + '.' + path;
         const distText = _.get(distTexts, path);
         translations[key] = distText || text;
@@ -41,18 +79,18 @@ function getTranslations(file, toLang) {
  * */
 function writeTranslations(file, toLang, translations) {
     const fileNameWithoutExt = path.basename(file).split('.')[0];
-    const srcLangDir = utils_1.getLangDir(CONFIG.srcLang);
+    const srcLangDir = (0, utils_1.getLangDir)(CONFIG.srcLang);
     const srcFile = path.resolve(srcLangDir, file);
     const { default: texts } = require(srcFile);
     const rst = {};
-    utils_1.traverse(texts, (text, path) => {
+    (0, utils_1.traverse)(texts, (text, path) => {
         const key = fileNameWithoutExt + '.' + path;
         // 使用 setWith 而不是 set，保证 numeric key 创建的不是数组，而是对象
         // https://github.com/lodash/lodash/issues/1316#issuecomment-120753100
         _.setWith(rst, path, translations[key], Object);
     });
     const fileContent = 'export default ' + JSON.stringify(rst, null, 2);
-    const filePath = path.resolve(utils_1.getLangDir(toLang), path.basename(file));
+    const filePath = path.resolve((0, utils_1.getLangDir)(toLang), path.basename(file));
     return new Promise((resolve, reject) => {
         fs.writeFile(filePath, fileContent, err => {
             if (err) {
@@ -81,7 +119,7 @@ function translateFile(file, toLang) {
  * 翻译所有文件
  */
 function sync(callback) {
-    const srcLangDir = utils_1.getLangDir(CONFIG.srcLang);
+    const srcLangDir = (0, utils_1.getLangDir)(CONFIG.srcLang);
     fs.readdir(srcLangDir, (err, files) => {
         if (err) {
             console.error(err);
@@ -108,5 +146,4 @@ function sync(callback) {
         }
     });
 }
-exports.sync = sync;
 //# sourceMappingURL=sync.js.map

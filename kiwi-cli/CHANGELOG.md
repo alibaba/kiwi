@@ -2,6 +2,20 @@
 
 Kiwi Cli
 
+## 1.1.1 (2026-06-17)
+### Bug Fixes
+- 修复 --translate 增量翻译执行问题（原来会因缓存问题导致全量翻译）
+- 修复 --extract 抽取文案时一级path大小写与lang文件名大小写不一致的问题
+- 修复 --extract 新增文件某些场景下未添加到默认导入的问题
+- 修复 --extract ts文件中某些场景下错误识别中文注释的问题
+- 优化 --extract 对字符串模板嵌套的处理，现在支持处理最多3层变量嵌套
+
+### Features
+- 升级typescript及其相关依赖，ts -> v5
+- --extract 添加文件/行级中文抽取忽略 kiwi-disable-file、kiwi-disable-next-line
+- 各命令相关文档完善
+
+
 ## 1.0.23 (2022-06-10)
 -  kiwi --extract 兼容文件夹中带 - 的情况
 

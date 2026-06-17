@@ -6,6 +6,31 @@
 import { TargetStr } from './define';
 import * as vscode from 'vscode';
 import { updateLangFiles } from './file';
+
+/**
+ * 使用平衡括号计数提取模板字符串中的 ${...} 变量
+ * 支持任意深度的嵌套，解决正则无法处理嵌套 {} 的问题
+ */
+function findTemplateVariables(text: string): string[] {
+  const vars: string[] = [];
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '$' && text[i + 1] === '{') {
+      let depth = 1;
+      const start = i;
+      i += 2;
+      while (i < text.length && depth > 0) {
+        if (text[i] === '{') depth++;
+        else if (text[i] === '}') depth--;
+        i++;
+      }
+      vars.push(text.slice(start, i));
+    } else {
+      i++;
+    }
+  }
+  return vars;
+}
 /**
  * 更新文件
  * @param arg  目标字符串对象
@@ -43,10 +68,10 @@ export function replaceAndUpdate(arg: TargetStr, val: string, validateDuplicate:
     }
     // 若是模板字符串，看看其中是否包含变量
     if (last1Char === '`') {
-      const varInStr = arg.text.match(/(\$\{[^\}]+?\})/g);
-      if (varInStr) {
+      const varInStr = findTemplateVariables(arg.text);
+      if (varInStr.length > 0) {
         const kvPair = varInStr.map((str, index) => {
-          return `val${index + 1}: ${str.replace(/^\${([^\}]+)\}$/, '$1')}`;
+          return `val${index + 1}: ${str.slice(2, -1)}`;
         });
         finalReplaceVal = `I18N.template(${val}, { ${kvPair.join(',\n')} })`;
 

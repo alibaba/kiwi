@@ -18,7 +18,10 @@ import * as compilerVue from 'vue-template-compiler';
 function findTextInTs(code: string, fileName: string) {
   const matches = [];
   const activeEditor = vscode.window.activeTextEditor;
-  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
+  // 根据文件扩展名决定 ScriptKind，.ts 文件不能用 TSX 模式解析
+  // 否则泛型语法 request<T>() 会被误认为 JSX 标签，导致 AST 错误
+  const scriptKind = fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, scriptKind);
   const lines = ast.text.split(/\r?\n/);
   // 文件注释中不包含 /* kiwi-disable-file */
   const hasDisableKiwi = /\/\*+\s+kiwi\-disable\-file/.test(ast.text);
@@ -87,12 +90,12 @@ function findTextInTs(code: string, fileName: string) {
         break;
       }
       case ts.SyntaxKind.TemplateExpression: {
-        const { pos, end } = node;
-        let templateContent = code.slice(pos, end);
+        const start = node.getStart();
+        const end = node.getEnd();
+        // 使用 getStart() 而非 pos，避免包含前导注释/空白导致误判
+        let templateContent = code.slice(start, end);
         templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
-          const start = node.getStart();
-          const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
           const startPos = activeEditor.document.positionAt(start + 1);
           const endPos = activeEditor.document.positionAt(end - 1);
@@ -105,13 +108,13 @@ function findTextInTs(code: string, fileName: string) {
         }
         break;
       }
-      case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-        const { pos, end } = node;
-        let templateContent = code.slice(pos, end);
+      case ts.SyntaxKind.NoSubstitutionTemplateLiteral: {
+        const start = node.getStart();
+        const end = node.getEnd();
+        // 使用 getStart() 而非 pos，避免包含前导注释/空白导致误判
+        let templateContent = code.slice(start, end);
         templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX) && hasNoDisableRule(node)) {
-          const start = node.getStart();
-          const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */
           const startPos = activeEditor.document.positionAt(start + 1);
           const endPos = activeEditor.document.positionAt(end - 1);
@@ -122,6 +125,7 @@ function findTextInTs(code: string, fileName: string) {
             isString: true
           });
         }
+      }
     }
 
     ts.forEachChild(node, visit);

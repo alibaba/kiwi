@@ -3,13 +3,14 @@
  * @desc 全量翻译 translate命令
  */
 require('ts-node').register({
+  transpileOnly: true,
   compilerOptions: {
     module: 'commonjs'
   }
 });
 import * as path from 'path';
 import * as fs from 'fs';
-import * as baiduTranslate from 'baidu-translate';
+import baiduTranslate from 'baidu-translate';
 import { tsvFormatRows } from 'd3-dsv';
 import { getProjectConfig, getLangDir, withTimeout, translateText } from './utils';
 import { importMessages } from './import';
@@ -156,7 +157,7 @@ async function runTranslateApi(dstLang: string, origin: string) {
   }
   const content = tsvFormatRows(messagesToTranslate);
   // 输出tsv文件
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const filePath = path.resolve(getLangDir(dstLang), `${dstLang}_translate.tsv`);
     fs.writeFile(filePath, content, err => {
       if (err) {

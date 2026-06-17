@@ -4,8 +4,9 @@
  */
 
 import * as _ from 'lodash';
-import * as slash from 'slash2';
+import slash from 'slash2';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as colors from 'colors';
 
 import { getSpecifiedFiles, readFile, writeFile, isFile, isDirectory } from './file';
@@ -24,6 +25,34 @@ import { replaceAndUpdate, hasImportI18N, createImportI18N } from './replace';
 import { getProjectConfig } from '../utils';
 
 const CONFIG = getProjectConfig();
+
+/**
+ * 获取已存在的 lang 文件名列表（不含扩展名，不含 index）
+ */
+function getExistingLangFiles(): string[] {
+  const srcLangDir = path.resolve(CONFIG.kiwiDir, CONFIG.srcLang);
+  if (!fs.existsSync(srcLangDir)) return [];
+  return fs
+    .readdirSync(srcLangDir)
+    .filter(f => f.endsWith(`.${CONFIG.fileType}`) && f !== `index.${CONFIG.fileType}`)
+    .map(f => f.replace(`.${CONFIG.fileType}`, ''));
+}
+
+/**
+ * 检查 suggestion 的第一个元素（作为 lang 文件名）是否与已有文件存在大小写冲突
+ * 如果存在，使用已有文件的命名以保证一致性
+ */
+function resolveFilenameCasing(suggestion: string[]): string[] {
+  if (!suggestion || !suggestion.length) return suggestion;
+  const existingFiles = getExistingLangFiles();
+  const firstName = suggestion[0];
+  const match = existingFiles.find(f => f.toLowerCase() === firstName.toLowerCase());
+  if (match && match !== firstName) {
+    // 存在大小写冲突，使用已有文件的命名
+    suggestion[0] = match;
+  }
+  return suggestion;
+}
 
 /**
  * 剔除 kiwiDir 下的文件
@@ -111,7 +140,7 @@ function getSuggestion(currentFilename: string) {
     }
   }
 
-  return suggestion;
+  return resolveFilenameCasing(suggestion);
 }
 
 /**
@@ -213,45 +242,42 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
 
   console.log('即将截取每个中文文案的前5位翻译生成key值，并替换中...');
 
-  // 对当前文件进行文案key生成和替换
-  const generateKeyAndReplace = async item => {
-    const currentFilename = item.file;
-    console.log(`${currentFilename} 替换中...`);
-    // 过滤掉模板字符串内的中文，避免替换时出现异常
-    const targetStrs = item.texts.reduce((pre, strObj, i) => {
-      // 因为文案已经根据位置倒排，所以比较时只需要比较剩下的文案即可
-      const afterStrs = item.texts.slice(i + 1);
+  /**
+   * 对单个文件执行一轮提取替换
+   * @param currentFilename 文件路径
+   * @param texts 待替换的中文文案列表（已按 start 降序排列）
+   * @param depth 当前递归深度，防止无限递归
+   */
+  const extractAndReplace = async (currentFilename: string, texts: any[], depth = 0) => {
+    // 过滤掉模板字符串内的中文，避免替换时位置冲突
+    const targetStrs = texts.reduce((pre, strObj, i) => {
+      const afterStrs = texts.slice(i + 1);
       if (afterStrs.some(obj => strObj.range.end <= obj.range.end)) {
         return pre;
       }
       return pre.concat(strObj);
     }, []);
-    const len = item.texts.length - targetStrs.length;
-    if (len > 0) {
-      console.log(colors.red(`存在 ${highlightText(len)} 处文案无法替换，请避免在模板字符串的变量中嵌套中文`));
+    const filteredCount = texts.length - targetStrs.length;
+    if (filteredCount > 0 && depth === 0) {
+      console.log(
+        colors.yellow(`存在 ${highlightText(filteredCount)} 处模板字符串变量中的嵌套中文，将在下一轮提取中处理`)
+      );
     }
 
+    // 翻译生成 key
     let translateTexts;
-
     if (origin !== 'Google') {
-      // 翻译中文文案，百度和pinyin将文案进行拼接统一翻译
       const delimiter = origin === 'Baidu' ? '\n' : '$';
       const translateOriginTexts = targetStrs.reduce((prev, curr, i) => {
         const transOriginText = getTransOriginText(curr.text);
-        if (i === 0) {
-          return transOriginText;
-        }
+        if (i === 0) return transOriginText;
         return `${prev}${delimiter}${transOriginText}`;
       }, []);
-
       translateTexts = await translateKeyText(translateOriginTexts, origin);
     } else {
-      // google并发性较好，且未找到有效的分隔符，故仍然逐个文案进行翻译
       const translatePromises = targetStrs.reduce((prev, curr) => {
-        const transOriginText = getTransOriginText(curr.text);
-        return prev.concat(translateText(transOriginText, 'en_US'));
+        return prev.concat(translateText(getTransOriginText(curr.text), 'en_US'));
       }, []);
-
       [...translateTexts] = await Promise.all(translatePromises);
     }
 
@@ -260,8 +286,8 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
       return;
     }
 
+    // 生成可替换的 key-value 对并执行替换
     const replaceableStrs = getReplaceableStrs(currentFilename, langsPrefix, translateTexts, targetStrs);
-
     await replaceableStrs
       .reduce((prev, obj) => {
         return prev.then(() => {
@@ -269,17 +295,35 @@ function extractAll({ dirPath, prefix }: { dirPath?: string; prefix?: string }) 
         });
       }, Promise.resolve())
       .then(() => {
-        // 添加 import I18N
         if (!hasImportI18N(currentFilename)) {
           const code = createImportI18N(currentFilename);
-
           writeFile(currentFilename, code);
         }
-        successInfo(`${currentFilename} 替换完成，共替换 ${targetStrs.length} 处文案！`);
+        successInfo(`${currentFilename} ${depth > 0 ? '嵌套文案' : ''}替换完成，共替换 ${targetStrs.length} 处文案！`);
       })
       .catch(e => {
         failInfo(e.message);
       });
+
+    // 如果有被过滤的嵌套文案，递归处理（最多递归 3 层）
+    if (filteredCount > 0 && depth < 3) {
+      const updatedCode = readFile(currentFilename);
+      const remainingTexts = findChineseText(updatedCode, currentFilename);
+      const sortRemaining = _.sortBy(remainingTexts, obj => -obj.range.start);
+      if (sortRemaining.length > 0) {
+        console.log(
+          `${currentFilename} 发现 ${highlightText(sortRemaining.length)} 处嵌套中文，进行第 ${depth + 2} 轮提取...`
+        );
+        await extractAndReplace(currentFilename, sortRemaining, depth + 1);
+      }
+    }
+  };
+
+  // 对当前文件进行文案key生成和替换
+  const generateKeyAndReplace = async item => {
+    const currentFilename = item.file;
+    console.log(`${currentFilename} 替换中...`);
+    await extractAndReplace(currentFilename, item.texts);
   };
 
   allTargetStrs
