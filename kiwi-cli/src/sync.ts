@@ -92,7 +92,14 @@ function sync(callback?) {
     if (err) {
       console.error(err);
     } else {
-      files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts' && file !== 'mock.ts').map(file => file);
+      files = files
+        .filter(
+          file =>
+            file.endsWith(`.${CONFIG.fileType}`) &&
+            file !== `index.${CONFIG.fileType}` &&
+            file !== `mock.${CONFIG.fileType}`
+        )
+        .map(file => file);
       const translateFiles = toLang =>
         Promise.all(
           files.map(file => {
@@ -103,11 +110,11 @@ function sync(callback?) {
         () => {
           const langDirs = CONFIG.distLangs.map(getLangDir);
           langDirs.map(dir => {
-            const filePath = path.resolve(dir, 'index.ts');
+            const filePath = path.resolve(dir, `index.${CONFIG.fileType}`);
             if (!fs.existsSync(dir)) {
               fs.mkdirSync(dir);
             }
-            fs.copyFileSync(path.resolve(srcLangDir, 'index.ts'), filePath);
+            fs.copyFileSync(path.resolve(srcLangDir, `index.${CONFIG.fileType}`), filePath);
           });
           callback && callback();
         },
