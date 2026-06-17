@@ -2,7 +2,6 @@
   "private": true,
   "description": "kiwi is a full process international solution",
   "workspaces": [
-    "kiwi-cli",
     "kiwi-intl",
     "kiwi-demo"
   ],

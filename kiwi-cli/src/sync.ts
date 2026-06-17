@@ -3,6 +3,7 @@
  * @desc 翻译文件
  */
 require('ts-node').register({
+  transpileOnly: true,
   compilerOptions: {
     module: 'commonjs'
   }
@@ -23,9 +24,12 @@ function getTranslations(file, toLang) {
   const distLangDir = getLangDir(toLang);
   const srcFile = path.resolve(srcLangDir, file);
   const distFile = path.resolve(distLangDir, file);
+  // 清除 require 缓存，确保读取最新文件内容
+  delete require.cache[require.resolve(srcFile)];
   const { default: texts } = require(srcFile);
   let distTexts;
   if (fs.existsSync(distFile)) {
+    delete require.cache[require.resolve(distFile)];
     distTexts = require(distFile).default;
   }
 
@@ -57,7 +61,7 @@ function writeTranslations(file, toLang, translations) {
 
   const fileContent = 'export default ' + JSON.stringify(rst, null, 2);
   const filePath = path.resolve(getLangDir(toLang), path.basename(file));
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     fs.writeFile(filePath, fileContent, err => {
       if (err) {
         reject(err);

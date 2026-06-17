@@ -12,6 +12,26 @@ import * as babelTypes from '@babel/types';
 /** unicode cjk 中日韩文 范围 */
 const DOUBLE_BYTE_REGEX = /[\u4E00-\u9FFF]/g;
 
+/** 文件级禁用规则 */
+const DISABLE_FILE_REGEX = /\/\*+\s+kiwi-disable-file\s*\*\//;
+/** 行级禁用规则（JS/TS） */
+const DISABLE_LINE_REGEX = /\/\/\s+kiwi-disable-next-line|\/\*+\s+kiwi-disable-next-line\s*\*\//;
+/** 行级禁用规则（HTML） */
+const DISABLE_HTML_LINE_REGEX = /<!--\s+kiwi-disable-next-line\s*-->/;
+
+/**
+ * 判断 TS/JS 代码中节点是否被禁用规则覆盖
+ * @param code 源代码
+ * @param lines 按行分割的代码数组
+ * @param hasDisableFile 是否有文件级禁用
+ * @param line 节点所在行号（0-based）
+ */
+function isDisabled(lines: string[], hasDisableFile: boolean, line: number): boolean {
+  if (hasDisableFile) return true;
+  const lastLine = lines[line - 1] || '';
+  return DISABLE_LINE_REGEX.test(lastLine);
+}
+
 function transerI18n(code, filename, lang) {
   if (lang === 'ts') {
     return typescriptI18n(code, filename);
@@ -77,7 +97,15 @@ function removeFileComment(code, fileName) {
  */
 function findTextInTs(code: string, fileName: string) {
   const matches = [];
-  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
+  // 根据文件扩展名决定 ScriptKind，.ts 文件不能用 TSX 模式解析
+  // 否则泛型语法 request<T>() 会被误认为 JSX 标签，导致 AST 错误
+  const scriptKind = fileName.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, scriptKind);
+  const lines = code.split(/\r?\n/);
+  const hasDisableFile = DISABLE_FILE_REGEX.test(code);
+
+  // 文件级禁用，直接返回空
+  if (hasDisableFile) return matches;
 
   function visit(node: ts.Node) {
     switch (node.kind) {
@@ -85,6 +113,8 @@ function findTextInTs(code: string, fileName: string) {
         /** 判断 Ts 中的字符串含有中文 */
         const { text } = node as ts.StringLiteral;
         if (text.match(DOUBLE_BYTE_REGEX)) {
+          const { line } = ast.getLineAndCharacterOfPosition(node.getStart());
+          if (isDisabled(lines, false, line)) break;
           const start = node.getStart();
           const end = node.getEnd();
           const range = { start, end };
@@ -106,6 +136,8 @@ function findTextInTs(code: string, fileName: string) {
             const noCommentText = removeFileComment(text, fileName);
 
             if (noCommentText.match(DOUBLE_BYTE_REGEX)) {
+              const { line } = ast.getLineAndCharacterOfPosition(child.getStart());
+              if (isDisabled(lines, false, line)) return;
               const start = child.getStart();
               const end = child.getEnd();
               const range = { start, end };
@@ -121,12 +153,14 @@ function findTextInTs(code: string, fileName: string) {
         break;
       }
       case ts.SyntaxKind.TemplateExpression: {
-        const { pos, end } = node;
-        const templateContent = code.slice(pos, end);
+        const start = node.getStart();
+        const end = node.getEnd();
+        // 使用 getStart() 而非 pos，避免包含前导注释/空白导致误判
+        const templateContent = code.slice(start, end);
 
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
-          const start = node.getStart();
-          const end = node.getEnd();
+          const { line } = ast.getLineAndCharacterOfPosition(start);
+          if (isDisabled(lines, false, line)) break;
           const range = { start, end };
           matches.push({
             range,
@@ -137,12 +171,14 @@ function findTextInTs(code: string, fileName: string) {
         break;
       }
       case ts.SyntaxKind.NoSubstitutionTemplateLiteral: {
-        const { pos, end } = node;
-        const templateContent = code.slice(pos, end);
+        const start = node.getStart();
+        const end = node.getEnd();
+        // 使用 getStart() 而非 pos，避免包含前导注释/空白导致误判
+        const templateContent = code.slice(start, end);
 
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
-          const start = node.getStart();
-          const end = node.getEnd();
+          const { line } = ast.getLineAndCharacterOfPosition(start);
+          if (isDisabled(lines, false, line)) break;
           const range = { start, end };
           matches.push({
             range,
@@ -166,6 +202,12 @@ function findTextInTs(code: string, fileName: string) {
  */
 function findTextInJs(code: string) {
   const matches = [];
+  const lines = code.split(/\r?\n/);
+  const hasDisableFile = DISABLE_FILE_REGEX.test(code);
+
+  // 文件级禁用，直接返回空
+  if (hasDisableFile) return matches;
+
   const ast = babelParser.parse(code, {
     sourceType: 'module',
     plugins: ['jsx', 'decorators-legacy']
@@ -173,8 +215,10 @@ function findTextInJs(code: string) {
 
   babelTraverse.default(ast, {
     StringLiteral({ node }) {
-      const { start, end, value } = node as babelTypes.StringLiteral;
+      const { start, end, value, loc } = node as babelTypes.StringLiteral;
       if (value && value.match(DOUBLE_BYTE_REGEX)) {
+        const line = loc ? loc.start.line - 1 : 0; // Babel loc is 1-based
+        if (isDisabled(lines, false, line)) return;
         const range = { start, end };
         matches.push({
           range,
@@ -184,9 +228,11 @@ function findTextInJs(code: string) {
       }
     },
     TemplateLiteral({ node }) {
-      const { start, end } = node as babelTypes.TemplateLiteral;
+      const { start, end, loc } = node as babelTypes.TemplateLiteral;
       const templateContent = code.slice(start, end);
       if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+        const line = loc ? loc.start.line - 1 : 0;
+        if (isDisabled(lines, false, line)) return;
         const range = { start, end };
         matches.push({
           range,
@@ -199,9 +245,11 @@ function findTextInJs(code: string) {
       const { children } = node as babelTypes.JSXElement;
       children.forEach(child => {
         if (babelTypes.isJSXText(child)) {
-          const { value, start, end } = child;
-          const range = { start, end };
+          const { value, start, end, loc } = child;
           if (value.match(DOUBLE_BYTE_REGEX)) {
+            const line = loc ? loc.start.line - 1 : 0;
+            if (isDisabled(lines, false, line)) return;
+            const range = { start, end };
             matches.push({
               range,
               text: value.trim(),
@@ -221,11 +269,25 @@ function findTextInJs(code: string) {
  */
 function findTextInHtml(code) {
   const matches = [];
+  const lines = code.split(/\r?\n/);
+  const hasDisableFile = DISABLE_HTML_LINE_REGEX.test(code) && /<!--\s+kiwi-disable-file\s*-->/.test(code);
+
+  // 文件级禁用，直接返回空
+  if (hasDisableFile) return matches;
+
   const ast = compiler.parseTemplate(code, 'ast.html', {
     preserveWhitespaces: false
   });
 
+  function isHtmlLineDisabled(node) {
+    const valueSpan = node.valueSpan || node.sourceSpan;
+    const line = valueSpan.start.line; // 0-based
+    const lastLine = lines[line - 1] || '';
+    return DISABLE_HTML_LINE_REGEX.test(lastLine);
+  }
+
   function visit(node) {
+    if (isHtmlLineDisabled(node)) return;
     const value = node.value;
     if (value && typeof value === 'string' && value.match(DOUBLE_BYTE_REGEX)) {
       const valueSpan = node.valueSpan || node.sourceSpan;
@@ -374,6 +436,10 @@ function findTextInVue(code: string) {
 function findTextInVueTs(code: string, fileName: string, startNum: number) {
   const matches = [];
   const ast = ts.createSourceFile('', code, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TS);
+  const lines = code.split(/\r?\n/);
+  const hasDisableFile = DISABLE_FILE_REGEX.test(code);
+
+  if (hasDisableFile) return matches;
 
   function visit(node: ts.Node) {
     switch (node.kind) {
@@ -381,6 +447,8 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
         /** 判断 Ts 中的字符串含有中文 */
         const { text } = node as ts.StringLiteral;
         if (text.match(DOUBLE_BYTE_REGEX)) {
+          const { line } = ast.getLineAndCharacterOfPosition(node.getStart());
+          if (isDisabled(lines, false, line)) break;
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除引号 */
@@ -398,6 +466,8 @@ function findTextInVueTs(code: string, fileName: string, startNum: number) {
         let templateContent = code.slice(pos, end);
         templateContent = templateContent.toString().replace(/\$\{[^\}]+\}/, '');
         if (templateContent.match(DOUBLE_BYTE_REGEX)) {
+          const { line } = ast.getLineAndCharacterOfPosition(node.getStart());
+          if (isDisabled(lines, false, line)) break;
           const start = node.getStart();
           const end = node.getEnd();
           /** 加一，减一的原因是，去除`号 */

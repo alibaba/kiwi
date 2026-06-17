@@ -4,6 +4,7 @@
  * @TODO: index 文件需要添加 mock
  */
 require('ts-node').register({
+  transpileOnly: true,
   compilerOptions: {
     module: 'commonjs'
   }
@@ -22,6 +23,9 @@ const CONFIG = getProjectConfig();
 function getSourceText() {
   const srcLangDir = getLangDir(CONFIG.srcLang);
   const srcFile = path.resolve(srcLangDir, 'index.ts');
+  // 清除 require 缓存，确保读取最新文件内容
+  const resolvedSrcFile = require.resolve(srcFile);
+  delete require.cache[resolvedSrcFile];
   const { default: texts } = require(srcFile);
 
   return texts;
@@ -35,6 +39,9 @@ function getDistText(dstLang) {
   const distFile = path.resolve(distLangDir, 'index.ts');
   let distTexts = {};
   if (fs.existsSync(distFile)) {
+    // 清除 require 缓存，确保读取最新文件内容
+    const resolvedDistFile = require.resolve(distFile);
+    delete require.cache[resolvedDistFile];
     distTexts = require(distFile).default;
   }
 
@@ -83,7 +90,7 @@ async function mockCurrentLang(dstLang: string, origin: string) {
 function writeMockFile(dstLang, mocks) {
   const fileContent = 'export default ' + JSON.stringify(mocks, null, 2);
   const filePath = path.resolve(getLangDir(dstLang), 'mock.ts');
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     fs.writeFile(filePath, fileContent, err => {
       if (err) {
         reject(err);

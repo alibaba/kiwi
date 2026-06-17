@@ -4,7 +4,7 @@
  */
 import * as path from 'path';
 import * as _ from 'lodash';
-import * as inquirer from 'inquirer';
+import inquirer from 'inquirer';
 import * as fs from 'fs';
 import { pinyin } from 'pinyin-pro';
 import { PROJECT_CONFIG, KIWI_CONFIG_FILE } from './const';
@@ -92,6 +92,8 @@ function getAllMessages(lang: string, filter = (message: string, key: string) =>
   files = files.filter(file => file.endsWith('.ts') && file !== 'index.ts').map(file => path.resolve(srcLangDir, file));
 
   const allMessages = files.map(file => {
+    // 清除 require 缓存，确保读取最新文件内容
+    delete require.cache[require.resolve(file)];
     const { default: messages } = require(file);
     const fileNameWithoutExt = path.basename(file).split('.')[0];
     const flattenedMessages = {};

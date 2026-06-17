@@ -1,30 +1,71 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.translate = translate;
+exports.baiduTranslateTexts = baiduTranslateTexts;
+exports.googleTranslateTexts = googleTranslateTexts;
 /**
  * @author zongwenjian
  * @desc 全量翻译 translate命令
  */
 require('ts-node').register({
+    transpileOnly: true,
     compilerOptions: {
         module: 'commonjs'
     }
 });
-const path = require("path");
-const fs = require("fs");
-const baiduTranslate = require("baidu-translate");
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
+const baidu_translate_1 = __importDefault(require("baidu-translate"));
 const d3_dsv_1 = require("d3-dsv");
 const utils_1 = require("./utils");
 const import_1 = require("./import");
 const mock_1 = require("./mock");
-const CONFIG = utils_1.getProjectConfig();
+const CONFIG = (0, utils_1.getProjectConfig)();
 /**
  * 百度单次翻译任务
  * @param text 待翻译文案
@@ -32,8 +73,8 @@ const CONFIG = utils_1.getProjectConfig();
  */
 function translateTextByBaidu(text, toLang) {
     const { baiduApiKey: { appId, appKey }, baiduLangMap } = CONFIG;
-    return utils_1.withTimeout(new Promise((resolve, reject) => {
-        baiduTranslate(appId, appKey, baiduLangMap[toLang], 'zh')(text)
+    return (0, utils_1.withTimeout)(new Promise((resolve, reject) => {
+        (0, baidu_translate_1.default)(appId, appKey, baiduLangMap[toLang], 'zh')(text)
             .then(data => {
             if (data && data.trans_result) {
                 resolve(data.trans_result);
@@ -65,7 +106,7 @@ function textToUpperCaseByFirstWord(text) {
 function googleTranslateTexts(untranslatedTexts, toLang) {
     return __awaiter(this, void 0, void 0, function* () {
         const translateAllTexts = Object.keys(untranslatedTexts).map(key => {
-            return utils_1.translateText(untranslatedTexts[key], toLang).then(translatedText => [key, translatedText]);
+            return (0, utils_1.translateText)(untranslatedTexts[key], toLang).then(translatedText => [key, translatedText]);
         });
         return new Promise(resolve => {
             const result = {};
@@ -78,7 +119,6 @@ function googleTranslateTexts(untranslatedTexts, toLang) {
         });
     });
 }
-exports.googleTranslateTexts = googleTranslateTexts;
 /**
  * 使用百度翻译所有待翻译的文案
  * @param untranslatedTexts 待翻译文案
@@ -135,14 +175,13 @@ function baiduTranslateTexts(untranslatedTexts, toLang) {
         }));
     });
 }
-exports.baiduTranslateTexts = baiduTranslateTexts;
 /**
  * 执行翻译任务，自动导入翻译结果
  * @param dstLang
  */
 function runTranslateApi(dstLang, origin) {
     return __awaiter(this, void 0, void 0, function* () {
-        const untranslatedTexts = mock_1.getAllUntranslatedTexts(dstLang);
+        const untranslatedTexts = (0, mock_1.getAllUntranslatedTexts)(dstLang);
         let mocks = {};
         if (origin === 'Google') {
             mocks = yield googleTranslateTexts(untranslatedTexts, dstLang);
@@ -154,10 +193,10 @@ function runTranslateApi(dstLang, origin) {
         if (messagesToTranslate.length === 0) {
             return Promise.resolve();
         }
-        const content = d3_dsv_1.tsvFormatRows(messagesToTranslate);
+        const content = (0, d3_dsv_1.tsvFormatRows)(messagesToTranslate);
         // 输出tsv文件
         return new Promise((resolve, reject) => {
-            const filePath = path.resolve(utils_1.getLangDir(dstLang), `${dstLang}_translate.tsv`);
+            const filePath = path.resolve((0, utils_1.getLangDir)(dstLang), `${dstLang}_translate.tsv`);
             fs.writeFile(filePath, content, err => {
                 if (err) {
                     reject(err);
@@ -165,7 +204,7 @@ function runTranslateApi(dstLang, origin) {
                 else {
                     console.log(`${dstLang} 自动翻译完成`);
                     // 自动导入翻译结果
-                    import_1.importMessages(filePath, dstLang);
+                    (0, import_1.importMessages)(filePath, dstLang);
                     resolve();
                 }
             });
@@ -193,5 +232,4 @@ function translate(origin) {
         }
     });
 }
-exports.translate = translate;
 //# sourceMappingURL=translate.js.map

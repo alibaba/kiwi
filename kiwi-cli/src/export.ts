@@ -3,6 +3,7 @@
  * @desc 导出未翻译文件
  */
 require('ts-node').register({
+  transpileOnly: true,
   compilerOptions: {
     module: 'commonjs'
   }

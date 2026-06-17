@@ -14,6 +14,7 @@ import { LangSceneParam, TargetStr, TranslateAPiEnum } from './define';
 import { replaceAndUpdate } from './replaceAndUpdate';
 import { AutoImportI18NFixer } from './autoImportI18n';
 import { kiwiSearch } from './kiwiSearch/extension';
+import { findChineseText } from './findChineseText';
 import {
   findMatchKey,
   getConfiguration,
@@ -312,7 +313,7 @@ export function activate(context: vscode.ExtensionContext) {
   // 一键替换所有中文
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-i18n-linter.kiwigo', () => {
-      // 将嵌套的模板字符串情况移除，只替换最外层的文案，内部中文保留
+      // 将嵌套的模板字符串情况移除，只替换最外层的文案，内部中文在第二遍处理
       const newTargetStrs = targetStrs.filter((item, i) => {
         if (i > 0) {
           const beforeStrs = targetStrs.slice(0, i);
@@ -379,10 +380,16 @@ export function activate(context: vscode.ExtensionContext) {
           );
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
-          // 根据在文件中的位置进行排序，防止后续生成key和文案位置错位
-          const sortTargetStrs: any = _.sortBy(newTargetStrs, item => {
-            return item.range.start.line;
-          });
+          // 根据在文件中的位置进行排序（行号 + 列号），确保 reverse 后从右到左、从下到上处理
+          const sortTargetStrs: any = _.sortBy(newTargetStrs, [
+            item => item.range.start.line,
+            item => item.range.start.character
+          ]);
+          // 包含嵌套项的完整列表，用于递归提取
+          const allSortedStrs: any = _.sortBy(targetStrs, [
+            item => item.range.start.line,
+            item => item.range.start.character
+          ]);
           // 翻译中文文案
           const delimiter = translateApi === TranslateAPiEnum.Baidu ? '\n' : '$';
           const translateTexts = sortTargetStrs.reduce((prev, curr, i) => {
@@ -426,75 +433,114 @@ export function activate(context: vscode.ExtensionContext) {
 
           let translatedTexts;
           try {
-            translatedTexts = await translateText(translateTexts, translateApi);
-
-            const replaceableStrs = sortTargetStrs.reduce((prev, curr, i) => {
-              // 比较场景和文案 是否都一样，是则视为同一个文案
-
-              const key = findMatchKeyWithScene(finalLangObj, curr.text, langScene[i]);
-              const memoryKey = `${curr.text}_${langScene[i] || ''}`;
-              if (!virtualMemory[memoryKey]) {
-                if (key) {
-                  virtualMemory[memoryKey] = key;
-                  return prev.concat({
-                    target: curr,
-                    key: `${key}`
+            /**
+             * 对一组文案执行提取替换，支持递归处理嵌套中文
+             * @param textsToReplace 待替换的文案列表
+             * @param depth 递归深度，防止无限递归
+             */
+            const extractAndReplace = async (textsToReplace: any[], depth = 0) => {
+              // 过滤掉嵌套在外层模板字符串内的中文，避免位置冲突
+              const outerStrs = textsToReplace.filter((item, i) => {
+                if (i > 0) {
+                  const beforeStrs = textsToReplace.slice(0, i);
+                  const curRange = item.range;
+                  const [curStartLine, curEndLine] = [curRange.start.line, curRange.end.line];
+                  const [curStart, curEnd] = [curRange.start.character, curRange.end.character];
+                  const include = beforeStrs.some(str => {
+                    const preRange = str.range;
+                    const [preStartLine, preEndLine] = [preRange.start.line, preRange.end.line];
+                    const [preStart, preEnd] = [preRange.start.character, preRange.end.character];
+                    return !(
+                      curEndLine < preStartLine ||
+                      curStartLine > preEndLine ||
+                      (curStartLine === preEndLine && curStart > preEnd) ||
+                      (curEndLine === preStartLine && curEnd < preStart)
+                    );
                   });
+                  return !include;
                 }
-                const transText = translatedTexts[i] && _.camelCase(translatedTexts[i]);
-                let transKey = `${newPath + '.'}${
-                  openLangScene && (langScene[i] || 'noScene') !== 'noScene'
-                    ? `${langScene[i]}_${transText}`
-                    : transText
-                }`;
-                let occurTime = 1;
-                // 防止出现前四位相同但是整体文案不同的情况
-                while (
-                  finalLangObj[transKey] !== curr.text &&
-                  _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
-                ) {
-                  occurTime++;
-                }
-                if (occurTime >= 2) {
-                  transKey = `${transKey}${occurTime}`;
-                }
-                virtualMemory[memoryKey] = transKey;
-                finalLangObj[transKey] = curr.text;
-                return prev.concat({
-                  target: curr,
-                  key: transKey
-                });
-              } else {
-                return prev.concat({
-                  target: curr,
-                  key: virtualMemory[memoryKey]
-                });
-              }
-            }, []);
-
-            replaceableStrs
-              .reverse()
-              .reduce((prev: Promise<any>, obj) => {
-                return prev.then(() => {
-                  return replaceAndUpdate(obj.target, `I18N.${obj.key}`, false);
-                });
-              }, Promise.resolve())
-              .then(() => {
-                vscode.window.showInformationMessage('替换完成');
-                if (autoFixer) {
-                  autoFixer.fix(vscode.window.activeTextEditor.document);
-                }
-              })
-              .catch(e => {
-                vscode.window.showErrorMessage(e.message);
-              })
-              .finally(() => {
-                // 替换结束
-                updateKiwiGoBarStatusBar('KiwiGo');
+                return true;
               });
+              const localFilteredCount = textsToReplace.length - outerStrs.length;
+              if (localFilteredCount > 0 && depth === 0) {
+                console.log(`存在 ${localFilteredCount} 处嵌套中文，将在下一轮提取中处理`);
+              }
+
+              const delimiter = translateApi === TranslateAPiEnum.Baidu ? '\n' : '$';
+              const transOrigin = outerStrs.reduce((prev, curr, i) => {
+                const reg = /[a-zA-Z\u4e00-\u9fa5]+/g;
+                const findText = curr.text.match(reg) || [];
+                const transText = findText.join('').slice(0, 5) || '中文符号';
+                if (i === 0) return transText;
+                return `${prev}${delimiter}${transText}`;
+              }, '');
+
+              const translated = await translateText(transOrigin, translateApi);
+              finalLangObj = getSuggestLangObj();
+
+              const replaceableStrs = outerStrs.reduce((prev, curr, i) => {
+                const key = findMatchKeyWithScene(finalLangObj, curr.text, depth === 0 ? langScene[i] || '' : '');
+                const memoryKey = `${curr.text}_${depth === 0 ? langScene[i] || '' : ''}`;
+                if (!virtualMemory[memoryKey]) {
+                  if (key) {
+                    virtualMemory[memoryKey] = key;
+                    return prev.concat({ target: curr, key: `${key}` });
+                  }
+                  const transText = translated[i] && _.camelCase(translated[i]);
+                  let transKey = `${newPath + '.'}${
+                    depth === 0 && openLangScene && (langScene[i] || 'noScene') !== 'noScene'
+                      ? `${langScene[i]}_${transText}`
+                      : transText
+                  }`;
+                  let occurTime = 1;
+                  while (
+                    finalLangObj[transKey] !== curr.text &&
+                    _.keys(finalLangObj).includes(`${transKey}${occurTime >= 2 ? occurTime : ''}`)
+                  ) {
+                    occurTime++;
+                  }
+                  if (occurTime >= 2) transKey = `${transKey}${occurTime}`;
+                  virtualMemory[memoryKey] = transKey;
+                  finalLangObj[transKey] = curr.text;
+                  return prev.concat({ target: curr, key: transKey });
+                } else {
+                  return prev.concat({ target: curr, key: virtualMemory[memoryKey] });
+                }
+              }, []);
+
+              await replaceableStrs.reverse().reduce((prev: Promise<any>, obj) => {
+                return prev.then(() => replaceAndUpdate(obj.target, `I18N.${obj.key}`, false));
+              }, Promise.resolve());
+
+              // 检查是否有剩余嵌套中文，递归处理（最多 3 层）
+              if (localFilteredCount > 0 && depth < 3) {
+                const editor = vscode.window.activeTextEditor;
+                if (editor) {
+                  const currentCode = editor.document.getText();
+                  const currentFileName = editor.document.fileName;
+                  const remainingTexts = findChineseText(currentCode, currentFileName);
+                  if (remainingTexts && remainingTexts.length > 0) {
+                    await extractAndReplace(remainingTexts, depth + 1);
+                    return remainingTexts.length;
+                  }
+                }
+              }
+              return 0;
+            };
+
+            const nestedCount = await extractAndReplace(allSortedStrs);
+            if (nestedCount > 0) {
+              vscode.window.showInformationMessage(`替换完成，包含 ${nestedCount} 处嵌套文案`);
+            } else {
+              vscode.window.showInformationMessage('替换完成');
+            }
+            if (autoFixer) {
+              autoFixer.fix(vscode.window.activeTextEditor.document);
+            }
           } catch (error) {
+            vscode.window.showErrorMessage(_.isString(error) ? error : error?.message || '替换失败');
+          } finally {
             updateKiwiGoBarStatusBar('KiwiGo');
-            vscode.window.showErrorMessage(error);
           }
         });
     })

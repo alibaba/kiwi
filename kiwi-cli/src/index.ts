@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import * as commander from 'commander';
-import * as inquirer from 'inquirer';
+import commander from 'commander';
+import inquirer from 'inquirer';
 import { isString } from 'lodash';
 import { initProject } from './init';
 import { sync } from './sync';
@@ -12,7 +12,7 @@ import { mockLangs } from './mock';
 import { extractAll } from './extract/extract';
 import { translate } from './translate';
 import { getTranslateOriginType } from './utils';
-import * as ora from 'ora';
+import ora from 'ora';
 
 /**
  * 进度条加载
@@ -31,7 +31,7 @@ function spining(text, callback) {
 }
 
 commander
-  .version('0.2.0')
+  .version('1.1.1')
   .option('--init [type]', '初始化项目')
   .option('--import [file] [lang]', '导入翻译文案')
   .option('--export [file] [lang]', '导出未翻译的文案')
@@ -139,7 +139,6 @@ if (commander.translate) {
 }
 
 if (commander.extract) {
-  console.log(isString(commander.prefix));
   if (commander.prefix === true) {
     console.log('请指定翻译后文案 key 值的前缀 --prefix xxxx');
   } else if (isString(commander.prefix) && !new RegExp(/^I18N(\.[-_a-zA-Z1-9$]+)+$/).test(commander.prefix)) {
