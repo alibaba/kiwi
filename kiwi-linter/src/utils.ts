@@ -12,7 +12,6 @@ import axios from 'axios';
 import { pinyin } from 'pinyin-pro';
 import { LangSceneParam, TranslateAPiEnum } from './define';
 import { getObjectLiteralExpression } from './astUtils';
-import { I18N_GLOB } from './const';
 
 /**
  * 将对象拍平
@@ -360,8 +359,8 @@ export function getTranslateAPiList() {
 }
 
 /** 获取语言文件名称 */
-export function getI18NFileNames() {
-  const _I18N_GLOB = getCurrentProjectLangPath() || I18N_GLOB;
+export function getI18NFileNames(DEFAULT_I18N_GLOB?:string) {
+  const _I18N_GLOB = getCurrentProjectLangPath() || DEFAULT_I18N_GLOB;
   const paths = globby.sync(_I18N_GLOB);
   return (paths || [])
     .map(i => {
@@ -374,11 +373,11 @@ export function getI18NFileNames() {
 }
 
 /** 纠正path中文件名称的方法 */
-export function getSafePath(path: string) {
+export function getSafePath(path: string, DEFAULT_I18N_GLOB?:string) {
   if (!path) {
     return path;
   }
-  const fileNames = getI18NFileNames();
+  const fileNames = getI18NFileNames(DEFAULT_I18N_GLOB);
   const [filename, ...restPath] = path.split('.');
   const sameFileNameIndex = fileNames.map(i => i.toLowerCase()).findIndex(i => i === filename.toLowerCase());
   if (sameFileNameIndex > -1) {

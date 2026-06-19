@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import * as fs from 'fs-extra';
 import { UI } from './ui';
 import { getSuggestLangObj } from './getLangData';
-import { DIR_ADAPTOR, KiwiSearchTypes } from './const';
+import { DIR_ADAPTOR, I18N_GLOB, KiwiSearchTypes } from './const';
 import { findAllI18N, findI18N } from './findAllI18N';
 import { triggerUpdateDecorations } from './chineseCharDecorations';
 import { LangSceneParam, TargetStr, TranslateAPiEnum } from './define';
@@ -63,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand('vscode-i18n-linter.searchI18N', () => {
     vscode.window.showQuickPick(KiwiSearchTypes).then(val => {
-      if (val.label === '在当前文件中搜索') {
+      if (val?.label === '在当前文件中搜索') {
         findI18N();
       } else {
         findAllI18N();
@@ -376,7 +376,8 @@ export function activate(context: vscode.ExtensionContext) {
             path
               .split('.')
               .slice(1)
-              .join('.')
+              .join('.'),
+            I18N_GLOB
           );
           const virtualMemory = {};
           finalLangObj = getSuggestLangObj();
